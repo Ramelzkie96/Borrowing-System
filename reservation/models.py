@@ -1,0 +1,62 @@
+from django.db import models
+from django.contrib.auth.models import AbstractBaseUser
+from django.core.validators import MinLengthValidator
+from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+
+
+class ReservationUser(models.Model):
+    YEAR_LEVEL_CHOICES = [
+        ('1', '1st Year'),
+        ('2', '2nd Year'),
+        ('3', '3rd Year'),
+        ('4', '4th Year'),
+    ]
+
+    name = models.CharField(max_length=50)
+    student_id = models.CharField(max_length=9, unique=True, validators=[MinLengthValidator(6)])
+    year_level = models.CharField(max_length=10, choices=YEAR_LEVEL_CHOICES)
+    email = models.EmailField()
+    course = models.CharField(max_length=50)
+    phone_number = models.CharField(max_length=15)
+    password = models.CharField(max_length=128)
+    profile_image = models.ImageField(upload_to='profile_pics/', default='profile_pics/users.jpg')
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if self.pk is None or self.password != self.__original_password:
+            self.password = make_password(self.password)
+        super().save(*args, **kwargs)
+        
+    def check_password(self, password):
+        return check_password(password, self.password)
+
+
+
+class StudentReservation(models.Model):
+    student_id = models.CharField(max_length=20)
+    name = models.CharField(max_length=100)
+    course = models.CharField(max_length=50)
+    year_level = models.CharField(max_length=50)
+    email = models.EmailField()
+    phone_number = models.CharField(max_length=15)
+    reserve_date = models.DateField()  # Changed to DateField for better date handling
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+    quantity = models.PositiveIntegerField()
+    purpose = models.TextField()
+    status = models.CharField(max_length=20, default='Pending')
+    user = models.ForeignKey('ReservationUser', on_delete=models.CASCADE)
+    notification = models.CharField(max_length=500, null=True)
+    handled_by = models.CharField(max_length=50, blank=True, null=True)
+    handled_by_profile_picture = models.URLField(max_length=500, blank=True, null=True)
+    is_read = models.BooleanField(default=False)
+    is_handled = models.BooleanField(default=False)
+    user_type = models.CharField(max_length=50, blank=True, null=True) 
+
+    def __str__(self):
+        return f"Reservation by {self.name} for {self.content_object.name}"

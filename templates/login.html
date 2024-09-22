@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %} 
+  <link rel="stylesheet" type="text/css" href="{% static 'css/login.css'%}"> 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+{% endblock %}
+
+{% block extra_js %} 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="logo">
+  <img class="img1" src="{% static 'images/logo.png' %}" alt="">
+  <img class="img2" src="{% static 'images/cote.png' %}" alt="">
+</div>
+    <div class="container">
+
+
+
+      <<div id="django-messages">
+        {% for message in messages %}
+            <div class="message" data-type="{{ message.tags }}" data-content="{{ message|escapejs }}"></div>
+        {% endfor %}
+    </div>
+    
+
+      <div class="wrapper">
+        <div class="title"><span>IT Borrowing System</span></div>
+        <form action="#" method="POST">
+            <span class="text-muted">
+                {% if msg %}
+                    {{ msg | safe }}
+                {% else %}
+                    Login page
+                {% endif %}
+            </span>
+            {% csrf_token %}
+          <div class="row">
+            <i class="fas fa-user"></i>
+            {{form.username}}
+          </div>
+          <div class="row">
+            <i class="fas fa-lock"></i>
+            {{form.password}}
+          </div>
+          <div class="pass"><a href="{% url 'password_reset' %}">Forgot password?</a></div>
+          <div class="row button">
+            <input type="submit" id="toastr-success-bottom-left" value="Login">
+          </div>
+          <div class="">
+            <span class="text-center">For student reservation item &nbsp; <a href="{% url 'reservation-login' %}" style="text-decoration: underline; font-weight: 600;">Login</a></span>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        toastr.options = {
+            "closeButton": true,
+            "progressBar": true,
+            "timeOut": "5000",
+            "positionClass": "toast-bottom-right"
+        };
+      
+        // Test Toastr directly
+        toastr.success("Toastr is working!");
+      
+        // Loop through the hidden messages and display them
+        document.querySelectorAll('#django-messages .message').forEach(function(el) {
+            var messageType = el.getAttribute('data-type');
+            var messageContent = el.getAttribute('data-content');
+      
+            if (messageType === 'success') {
+                toastr.success(messageContent);
+            } else if (messageType === 'danger') {
+                toastr.error(messageContent);
+            } else if (messageType === 'warning') {
+                toastr.warning(messageContent);
+            } else if (messageType === 'info') {
+                toastr.info(messageContent);
+            }
+        });
+      });
+      
+    </script>
+    
+{% endblock content %}

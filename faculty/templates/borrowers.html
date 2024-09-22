@@ -1,0 +1,381 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %} 
+    <link href="{% static 'vendor/pg-calendar/css/pignose.calendar.min.css'%}" rel="stylesheet">
+    <link href="{% static 'vendor/chartist/css/chartist.min.css'%}" rel="stylesheet">
+    <link href="{% static 'css/style.css'%}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'vendor/pickadate/themes/default.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/pickadate/themes/default.date.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    
+    <style>
+        .activee {
+            background: #6b51df;
+        }
+        #datepicker {
+            width: 129px;
+        }
+        .error-border {
+    border: 1px solid red !important;
+}
+        
+    </style>
+{% endblock %}
+
+
+{% block extra_js %} 
+    <script src="{% static 'vendor/global/global.min.js' %}"></script>
+    <script src="{% static 'js/quixnav-init.js' %}"></script>
+    <script src="{% static 'js/custom.min.js' %}"></script>
+    <script src="{% static 'vendor/moment/moment.min.js'%}"></script>
+    <script src="{% static 'js/dashboard/dashboard-2.js'%}"></script>
+    
+    <!-- pickadate -->
+    <script src="{% static 'vendor/pickadate/picker.js' %}"></script>
+    <script src="{% static 'vendor/pickadate/picker.time.js' %}"></script>
+    <script src="{% static 'vendor/pickadate/picker.date.js' %}"></script>
+    <script src="{% static 'js/plugins-init/pickadate-init.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+{% endblock %}
+
+
+
+{% block content %}
+    <!--*******************
+        Preloader start
+    ********************-->
+    <div id="preloader">
+        <div class="sk-three-bounce">
+            <div class="sk-child sk-bounce1"></div>
+            <div class="sk-child sk-bounce2"></div>
+            <div class="sk-child sk-bounce3"></div>
+        </div>
+    </div>
+    <!--*******************
+        Preloader end
+    ********************-->
+
+
+    <!--**********************************
+        Main wrapper start
+    ***********************************-->
+    <div id="main-wrapper">
+
+        <!--**********************************
+            Nav header start
+        ***********************************-->
+        <div class="nav-header">
+            <a href="index.html" class="brand-logo">
+                <img class="logo-abbr" src="{% static 'images/logo.png'%}" alt="">
+                <img class="brand-title" src="{% static 'images/faculty.png'%}" alt="">
+            </a>
+
+            <div class="nav-control">
+                <div class="hamburger">
+                    <span class="line"></span><span class="line"></span><span class="line"></span>
+                </div>
+            </div>
+        </div>
+        <!--**********************************
+            Nav header end
+        ***********************************-->
+
+        <!--**********************************
+            Header start
+        ***********************************-->
+        <div class="header">
+            <div class="header-content">
+                <nav class="navbar navbar-expand">
+                    <div class="collapse navbar-collapse justify-content-between">
+                        <div class="header-left">
+                           
+                        </div>
+
+                        <ul class="navbar-nav header-right">
+                            
+                            <li class="nav-item dropdown header-profile">
+                                <a class="nav-link" href="#" role="button" data-toggle="dropdown">
+                                    <i class="mdi mdi-account"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a href="./app-profile.html" class="dropdown-item">
+                                        <i class="icon-user"></i>
+                                        <span class="ml-2">Profile </span>
+                                    </a>
+                                    <a href="./email-inbox.html" class="dropdown-item">
+                                        <i class="icon-envelope-open"></i>
+                                        <span class="ml-2">Inbox </span>
+                                    </a>
+                                    <a href="./page-login.html" class="dropdown-item">
+                                        <i class="icon-key"></i>
+                                        <span class="ml-2">Logout </span>
+                                    </a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </div>
+        <!--**********************************
+            Header end ti-comment-alt
+        ***********************************-->
+
+        <!--**********************************
+            Sidebar start
+        ***********************************-->
+        <div class="quixnav">
+            <div class="quixnav-scroll">
+                <ul class="metismenu" id="menu">
+                    <li class="nav-label first">Main Menu</li>
+                    <!-- <li><a href="index.html"><i class="icon icon-single-04"></i><span class="nav-text">Dashboard</span></a>
+                    </li> -->
+                    <li><a href="{% url 'dashboard'%}" aria-expanded="false">
+                        <img src="{% static 'images/dashboard.png'%}" width="30" height="30" alt="">
+                        <span class="nav-text">Dashboard</span></a>
+                       
+                    </li>
+
+                    <li class="nav-label">ITEMS</li>
+                    <li><a class="has-arrow" href="javascript:void()" aria-expanded="false">
+                        <img src="{% static 'images/item.png'%}" width="30" height="30" alt=""> 
+                        <span class="nav-text" >Manage Items</span></a>
+                        <ul aria-expanded="false">
+                            <li><a href="{%url 'add-item'%}">Add Item</a></li>
+                            <li><a href="{% url 'item-record'%}">Item Records</a></li>
+                        </ul>
+                    </li>
+                    <li class="activee"><a href="{% url 'borrowers'%}" aria-expanded="false">
+                        <img src="{% static 'images/add-item.png'%}" width="30" height="30" alt="">
+                        <span class="nav-text">Add Borrow Item</span></a>
+                    </li>
+                    <li><a href="{% url 'borrow-record'%}" aria-expanded="false">
+                        <img src="{% static 'images/search.png'%}" width="30" height="30" alt="">
+                        <span class="nav-text">Borrow Record</span></a>
+                    </li>
+                    <li><a href="{% url 'returned-record'%}" aria-expanded="false">
+                        <img src="{% static 'images/return.png'%}" width="30" height="30" alt="">
+                        <span class="nav-text">Return Record</span></a>
+                    </li>
+                    <li class="nav-label">Borrower's Reservation</li>
+                    <li><a  href="{% url 'student-reservation' %}" aria-expanded="false">
+                        <img src="{% static 'images/reservation.png'%}" width="30" height="30" alt="">
+                        <span class="nav-text">Reservation List</span></a>
+                    </li>
+
+                    <li class="nav-label">ACCOUNTS</li>
+                    <li><a class="has-arrow" href="javascript:void()" aria-expanded="false">
+                        <img src="{% static 'images/userr.png'%}" width="30" height="30" alt="">
+                        <span class="nav-text">User</span></a>
+                        <ul aria-expanded="false">
+                            <li><a href="{% url 'change-profile' %}">Change Profile</a></li>
+                            <li><a href="{% url 'change-password' %}">Change Password</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="{% url 'logout'%}" aria-expanded="false">
+                        <img src="{% static 'images/logout.png'%}" width="30" height="30" alt="">
+                        <span class="nav-text">Logout</span></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!--**********************************
+            Sidebar end
+        ***********************************-->
+
+        <!--**********************************
+            Content body start
+        ***********************************-->
+        <div class="content-body">
+            <!-- Dynamic messages start -->
+            <div id="django-messages" style="display:none;">
+                {% for message in messages %}
+                    <div class="message" data-type="{{ message.tags }}" data-content="{{ message|escapejs }}"></div>
+                {% endfor %}
+            </div>
+            <!-- Dynamic messages end -->
+        <div class="container-fluid">
+            <div class="card" style="border-top: 4px solid #593bdb; box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 4px;">
+                <div class="card-header">
+                    <h4 class="card-title text-primary" style="font-size: 30px;">Add New Item</h4>
+                </div>
+                <div class="card-body">
+                    <div class="basic-form">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label class="text-dark">Student ID</label>
+                                    {{ form.student_id }}
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label class="text-dark">Name</label>
+                                    {{ form.name }}
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label class="text-dark">Course</label>
+                                    {{ form.course }}
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label class="text-dark">Year</label>
+                                    {{ form.year }}
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-6">
+                                    <label class="text-dark">Email</label>
+                                    {{ form.email }}
+                                </div>
+                
+                                <div class="form-group col-md-3">
+                                    <label class="text-dark">Phone</label>
+                                    {{ form.phone }}
+                                </div>
+                
+                                <div class="form-group col-md-3">
+                                    <label class="text-dark">Date Borrow</label>
+                                    <div class="input-group">
+                                        {{ form.date_borrow }}
+                                        <div class="input-group-append">
+                                            <i class="fas fa-calendar-alt" style="position: absolute; right: 14px; top: 8px; font-size: 18px;"></i>
+                                        </div>
+                                    </div>
+                                    {% if form.date_borrow.errors %}
+                                        <script>
+                                            document.querySelector('#datepicker').classList.add('error-border');
+                                        </script>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group col-md-2">
+                                    <label class="text-dark">
+                                        <input type="radio" name="borrower_type" value="Student" id="student_radio" style="width: 20px; height: 20px;">&nbsp;
+                                        Student
+                                    </label>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label class="text-dark">
+                                        <input type="radio" name="borrower_type" value="Teacher" id="teacher_radio" style="width: 20px; height: 20px;">&nbsp;
+                                        Teacher
+                                    </label>
+                                </div>
+                                <div class="form-group col-md-2">
+                                    <label class="text-dark">
+                                        Others:
+                                        <input type="text" name="other_borrower_type" id="other_borrower_type" style="width: 130px; height: 20px; border-top: 1px solid white; border-right: 1px solid white; border-left: 1px solid white;">&nbsp;
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            
+                        
+
+                            <div class="form-row">
+                                <div class="col-xl-6">
+                                    <div class="card {% if selected_item_has_zero_quantity %}border border-danger{% endif %}" style="box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;">
+                                        <div class="card-body">
+                                            <div class="mb-2">
+                                                <h4 class="card-title">Items</h4>
+                                                <p>Select Item you want to borrow</p>
+                                            </div>
+                                            {{ form.item }}
+                                            <div class="mt-4">
+                                                <label class="text-dark">Quantity</label>
+                                                {{ form.quantity }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group col-md-6">
+                                    <label class="text-dark">Purpose for borrow</label>
+                                    {{ form.purpose }}
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Save</button>
+                        </form>
+                    </div>
+                </div>
+                
+            </div>
+                
+                </div>
+            </div>
+        </div>
+        <!--**********************************
+            Content body end
+        ***********************************-->
+
+
+        <!--**********************************
+            Footer start
+        ***********************************-->
+        <div class="footer">
+            <div class="copyright">
+                <p>Copyright © Designed &amp; Developed by <a href="#" target="_blank">Quixkit</a> 2019</p>
+                <p>Distributed by <a href="https://themewagon.com/" target="_blank">Themewagon</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+                //toaster message
+                document.addEventListener("DOMContentLoaded", function() {
+                    // Configure Toastr options
+                    toastr.options = {
+                        "closeButton": true,
+                        "progressBar": true,
+                        "timeOut": "5000",
+                        "positionClass": "toast-bottom-right"
+                    };
+                
+                    // Loop through the hidden messages and display them
+                    document.querySelectorAll('#django-messages .message').forEach(function(el) {
+                        console.log(el);  // Add this for debugging
+                        var messageType = el.getAttribute('data-type');
+                        var messageContent = el.getAttribute('data-content');
+                    
+                
+                        // Display Toastr notification based on the message type
+                        if (messageType === 'success') {
+                            toastr.success(messageContent);
+                        } else if (messageType === 'danger') {
+                            toastr.error(messageContent);
+                        } else if (messageType === 'warning') {
+                            toastr.warning(messageContent);
+                        } else if (messageType === 'info') {
+                            toastr.info(messageContent);
+                        }
+                    });
+                });
+
+
+
+
+                // Get the radio buttons and the "Others" input field
+    const studentRadio = document.getElementById('student_radio');
+    const teacherRadio = document.getElementById('teacher_radio');
+    const otherInput = document.getElementById('other_borrower_type');
+
+    // Function to enable or disable the "Others" input field
+    function toggleOtherInput() {
+        if (studentRadio.checked || teacherRadio.checked) {
+            otherInput.disabled = true;
+            otherInput.style.cursor = 'not-allowed';  // Show disabled cursor
+        } else {
+            otherInput.disabled = false;
+            otherInput.style.cursor = 'text';  // Show normal text cursor when enabled
+        }
+    }
+
+    // Add event listeners for the radio buttons
+    studentRadio.addEventListener('change', toggleOtherInput);
+    teacherRadio.addEventListener('change', toggleOtherInput);
+
+    // Initialize on page load
+    toggleOtherInput();
+        
+    </script>
+
+{% endblock content %}

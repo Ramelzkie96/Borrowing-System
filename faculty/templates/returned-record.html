@@ -1,0 +1,858 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %} 
+    <link href="{% static 'vendor/pg-calendar/css/pignose.calendar.min.css'%}" rel="stylesheet">
+    <link href="{% static 'vendor/chartist/css/chartist.min.css'%}" rel="stylesheet">
+    <link href="{% static 'css/style.css'%}" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'vendor/select2/css/select2.min.css'%}">
+    <link rel="stylesheet" href="{% static 'vendor/pickadate/themes/default.css' %}">
+    <link rel="stylesheet" href="{% static 'vendor/pickadate/themes/default.date.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+    <style>
+        .activee {
+            background: #6b51df;
+        }
+        .intp {
+            padding-left: 45px;
+            border: 1px solid #828282;
+        }
+        .intp::placeholder {
+            padding-left: -10px;
+        }
+
+        .highlight {
+            background-color: rgb(0, 255, 13);
+        }
+        .custom-modal .modal-dialog {
+            overflow: hidden;
+        }
+
+        .custom-modal .modal-content {
+            overflow: hidden;
+        }
+        .custom-modal .modal-body {
+            overflow-y: auto;
+            max-height: calc(100vh - 200px); /* Adjust this value as needed */
+        }
+        .error-border.form-control {
+        border-color: red !important;
+        border-width: 1px !important; /* Adjust as needed */
+    }
+
+    </style>
+{% endblock %}
+
+
+{% block extra_js %} 
+    <script src="{% static 'vendor/global/global.min.js' %}"></script>
+    <script src="{% static 'js/quixnav-init.js' %}"></script>
+    <script src="{% static 'js/custom.min.js' %}"></script>
+    <script src="{% static 'vendor/moment/moment.min.js'%}"></script>
+    <script src="{% static 'js/dashboard/dashboard-2.js'%}"></script>
+    <script src="{% static 'vendor/select2/js/select2.full.min.js'%}"></script>
+    <script src="{% static 'js/plugins-init/select2-init.js'%}"></script>
+    <!-- pickadate -->
+    <script src="{% static 'vendor/pickadate/picker.js' %}"></script>
+    <script src="{% static 'vendor/pickadate/picker.time.js' %}"></script>
+    <script src="{% static 'vendor/pickadate/picker.date.js' %}"></script>
+    <script src="{% static 'js/plugins-init/pickadate-init.js' %}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+{% endblock %}
+
+
+
+{% block content %}
+    <!--*******************
+        Preloader start
+    ********************-->
+    <div id="preloader">
+        <div class="sk-three-bounce">
+            <div class="sk-child sk-bounce1"></div>
+            <div class="sk-child sk-bounce2"></div>
+            <div class="sk-child sk-bounce3"></div>
+        </div>
+    </div>
+    <!--*******************
+        Preloader end
+    ********************-->
+
+
+    <!--**********************************
+        Main wrapper start
+    ***********************************-->
+    <div id="main-wrapper">
+
+        <!--**********************************
+            Nav header start
+        ***********************************-->
+        <div class="nav-header">
+            <a href="index.html" class="brand-logo">
+                <img class="logo-abbr" src="{% static 'images/logo.png'%}" alt="">
+                <img class="brand-title" src="{% static 'images/faculty.png'%}" alt="">
+            </a>
+
+            <div class="nav-control">
+                <div class="hamburger">
+                    <span class="line"></span><span class="line"></span><span class="line"></span>
+                </div>
+            </div>
+        </div>
+        <!--**********************************
+            Nav header end
+        ***********************************-->
+
+        <!--**********************************
+            Header start
+        ***********************************-->
+        <div class="header">
+            <div class="header-content">
+                <nav class="navbar navbar-expand">
+                    <div class="collapse navbar-collapse justify-content-between">
+                        <div class="header-left">
+                           
+                        </div>
+
+                        <ul class="navbar-nav header-right">
+                            
+                            <li class="nav-item dropdown header-profile">
+                                <a class="nav-link" href="#" role="button" data-toggle="dropdown">
+                                    <i class="mdi mdi-account"></i>
+                                </a>
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a href="./app-profile.html" class="dropdown-item">
+                                        <i class="icon-user"></i>
+                                        <span class="ml-2">Profile </span>
+                                    </a>
+                                    <a href="./email-inbox.html" class="dropdown-item">
+                                        <i class="icon-envelope-open"></i>
+                                        <span class="ml-2">Inbox </span>
+                                    </a>
+                                    <a href="./page-login.html" class="dropdown-item">
+                                        <i class="icon-key"></i>
+                                        <span class="ml-2">Logout </span>
+                                    </a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </div>
+        <!--**********************************
+            Header end ti-comment-alt
+        ***********************************-->
+
+        <!--**********************************
+            Sidebar start
+        ***********************************-->
+        <div class="quixnav">
+            <div class="quixnav-scroll">
+                <ul class="metismenu" id="menu">
+                    <li class="nav-label first">Main Menu</li>
+                    <!-- <li><a href="index.html"><i class="icon icon-single-04"></i><span class="nav-text">Dashboard</span></a>
+                    </li> -->
+                    <li><a  href="{% url 'dashboard'%}" aria-expanded="false">
+                        <img src="{% static 'images/dashboard.png'%}" width="30" height="30" alt="">
+                        <span class="nav-text">Dashboard</span></a>
+                       
+                    </li>
+
+                    <li class="nav-label">ITEMS</li>
+                    <li><a class="has-arrow" href="javascript:void()" aria-expanded="false">
+                        <img src="{% static 'images/item.png'%}" width="30" height="30" alt=""> 
+                        <span class="nav-text" >Manage Items</span></a>
+                        <ul aria-expanded="false">
+                            <li><a href="{%url 'add-item'%}">Add Item</a></li>
+                            <li><a href="{% url 'item-record'%}">Item Records</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="{% url 'borrowers'%}" aria-expanded="false">
+                        <img src="{% static 'images/add-item.png'%}" width="30" height="30" alt="">
+                        <span class="nav-text">Add Borrow Item</span></a>
+                    </li>
+                    <li><a href="{% url 'borrow-record'%}" aria-expanded="false">
+                        <img src="{% static 'images/search.png'%}" width="30" height="30" alt="">
+                        <span class="nav-text">Borrow Record</span></a>
+                    </li>
+                    <li class="activee"><a href="javascript:void()" aria-expanded="false">
+                        <img src="{% static 'images/return.png'%}" width="30" height="30" alt="">
+                        <span class="nav-text text-white">Return Record</span></a>
+                    </li>
+                    <li class="nav-label">Borrower's Reservation</li>
+                    <li><a  href="{% url 'student-reservation' %}" aria-expanded="false">
+                        <img src="{% static 'images/reservation.png'%}" width="30" height="30" alt="">
+                        <span class="nav-text">Reservation List</span></a>
+                    </li>
+
+                    <li class="nav-label">ACCOUNTS</li>
+                    <li><a class="has-arrow" href="javascript:void()" aria-expanded="false">
+                        <img src="{% static 'images/userr.png'%}" width="30" height="30" alt="">
+                        <span class="nav-text">User</span></a>
+                        <ul aria-expanded="false">
+                            <li><a href="{% url 'change-profile' %}">Change Profile</a></li>
+                            <li><a href="{% url 'change-password' %}">Change Password</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="{% url 'logout'%}" aria-expanded="false">
+                        <img src="{% static 'images/logout.png'%}" width="30" height="30" alt="">
+                        <span class="nav-text">Logout</span></a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <!--**********************************
+            Sidebar end
+        ***********************************-->
+
+        <!--**********************************
+            Content body start
+        ***********************************-->
+
+
+
+
+        <div class="content-body">
+                <!-- Dynamic messages start -->
+            <div id="django-messages" style="display:none;">
+                {% for message in messages %}
+                    <div class="message" data-type="{{ message.tags }}" data-content="{{ message|escapejs }}"></div>
+                {% endfor %}
+            </div>
+            <!-- Dynamic messages end -->
+
+
+            <!-- Modal for Viewing Item -->
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header" style="border-bottom: 2px solid #593bdb;">
+                <h5 class="modal-title" id="exampleModalCenterTitle" style="font-size: 25px;">View Item</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group row" style="margin-top: 1px;">
+                    <label class="col-form-label text-md-left font-weight-bold col-12 col-md-4 col-lg-4 text-dark" style="font-size: 15px;">Student ID:</label>
+                    <p id="modal-student-id" class="text-dark mt-1" style="font-size: 15px; margin-left: 20px;"></p>
+                </div>
+                <div class="form-group row" style="margin-top: -20px;">
+                    <label class="col-form-label text-md-left font-weight-bold col-12 col-md-4 col-lg-4 text-dark" style="font-size: 15px;">Name:</label>
+                    <p id="modal-name" class="text-dark mt-1" style="font-size: 15px; margin-left: 20px;"></p>
+                </div>
+                <div class="form-group row" style="margin-top: -20px;">
+                    <label class="col-form-label text-md-left font-weight-bold col-12 col-md-4 col-lg-4 text-dark" style="font-size: 15px;">Course:</label>
+                    <p id="modal-course" class="text-dark mt-1" style="font-size: 15px; margin-left: 20px;"></p>
+                </div>
+                <div class="form-group row" style="margin-top: -20px;">
+                    <label class="col-form-label text-md-left font-weight-bold col-12 col-md-4 col-lg-4 text-dark" style="font-size: 15px;">Year:</label>
+                    <p id="modal-year" class="text-dark mt-1" style="font-size: 15px; margin-left: 20px;"></p>
+                </div>
+                <div class="form-group row" style="margin-top: -20px;">
+                    <label class="col-form-label text-md-left font-weight-bold col-12 col-md-4 col-lg-4 text-dark" style="font-size: 15px;">Email:</label>
+                    <p id="modal-email" class="text-dark mt-1" style="font-size: 15px; margin-left: 20px;"></p>
+                </div>
+                <div class="form-group row" style="margin-top: -20px;">
+                    <label class="col-form-label text-md-left font-weight-bold col-12 col-md-4 col-lg-4 text-dark" style="font-size: 15px;">Item:</label>
+                    <p id="modal-item" class="text-dark mt-1" style="font-size: 15px; margin-left: 20px;"></p>
+                </div>
+                <div class="form-group row" style="margin-top: -20px;">
+                    <label class="col-form-label text-md-left font-weight-bold col-12 col-md-4 col-lg-4 text-dark" style="font-size: 15px;">Quantity:</label>
+                    <p id="modal-quantity" class="text-dark mt-1" style="font-size: 15px; margin-left: 20px;"></p>
+                </div>
+                <div class="form-group row" style="margin-top: -20px;">
+                    <label class="col-form-label text-md-left font-weight-bold col-12 col-md-4 col-lg-4 text-dark" style="font-size: 15px;">Date Returned:</label>
+                    <p id="modal-date-borrow" class="text-dark mt-1" style="font-size: 15px; margin-left: 20px;"></p>
+                </div>
+                <div class="form-group row" style="margin-top: -20px;">
+                    <label class="col-form-label text-md-left font-weight-bold col-12 col-md-4 col-lg-4 text-dark" style="font-size: 15px;">Status:</label>
+                    <p id="modal-status" class="text-dark mt-1" style="font-size: 15px; margin-left: 20px;"></p>
+                </div>
+                <div class="form-group row" style="margin-top: -20px;">
+                    <label class="col-form-label text-md-left font-weight-bold col-12 col-md-4 col-lg-4 text-dark" style="font-size: 15px;">Purpose:</label>
+                    <p id="modal-purpose" class="text-dark mt-1" style="font-size: 15px; margin-left: 20px;"></p>
+                </div>
+            </div>
+            <div class="modal-footer" style="margin-top: -20px;">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+            <!-- return modal -->
+            <div class="modal fade custom-modal" id="modalGrid">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <form id="returnItemForm" method="POST" action="{% url 'return-item' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="request_id" id="modalRequestId">
+                            <div class="modal-header">
+                                <h5 class="modal-title">For Defect Item</h5>
+                                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="container-fluid">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-4 col-form-label text-dark">Date Returned</label>
+                                        <div class="col-sm-8">
+                                            <div class="input-group">
+                                                <input name="date_return" id="dateReturn" class="form-control datepicker-default cal" style="border: 1px solid #474747;">
+                                                <i class="fas fa-calendar-alt" style="position: absolute; right: 10px; top: 10px; color: #333;"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-4 col-form-label text-dark">Status</label>
+                                        <div class="col-sm-8">
+                                            <select class="form-select form-control" name="status" id="status" style="border: 1px solid #474747;">
+                                                <option selected disabled>----</option>
+                                                <option value="Returned">Returned</option>
+                                                <option value="Returned/Defect Item">Returned/Defect Item</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <label class="col-sm-4 col-form-label text-dark">Note</label>
+                                        <div class="col-sm-8">
+                                            <textarea name="note" id="note" class="form-control" style="border: 1px solid #474747;"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Save changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+
+            
+
+
+            
+            
+            
+            
+
+            <div class="container-fluid">
+                <div class="row">  
+                    <div class="col-lg-12">
+                        <div class="card" style="border-top: 4px solid #593bdb; box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 4px;">
+                            <div class="card-header">
+                                <h4 class="card-title" style="font-size: 25px;color: #593bdb;">Returned Record</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <a href="{% url 'borrowers' %}" class="btn btn-whatsapp mb-3" style="box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;">Add New Item <span class="btn-icon-right"><img src="{% static 'images/plus.png' %}" alt="" width="30" height="30"></span></a>
+                                        <div class="sea" style="margin-right: 40px">
+                                            <i class='bx bx-search-alt-2' style="color: #593bdb; position: absolute; font-size: 20px; right: 250px; top: 83px;"></i>
+                                            <input type="search" id="searchInput" placeholder="Search" class="form-control intp" onkeyup="searchTable()">
+                                        </div>
+                                    </div>
+
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <div class="dataTables_length" id="example_length" style="color: #333; width: 140px;">
+                                            <label>Show entries 
+                                                <select name="example_length" aria-controls="example" class="form-control" onchange="updateShowEntries(this.value)">
+                                                    <option value="all" {% if current_show == 'all' %}selected{% endif %}>All</option>
+                                                    <option value="5" {% if current_show == 5 %}selected{% endif %}>5</option>
+                                                    <option value="10" {% if current_show == 10 %}selected{% endif %}>10</option>
+                                                    <option value="25" {% if current_show == 25 %}selected{% endif %}>25</option>
+                                                    <option value="50" {% if current_show == 50 %}selected{% endif %}>50</option>
+                                                    <option value="100" {% if current_show == 100 %}selected{% endif %}>100</option>
+                                                </select>
+                                            </label>
+                                        </div>
+
+                                        <div class="dataTables_length" id="example_length" style="color: #333; width: 140px; margin-right: 200px">
+                                            <input type="text" id="date-range-picker" placeholder="Select a date range to show record" style="width: 300px; padding: 5px;">
+                                            <i class="fa-solid fa-x" style="position: absolute; right: 70px; top: 135px; display: none;"  id="clear-icon"></i>
+                                        </div>
+                                    </div>
+                
+                                    <table id="itemTable" class="table table-bordered table-striped table-responsive-sm mt-3">
+                                        <thead class="thead-primary">
+                                            <tr>
+                                                <th scope="col" style="width: 100px;">Student ID</th>
+                                                <th scope="col">Name</th>
+                                                <th scope="col">Course</th>
+                                                <th scope="col">Year</th>
+                                                <th scope="col">Item</th>
+                                                <th scope="col">Quantity</th>
+                                                <th scope="col">Time Span</th>
+                                                <th scope="col">Status</th>
+                                                <th scope="col" style="width: 80px;">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody style="color: #333;">
+                                            {% if page_obj %}
+                                                {% for request in page_obj %}
+                                                    <tr>
+                                                        <td>{{ request.student_id }}</td>
+                                                        <td>{{ request.name }}</td>
+                                                        <td>{{ request.course }}</td>
+                                                        <td>{{ request.year }}</td>
+                                                        <td>{{ request.content_object.name }}</td>
+                                                        <td>{{ request.quantity }}</td>
+                                                        <td>{{ request.time_ago }}</td>
+                                                        <td>
+                                                            {% if request.status == "Borrowed" %}
+                                                                <div class="badge badge-success">{{ request.status }}</div>
+                                                            {% elif request.status == "Returned" %}
+                                                                <div class="badge badge-secondary">{{ request.status }}</div>
+                                                            {% else %}
+                                                                <div class="badge badge-danger">{{ request.status }}</div>
+                                                            {% endif %}
+                                                        </td>
+                                                        <td style="text-align: center; vertical-align: middle;">
+                                                            {% if request.status == "Returned" %}
+                                                                <button type="button" class="btn btn-secondary view-item-btn" data-toggle="modal" data-target="#exampleModalCenter"
+                                                                    data-student-id="{{ request.student_id }}"
+                                                                    data-name="{{ request.name }}"
+                                                                    data-course="{{ request.course }}"
+                                                                    data-year="{{ request.year }}"
+                                                                    data-email="{{ request.email }}"
+                                                                    data-item="{{ request.content_object.name }}"
+                                                                    data-quantity="{{ request.quantity }}"
+                                                                    data-date="{{ request.date_return }}"
+                                                                    data-purpose="{{ request.purpose }}"
+                                                                    data-status="{{ request.status }}">
+                                                                    <i class="fas fa-eye"></i>
+                                                                </button>
+                                                            {% elif request.status == "Returned/Defect Item" %}
+                                                                <div class="dropdown">
+                                                                    <a class="btn btn-link font-24 p-0 line-height-1 no-arrow dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
+                                                                        <img src="{% static 'images/mores.png' %}" alt="" width="30" height="30">
+                                                                    </a>
+                                                                    <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
+                                                                        <button type="button" class="dropdown-item view-item-btn" data-toggle="modal" data-target="#exampleModalCenter"
+                                                                            data-student-id="{{ request.student_id }}"
+                                                                            data-name="{{ request.name }}"
+                                                                            data-course="{{ request.course }}"
+                                                                            data-year="{{ request.year }}"
+                                                                            data-email="{{ request.email }}"
+                                                                            data-item="{{ request.content_object.name }}"
+                                                                            data-quantity="{{ request.quantity }}"
+                                                                            data-date="{{ request.date_return }}"
+                                                                            data-purpose="{{ request.purpose }}"
+                                                                            data-status="{{ request.status }}">
+                                                                            <i class="fas fa-eye"></i>&nbsp; View
+                                                                        </button>
+                                                                        <button type="button" class="dropdown-item return-item-btn" data-toggle="modal" data-target="#modalGrid"
+                                                                            data-request-id="{{ request.id }}"
+                                                                            data-date="{{ request.date_return }}"
+                                                                            data-status="{{ request.status }}"
+                                                                            data-note="{{ request.note }}">
+                                                                            <i class="fa-solid fa-rotate-left"></i>&nbsp; For Defect Item
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            {% endif %}
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                            {% else %}
+                                                <tr>
+                                                    <td colspan="10" class="text-center">
+                                                        <div style="color: #333;">
+                                                            No borrow requests found.
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            {% endif %}
+                                        </tbody>
+                                    </table>
+                                    
+                                    
+                                    
+                
+                                    <nav>
+                                        <ul class="pagination pagination-gutter">
+                                            {% if page_obj.has_previous %}
+                                                <li class="page-item page-indicator">
+                                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}&show={{ current_show }}">
+                                                        <i class="icon-arrow-left"></i>
+                                                    </a>
+                                                </li>
+                                            {% else %}
+                                                <li class="page-item page-indicator disabled">
+                                                    <a class="page-link" href="javascript:void(0)">
+                                                        <i class="icon-arrow-left"></i>
+                                                    </a>
+                                                </li>
+                                            {% endif %}
+                                            {% for num in page_obj.paginator.page_range %}
+                                                {% if page_obj.number == num %}
+                                                    <li class="page-item active">
+                                                        <a class="page-link" href="javascript:void(0)">{{ num }}</a>
+                                                    </li>
+                                                {% else %}
+                                                    <li class="page-item">
+                                                        <a class="page-link" href="?page={{ num }}&show={{ current_show }}">{{ num }}</a>
+                                                    </li>
+                                                {% endif %}
+                                            {% endfor %}
+                                            {% if page_obj.has_next %}
+                                                <li class="page-item page-indicator">
+                                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}&show={{ current_show }}">
+                                                        <i class="icon-arrow-right"></i>
+                                                    </a>
+                                                </li>
+                                            {% else %}
+                                                <li class="page-item page-indicator disabled">
+                                                    <a class="page-link" href="javascript:void(0)">
+                                                        <i class="icon-arrow-right"></i>
+                                                    </a>
+                                                </li>
+                                            {% endif %}
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        <!--**********************************
+            Content body end
+        ***********************************-->
+
+
+        <!--**********************************
+            Footer start
+        ***********************************-->
+        <div class="footer">
+            <div class="copyright">
+                <p>Copyright © Designed &amp; Developed by <a href="#" target="_blank">Quixkit</a> 2019</p>
+                <p>Distributed by <a href="https://themewagon.com/" target="_blank">Themewagon</a></p>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var editButtons = document.querySelectorAll('.edit-item-btn');
+            
+            editButtons.forEach(function(button) {
+                button.addEventListener('click', function() {
+                    var itemId = this.getAttribute('data-id');
+                    var itemName = this.getAttribute('data-name');
+                    var itemQuantity = this.getAttribute('data-quantity');
+    
+                    // Set the modal input values
+                    document.querySelector('#exampleModalCenter input[name="item_id"]').value = itemId;
+                    document.querySelector('#exampleModalCenter input[name="name"]').value = itemName;
+                    document.querySelector('#exampleModalCenter input[name="quantity"]').value = itemQuantity;
+                });
+            });
+        });
+
+        function updateShowEntries(value) {
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.set('show', value);
+    window.location.search = urlParams.toString();
+}
+
+
+
+document.getElementById("searchInput").addEventListener("input", function () {
+    searchTable();
+});
+
+function searchTable() {
+    var input, filter, table, tbody, tr, td, i, j, txtValue, regex;
+    input = document.getElementById("searchInput");
+    filter = input.value.toUpperCase();
+    regex = new RegExp(`(${filter})`, 'gi');
+    table = document.getElementById("itemTable");
+    tbody = table.getElementsByTagName("tbody")[0];  // Work only with tbody
+    tr = tbody.getElementsByTagName("tr");  // Get rows only from tbody
+    var noMatch = true;
+
+    // If the input is empty, reset table to show all rows and keep the badge and action button intact
+    if (!filter) {
+        for (i = 0; i < tr.length; i++) {
+            if (tr[i].classList.contains("no-record-row")) continue; // Skip the "No record found" row
+            tr[i].style.display = ""; // Show all rows
+            td = tr[i].getElementsByTagName("td");
+            for (j = 0; j < td.length; j++) {
+                // Ensure buttons, dropdowns, badges, and action columns are not affected
+                if (j === 7 || j === 8 || td[j].querySelector('.dropdown') || td[j].querySelector('.badge') || td[j].querySelector('.action-buttons')) {
+                    continue; // Skip "Status", "Action", and dropdowns, badges
+                }
+                td[j].innerHTML = td[j].textContent || td[j].innerText; // Reset text content
+            }
+        }
+        removeNoRecordRow();  // Remove "No record found" if it exists
+        return; // Exit function if input is empty
+    }
+
+    // If there's input, filter the table rows
+    noMatch = true;  // Reset noMatch for the filtering
+    for (i = 0; i < tr.length; i++) {
+        if (tr[i].classList.contains("no-record-row")) continue; // Skip "No record found" row
+
+        tr[i].style.display = "none"; // Hide all rows initially
+        td = tr[i].getElementsByTagName("td");
+        let rowContainsFilter = false;
+
+        // Iterate through each cell in the row
+        for (j = 0; j < td.length; j++) {
+            if (j === 7 || j === 8) continue; // Skip "Status" and "Action" columns
+            if (td[j]) {
+                txtValue = td[j].textContent || td[j].innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    rowContainsFilter = true;
+                    // Highlight matched text only in non-dropdown cells
+                    if (!td[j].querySelector('.dropdown')) {
+                        td[j].innerHTML = txtValue.replace(regex, "<span style='background-color: rgb(0, 255, 13);'>$1</span>");
+                    }
+                } else {
+                    // Remove highlights if no match
+                    if (!td[j].querySelector('.dropdown')) {
+                        td[j].innerHTML = txtValue.replace(/<span style='background-color: rgb\(0, 255, 13\);'>(.*?)<\/span>/g, "$1");
+                    }
+                }
+            }
+        }
+
+        // If the row contains the filter, show it
+        if (rowContainsFilter) {
+            tr[i].style.display = "";
+            noMatch = false;
+        }
+    }
+
+    // Show or hide "No record found" message based on matches
+    if (noMatch) {
+        showNoRecordRow();
+    } else {
+        removeNoRecordRow(); // Remove the "No record found" row if there are matches
+    }
+
+    // Remove existing "no record found" row if present
+    var noRecordRow = document.getElementById("noRecordRow");
+    if (noRecordRow) {
+        noRecordRow.remove();
+    }
+
+    // If no matches found, add a "no record found" row
+    if (noMatch) {
+        var newRow = tbody.insertRow();
+        newRow.setAttribute("id", "noRecordRow");
+        var cell = newRow.insertCell(0);
+        cell.colSpan = table.getElementsByTagName("th").length;
+        cell.style.textAlign = "center";
+        cell.textContent = "No borrow requests found.";
+    }
+}
+
+function showNoRecordRow() {
+    var noRecordRow = document.querySelector(".no-record-row");
+    if (noRecordRow) {
+        noRecordRow.style.display = "";
+    }
+}
+
+function removeNoRecordRow() {
+    var noRecordRow = document.querySelector(".no-record-row");
+    if (noRecordRow) {
+        noRecordRow.style.display = "none";
+    }
+}
+
+
+// viewing modal
+document.addEventListener('DOMContentLoaded', function () {
+    const viewItemButtons = document.querySelectorAll('.view-item-btn');
+
+    viewItemButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const studentId = button.getAttribute('data-student-id');
+            const name = button.getAttribute('data-name');
+            const course = button.getAttribute('data-course');
+            const year = button.getAttribute('data-year');
+            const email = button.getAttribute('data-email');
+            const item = button.getAttribute('data-item');
+            const quantity = button.getAttribute('data-quantity');
+            const date = button.getAttribute('data-date');
+            const purpose = button.getAttribute('data-purpose');
+            const status = button.getAttribute('data-status');
+
+            document.getElementById('modal-student-id').innerText = studentId;
+            document.getElementById('modal-name').innerText = name;
+            document.getElementById('modal-course').innerText = course;
+            document.getElementById('modal-year').innerText = year;
+            document.getElementById('modal-email').innerText = email;
+            document.getElementById('modal-item').innerText = item;
+            document.getElementById('modal-quantity').innerText = quantity;
+            document.getElementById('modal-date-borrow').innerText = date;
+            document.getElementById('modal-purpose').innerText = purpose;
+            document.getElementById('modal-status').innerText = status;
+        });
+    });
+});
+
+
+
+// date return
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.return-item-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const requestId = this.getAttribute('data-request-id');
+            const date = this.getAttribute('data-date');
+            const status = this.getAttribute('data-status');
+            const note = this.getAttribute('data-note');
+
+            // Populate modal fields
+            document.getElementById('modalRequestId').value = requestId;
+            document.getElementById('dateReturn').value = date;
+            document.getElementById('status').value = status;
+            document.getElementById('note').value = note;
+
+            // Remove error-border class if previously added
+            document.getElementById('dateReturn').classList.remove('error-border');
+        });
+    });
+});
+
+
+
+//date range
+document.addEventListener('DOMContentLoaded', function () {
+    const dateRangePicker = flatpickr("#date-range-picker", {
+        mode: "range",
+        dateFormat: "d F, Y",
+        onChange: function(selectedDates, dateStr, instance) {
+            const clearIcon = document.getElementById('clear-icon');
+            
+            if (selectedDates.length === 2) {
+                clearIcon.style.display = "inline";  // Show the clear icon when a date is selected
+                filterTableByDateRange(selectedDates[0], selectedDates[1]);
+            }
+        }
+    });
+
+    const clearIcon = document.getElementById('clear-icon');
+    clearIcon.addEventListener('click', function() {
+        dateRangePicker.clear();  // Clear the date range picker input
+        clearIcon.style.display = "none";  // Hide the clear icon
+        resetTable();  // Reset the table to show all records
+    });
+
+    function filterTableByDateRange(startDate, endDate) {
+        const rows = document.querySelectorAll("#itemTable tbody tr");
+
+        let hasVisibleRow = false;
+        rows.forEach(row => {
+            const dateBorrowed = row.querySelector("td:nth-child(7)").textContent.trim();
+            const dateBorrowedObj = new Date(dateBorrowed);
+
+            if (dateBorrowedObj >= startDate && dateBorrowedObj <= endDate) {
+                row.style.display = "";  // Show row
+                hasVisibleRow = true;
+            } else {
+                row.style.display = "none";  // Hide row
+            }
+        });
+
+        if (!hasVisibleRow) {
+            showNoRecordsMessage();
+        }
+    }
+
+    function resetTable() {
+        const rows = document.querySelectorAll("#itemTable tbody tr");
+        const noRecordsRow = document.querySelector("#itemTable tbody .no-records-row");
+
+        if (noRecordsRow) {
+            noRecordsRow.remove();  // Remove the "No records found" row if it exists
+        }
+
+        rows.forEach(row => {
+            row.style.display = "";  // Show all rows
+        });
+    }
+
+    function showNoRecordsMessage() {
+        const tbody = document.querySelector("#itemTable tbody");
+        const noRecordsRow = document.querySelector("#itemTable tbody .no-records-row");
+
+        if (!noRecordsRow) {
+            const noRecordsHTML = `
+                <tr class="no-records-row">
+                    <td colspan="9" class="text-center" style="color: #333;">
+                        No records found.
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += noRecordsHTML;
+        }
+    }
+});
+
+
+ //toaster message
+ document.addEventListener("DOMContentLoaded", function() {
+    // Configure Toastr options
+    toastr.options = {
+        "closeButton": true,
+        "progressBar": true,
+        "timeOut": "5000",
+        "positionClass": "toast-bottom-right"
+    };
+
+    // Loop through the hidden messages and display them
+    document.querySelectorAll('#django-messages .message').forEach(function(el) {
+        console.log(el);  // Add this for debugging
+        var messageType = el.getAttribute('data-type');
+        var messageContent = el.getAttribute('data-content');
+    
+
+        // Display Toastr notification based on the message type
+        if (messageType === 'success') {
+            toastr.success(messageContent);
+        } else if (messageType === 'danger') {
+            toastr.error(messageContent);
+        } else if (messageType === 'warning') {
+            toastr.warning(messageContent);
+        } else if (messageType === 'info') {
+            toastr.info(messageContent);
+        }
+    });
+});
+
+
+
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+    </script>
+    
+
+{% endblock content %}
