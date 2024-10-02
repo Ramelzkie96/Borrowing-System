@@ -62,7 +62,7 @@
         ***********************************-->
         <div class="nav-header">
             <a href="index.html" class="brand-logo">
-                <img class="logo-abbr" src="{% static 'images/logo.png'%}" alt="">
+                <img class="logo-abbr" src="{% static 'images/pit_logo.png'%}" alt="">
                 <img class="brand-title" src="{% static 'images/faculty.png'%}" alt="">
             </a>
 
@@ -91,7 +91,14 @@
                             
                             <li class="nav-item dropdown header-profile">
                                 <a class="nav-link" href="#" role="button" data-toggle="dropdown">
-                                    <i class="mdi mdi-account"></i>
+                                    <a class="nav-link" href="#" role="button" data-toggle="dropdown">
+                                        {% if request.user.profile_picture %}
+                                            <img src="{{ request.user.profile_picture.url }}" alt="{{ request.user.username }}'s profile picture">
+                                        {% else %}
+                                        <img src="{% static 'images/users.jpg' %}" alt="Default profile picture">
+                                        {% endif %}
+                                    </a>
+                                    <span class="text-dark">{{ request.user.username }}</span>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-right">
                                     <a href="./app-profile.html" class="dropdown-item">
@@ -268,7 +275,7 @@
                                     <table id="itemTable" class="table table-bordered table-striped table-responsive-sm" style="color: #333;">
                                         <thead class="thead-primary">
                                             <tr>
-                                                <th>#</th>  <!-- Change ID to # for numbering -->
+                                                <th>Property ID</th>  <!-- Change ID to # for numbering -->
                                                 <th>Item</th>
                                                 <th>Description</th>
                                                 <th>Quantity</th>
@@ -279,7 +286,7 @@
                                             {% if page_obj %}
                                                 {% for item in page_obj %}
                                                     <tr>
-                                                        <td>{{ forloop.counter }}</td>  <!-- Display the loop index starting from 1 -->
+                                                        <td>{{ item.property_id }}</td>  <!-- Display the loop index starting from 1 -->
                                                         <td>{{ item.name }}</td>
                                                         <td>{{ item.description }}</td>
                                                         <td>{{ item.quantity }}</td>
@@ -299,7 +306,7 @@
                                                 {% endfor %}
                                             {% else %}
                                                 <tr>
-                                                    <td colspan="4" class="text-center">No Record Available</td>
+                                                    <td colspan="5" class="text-center">No Record Available</td>
                                                 </tr>
                                             {% endif %}
                                         </tbody>
@@ -421,8 +428,8 @@ function searchTable() {
             tr[i].style.display = ""; // Show all rows
             td = tr[i].getElementsByTagName("td");
             for (j = 0; j < td.length; j++) {
-                if (j === 3) {
-                    continue; // Skip the action button column
+                if (j === 4) { // Skip the action column
+                    continue;
                 }
                 td[j].innerHTML = td[j].textContent || td[j].innerText; // Reset content to normal text
             }
@@ -438,8 +445,8 @@ function searchTable() {
         let rowContainsFilter = false;
 
         for (j = 0; j < td.length; j++) {
-            if (j === 3) {
-                continue; // Skip the action button column
+            if (j === 4) { // Skip the action column
+                continue;
             }
             if (td[j]) {
                 txtValue = td[j].textContent || td[j].innerText;
@@ -475,7 +482,7 @@ function showNoRecordRow() {
         var newRow = tbody.insertRow();
         newRow.classList.add("no-record-row");
         var cell = newRow.insertCell(0);
-        cell.colSpan = 4; // Adjust this according to your table column count
+        cell.colSpan = 5; // Adjust this to span across all columns, including the action column
         cell.style.textAlign = "center";
         cell.textContent = "No record found.";
     }
@@ -487,6 +494,7 @@ function removeNoRecordRow() {
         noRecordRow.remove();
     }
 }
+
 
 
 

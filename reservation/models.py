@@ -15,24 +15,33 @@ class ReservationUser(models.Model):
     ]
 
     name = models.CharField(max_length=50)
-    student_id = models.CharField(max_length=9, unique=True, validators=[MinLengthValidator(6)])
+    student_id = models.CharField(max_length=9, unique=True)
     year_level = models.CharField(max_length=10, choices=YEAR_LEVEL_CHOICES)
-    email = models.EmailField()
+    email = models.EmailField(unique=True)
     course = models.CharField(max_length=50)
     phone_number = models.CharField(max_length=15)
-    password = models.CharField(max_length=128)
+    password = models.CharField(max_length=128)  # Hashed password storage
     profile_image = models.ImageField(upload_to='profile_pics/', default='profile_pics/users.jpg')
 
     def __str__(self):
         return self.name
 
     def save(self, *args, **kwargs):
-        if self.pk is None or self.password != self.__original_password:
+        # Hash the password if it's new or has changed
+        if self.pk is None or not self.__is_password_hashed():
             self.password = make_password(self.password)
+
         super().save(*args, **kwargs)
-        
+
     def check_password(self, password):
         return check_password(password, self.password)
+
+    def __is_password_hashed(self):
+        # Check if the password is already hashed
+        return self.password and self.password.startswith('pbkdf2_sha256$')
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
 
 

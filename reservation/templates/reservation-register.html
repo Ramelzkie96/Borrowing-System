@@ -62,9 +62,10 @@
 	<div class="login-header box-shadow">
 		<div class="container-fluid d-flex justify-content-between align-items-center">
 			<div class="brand-logo">
-				<a href="login.html">
-					<img src="{% static 'vendorss/images/deskapp-logo.svg'%}" alt="">
-				</a>
+				<a href="javascript:void()">
+                    <img src="{%static 'images/pit_logo.png'%}" alt="" width="65" height="65">
+                    <span class="text-primary" style="font-weight: 800;">&nbsp; Student Reservation Item</span>
+                </a>
 			</div>
 			<div class="login-menu">
 				<ul>
@@ -138,8 +139,12 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Email Address :</label>
-                                        <input type="email" class="form-control" name="email" value="{{ request.POST.email }}" required>
+                                        <input type="email" class="form-control {% if email_error %}is-invalid{% endif %}" name="email" value="{{ request.POST.email }}" required>
+                                        {% if email_error %}
+                                            <div class="invalid-feedback" style="color: red;">{{ email_error }}</div>
+                                        {% endif %}
                                     </div>
+                                    
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -221,7 +226,7 @@ document.addEventListener("DOMContentLoaded", function() {
         // Display Toastr notification based on the message type
         if (messageType === 'success') {
             toastr.success(messageContent);
-        } else if (messageType === 'danger') {
+        } else if (messageType === 'error') {
             toastr.error(messageContent);
         } else if (messageType === 'warning') {
             toastr.warning(messageContent);

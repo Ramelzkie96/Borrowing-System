@@ -202,10 +202,10 @@
         </div>
         <div class="user-notification">
             <div class="dropdown">
-                <a class="dropdown-toggle no-arrow" href="#" role="button" data-toggle="dropdown" id="notification-ico">
+                <a class="dropdown-toggle no-arrow" href="#" role="button" data-toggle="dropdown" id="notification-icon">
                     <i class="icon-copy dw dw-notification"></i>
                     {% if unread_notification > 0 %}
-                        <span class="notification-activ text-danger" style="font-size: 15px; font-weight: 800; position: absolute;">
+                        <span class="notification-active text-danger" style="font-size: 15px; font-weight: 800; position: absolute;">
                             {{ unread_notification }}
                         </span>
                     {% endif %}
@@ -213,20 +213,26 @@
                 <div class="dropdown-menu dropdown-menu-right">
                     <div class="notification-list mx-h-350 customscroll">
                         <ul id="notification-list">
-                            {% for reservation in reservations %}
-                            <li data-id="{{ reservation.id }}" class="{% if reservation.is_read %} read {% endif %}">
-                                <a href="#">
-                                    <img src="{{ reservation.handled_by_profile_picture }}" alt="Handled by {{ reservation.handled_by }}">
-                                    <div class="notification-content">
-                                        <h3>{{ reservation.handled_by }}</h3>
-                                        <p>{{ reservation.notification }}</p>
-                                    </div>
-                                    <button class="notification-close" data-id="{{ reservation.id }}">
-                                        <i class="icon-copy dw dw-delete-3"></i>
-                                    </button>
-                                </a>
-                            </li>
-                            {% endfor %}
+                            {% if reservations %}
+                                {% for reservation in reservations %}
+                                    <li data-id="{{ reservation.id }}" class="{% if reservation.is_read %} read {% endif %}">
+                                        <a href="#">
+                                            <img src="{{ reservation.handled_by_profile_picture }}" alt="Handled by {{ reservation.handled_by }}">
+                                            <div class="notification-content">
+                                                <h3>{{ reservation.handled_by }}</h3>
+                                                <p>{{ reservation.notification }}</p>
+                                            </div>
+                                            <button class="notification-close" data-id="{{ reservation.id }}">
+                                                <i class="icon-copy dw dw-delete-3"></i>
+                                            </button>
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            {% else %}
+                                <li class="no-notifications text-center">
+                                    <p>No available notifications</p>
+                                </li>
+                            {% endif %}
                         </ul>
                     </div>
                 </div>
@@ -236,9 +242,10 @@
         <div class="user-info-dropdown">
             <div class="dropdown">
                 <a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown">
-                    <span class="user-icon">
-                        <img src="{{ user.profile_image.url }}" alt="Profile Image">
+                    <span class="user-icon" style="display: inline-block; width: 50px; height: 50px; overflow: hidden; border-radius: 50%;">
+                        <img src="{{ user.profile_image.url }}" alt="Profile Image" style="width: 100%; height: 100%; object-fit: cover;">
                     </span>
+                    
                     <span class="user-name">{{ user.name }}</span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
@@ -344,9 +351,9 @@
 
 <div class="left-side-bar">
     <div class="brand-logo">
-        <a href="index.html">
-            <img src="{%static 'vendorss/images/deskapp-logo.svg'%}" alt="" class="dark-logo">
-            <img src="{%static 'vendorss/images/deskapp-logo-white.svg'%}" alt="" class="light-logo">
+        <a href="{% url 'reservation-dashboard' %}">
+            <img src="{%static 'images/pit_logo.png'%}" alt="" width="50" height="50">
+            <span class="text-white" style="font-weight: 800; font-size: 14px;">&nbsp; Student Reservation</span>
         </a>
         <div class="close-sidebar" data-toggle="left-sidebar-close">
             <i class="ion-close-round"></i>
@@ -357,33 +364,33 @@
             <ul id="accordion-menu">
                 <li>
                     <a href="{% url 'reservation-dashboard' %}" class="dropdown-toggle no-arrow">
-                        <span class="micon dw dw-calendar1"></span><span class="mtext">Home</span>
+                        <span class="micon fa-solid fa-gauge" style="font-size: 25px;"></span><span class="mtext">Home</span>
                     </a>
                 </li>
-
-
+                
+                
                 <li>
                     <a href="javascript:void()" class="dropdown-toggle no-arrow">
-                        <span class="micon dw dw-calendar1"></span><span class="mtext">Status</span>
+                        <span class="micon fa-solid fa-spinner"></span><span class="mtext">Status</span>
                     </a>
                 </li>
-
+                
                 <li>
                     <div class="dropdown-divider"></div>
                 </li>
-
+                
                 <li class="dropdown">
                     <a href="javascript:;" class="dropdown-toggle">
-                        <span class="micon dw dw-apartment"></span><span class="mtext"> Manage Account </span>
+                        <img src="{% static 'images/manage-account.png' %}" width="20" height="20" class="micon" alt=""><span class="mtext"> Manage Account </span>
                     </a>
                     <ul class="submenu">
-                        <li><a href="ui-buttons.html">Edit Profile</a></li>
-                        <li><a href="ui-cards.html">Change Password</a></li>
+                        <li><a href="{% url 'reservation-change-profile' %}">Edit Profile</a></li>
+                        <li><a href="{% url 'reservation-change-password' %}">Change Password</a></li>
                     </ul>
                 </li>
                 <li>
                     <a href="{% url 'reservation-logout' %}" class="dropdown-toggle no-arrow">
-                        <span class="micon dw dw-calendar1"></span><span class="mtext">Logout</span>
+                        <span class="micon fa-solid fa-right-from-bracket"></span><span class="mtext">Logout</span>
                     </a>
                 </li>
             </ul>
@@ -422,11 +429,12 @@
                         </select>
                     </label>
                 </div>
-                <div class="pull-right">
-                    <a href="#border-table" class="btn btn-primary btn-sm scroll-click" rel="content-y" data-toggle="collapse" role="button"><i class="fa fa-code"></i> Source Code</a>
+                <div class="pull-right" style="position: relative;">
+                    <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%);"></i>
+                    <input type="text" placeholder="Search..." style="padding-left: 30px; width: 100%; height: 40px; border: 1px solid #ccc; border-radius: 5px;" id="searchInput" onkeyup="searchTable()">
                 </div>
             </div>
-            <table class="table table-bordered table-striped">
+            <table class="table table-bordered table-striped" id="itemTable">
                 <thead style="background-color: #031e23; color: white;">
                     <tr>
                         <th scope="col">STUDENT ID</th>
@@ -461,7 +469,18 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    <button class="dropdown-item view-item-btn">
+                                    <button class="dropdown-item view-item-btn" data-toggle="modal" data-target="#exampleModalCenter"
+                                    data-student-id="{{ reservation.student_id }}"
+                                    data-name="{{ reservation.name }}"
+                                    data-course="{{ reservation.course }}"
+                                    data-year="{{ reservation.year_level }}"
+                                    data-email="{{ reservation.email }}"
+                                    data-phone="{{ reservation.phone_number }}"
+                                    data-item="{{ reservation.content_object.name }}"
+                                    data-quantity="{{ reservation.quantity }}"
+                                    data-date="{{ reservation.reserve_date }}"
+                                    data-purpose="{{ reservation.purpose }}"
+                                    data-status="{{ reservation.status }}">
                                         <img src="{% static 'images/eye-btn.png' %}" alt="" width="35" height="35">
                                     </button>
                                 </td>
@@ -477,6 +496,74 @@
         </div>
         
         <!-- Bordered table End -->
+
+
+
+
+
+        <!-- Modal for Viewing Item -->
+        <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header" style="border-bottom: 2px solid #593bdb;">
+                        <h5 class="modal-title" id="exampleModalCenterTitle" style="font-size: 25px;">View Student Details</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group row mb-1">
+                            <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Student ID:</label>
+                            <p id="modal-student-id" class="text-dark mt-1" style="font-size: 15px; position:relative; left: 50px; top: 5px;"></p>
+                        </div>
+                        <div class="form-group row mb-1">
+                            <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Name:</label>
+                            <p id="modal-name" class="text-dark mt-1" style="font-size: 15px; position:relative; left: 50px; top: 5px;"></p>
+                        </div>
+                        <div class="form-group row mb-0">
+                            <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Course:</label>
+                            <p id="modal-course" class="text-dark mt-1" style="font-size: 15px; position:relative; left: 50px; top: 5px;"></p>
+                        </div>
+                        <div class="form-group row mb-0">
+                            <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Year:</label>
+                            <p id="modal-year" class="text-dark mt-1" style="font-size: 15px; position:relative; left: 50px; top: 5px;"></p>
+                        </div>
+                        <div class="form-group row mb-0">
+                            <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Phone:</label>
+                            <p id="modal-phone" class="text-dark mt-1" style="font-size: 15px; position:relative; left: 50px; top: 5px;"></p>
+                        </div>
+                        <div class="form-group row mb-0">
+                            <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Email:</label>
+                            <p id="modal-email" class="text-dark mt-1" style="font-size: 15px; position:relative; left: 50px; top: 5px;"></p>
+                        </div>
+                        <div class="form-group row mb-0">
+                            <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Item:</label>
+                            <p id="modal-item" class="text-dark mt-1" style="font-size: 15px; position:relative; left: 50px; top: 5px;"></p>
+                        </div>
+                        <div class="form-group row mb-0">
+                            <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Quantity:</label>
+                            <p id="modal-quantity" class="text-dark mt-1" style="font-size: 15px; position:relative; left: 50px; top: 5px;"></p>
+                        </div>
+                        <div class="form-group row mb-0">
+                            <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px; white-space: nowrap;">Date Reserved:</label>
+                            <p id="modal-date-borrow" class="text-dark mt-1" style="font-size: 15px; position:relative; left: 50px; top: 5px;"></p>
+                        </div>
+                        
+                        <div class="form-group row mb-0">
+                            <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Status:</label>
+                            <p id="modal-status" class="text-dark mt-1" style="font-size: 15px; position:relative; left: 50px; top: 5px;"></p>
+                        </div>
+                        <div class="form-group row mb-0">
+                            <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Purpose:</label>
+                            <p id="modal-purpose" class="text-dark mt-1" style="font-size: 15px; position:relative; left: 50px; top: 5px;"></p>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
 
 
@@ -511,7 +598,38 @@
     }, 5000);
 
 
-
+    // viewing modal
+    document.addEventListener('DOMContentLoaded', function () {
+        const viewItemButtons = document.querySelectorAll('.view-item-btn');
+    
+        viewItemButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const studentId = button.getAttribute('data-student-id');
+                const name = button.getAttribute('data-name');
+                const course = button.getAttribute('data-course');
+                const year = button.getAttribute('data-year');
+                const phone = button.getAttribute('data-phone');
+                const email = button.getAttribute('data-email');
+                const item = button.getAttribute('data-item');
+                const quantity = button.getAttribute('data-quantity');
+                const date = button.getAttribute('data-date');
+                const purpose = button.getAttribute('data-purpose');
+                const status = button.getAttribute('data-status');
+    
+                document.getElementById('modal-student-id').innerText = studentId;
+                document.getElementById('modal-name').innerText = name;
+                document.getElementById('modal-course').innerText = course;
+                document.getElementById('modal-year').innerText = year;
+                document.getElementById('modal-phone').innerText = phone;
+                document.getElementById('modal-email').innerText = email;
+                document.getElementById('modal-item').innerText = item;
+                document.getElementById('modal-quantity').innerText = quantity;
+                document.getElementById('modal-date-borrow').innerText = date;
+                document.getElementById('modal-purpose').innerText = purpose;
+                document.getElementById('modal-status').innerText = status;
+            });
+        });
+    });
 
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -578,6 +696,47 @@
         }
     });
 
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get all delete buttons
+        const deleteButtons = document.querySelectorAll('.notification-close');
+    
+        deleteButtons.forEach(function(button) {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Get the reservation id from the button's data-id attribute
+                const reservationId = this.getAttribute('data-id');
+    
+                // Send an AJAX request to delete the notification and reset is_handled to false
+                fetch('/delete-notification/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'  // Ensure CSRF token is set
+                    },
+                    body: JSON.stringify({ 'reservation_id': reservationId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // If successful, remove the notification item from the list
+                        const notificationItem = document.querySelector(`li[data-id="${reservationId}"]`);
+                        if (notificationItem) {
+                            notificationItem.remove();  // Remove the entire notification
+                        }
+                    } else {
+                        console.error('Error:', data.message || 'Failed to delete notification');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
+        });
+    });
+
+
             //toaster message
 document.addEventListener("DOMContentLoaded", function() {
     // Configure Toastr options
@@ -598,7 +757,7 @@ document.addEventListener("DOMContentLoaded", function() {
         // Display Toastr notification based on the message type
         if (messageType === 'success') {
             toastr.success(messageContent);
-        } else if (messageType === 'danger') {
+        } else if (messageType === 'error') {
             toastr.error(messageContent);
         } else if (messageType === 'warning') {
             toastr.warning(messageContent);
@@ -608,6 +767,109 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
     
+
+
+function searchTable() {
+    var input, filter, table, tbody, tr, td, i, j, txtValue, regex;
+    input = document.getElementById("searchInput");
+    filter = input.value.toUpperCase();
+    regex = new RegExp(`(${filter})`, 'gi');
+    table = document.getElementById("itemTable");
+    tbody = table.getElementsByTagName("tbody")[0];  // Work only with tbody
+    tr = tbody.getElementsByTagName("tr");  // Get rows only from tbody
+    var noMatch = true;
+
+    // If the input is empty, reset table to show all rows and keep the badge and action button intact
+    if (!filter) {
+        for (i = 0; i < tr.length; i++) {
+            if (tr[i].classList.contains("no-record-row")) continue; // Skip the "No record found" row
+            tr[i].style.display = ""; // Show all rows
+            td = tr[i].getElementsByTagName("td");
+            for (j = 0; j < td.length; j++) {
+                // Ensure buttons, dropdowns, badges, and action columns are not affected
+                if (j === 7 || j === 8 || j === 9 || td[j].querySelector('.dropdownnn') || td[j].querySelector('.badge') || td[j].querySelector('.action-buttons')) {
+                    continue; // Skip "Status", "Action", and dropdowns, badges
+                }
+                td[j].innerHTML = td[j].textContent || td[j].innerText; // Reset text content
+            }
+        }
+        removeNoRecordRow();  // Remove "No record found" if it exists
+        return; // Exit function if input is empty
+    }
+
+    // If there's input, filter the table rows
+    noMatch = true;  // Reset noMatch for the filtering
+    for (i = 0; i < tr.length; i++) {
+        if (tr[i].classList.contains("no-record-row")) continue; // Skip "No record found" row
+
+        tr[i].style.display = "none"; // Hide all rows initially
+        td = tr[i].getElementsByTagName("td");
+        let rowContainsFilter = false;
+
+        // Iterate through each cell in the row
+        for (j = 0; j < td.length; j++) {
+            if (j === 7 || j === 8 || j === 9) continue; // Skip "Status" and "Action" columns
+            if (td[j]) {
+                txtValue = td[j].textContent || td[j].innerText;
+                if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                    rowContainsFilter = true;
+                    // Highlight matched text only in non-dropdown cells
+                    if (!td[j].querySelector('.dropdown')) {
+                        td[j].innerHTML = txtValue.replace(regex, "<span style='background-color: rgb(0, 255, 13);'>$1</span>");
+                    }
+                } else {
+                    // Remove highlights if no match
+                    if (!td[j].querySelector('.dropdown')) {
+                        td[j].innerHTML = txtValue.replace(/<span style='background-color: rgb\(0, 255, 13\);'>(.*?)<\/span>/g, "$1");
+                    }
+                }
+            }
+        }
+
+        // If the row contains the filter, show it
+        if (rowContainsFilter) {
+            tr[i].style.display = "";
+            noMatch = false;
+        }
+    }
+
+    // Show or hide "No record found" message based on matches
+    if (noMatch) {
+        showNoRecordRow();
+    } else {
+        removeNoRecordRow(); // Remove the "No record found" row if there are matches
+    }
+
+    // Remove existing "no record found" row if present
+    var noRecordRow = document.getElementById("noRecordRow");
+    if (noRecordRow) {
+        noRecordRow.remove();
+    }
+
+    // If no matches found, add a "no record found" row
+    if (noMatch) {
+        var newRow = tbody.insertRow();
+        newRow.setAttribute("id", "noRecordRow");
+        var cell = newRow.insertCell(0);
+        cell.colSpan = table.getElementsByTagName("th").length;
+        cell.style.textAlign = "center";
+        cell.textContent = "No borrow requests found.";
+    }
+}
+
+function showNoRecordRow() {
+    var noRecordRow = document.querySelector(".no-record-row");
+    if (noRecordRow) {
+        noRecordRow.style.display = "";
+    }
+}
+
+function removeNoRecordRow() {
+    var noRecordRow = document.querySelector(".no-record-row");
+    if (noRecordRow) {
+        noRecordRow.style.display = "none";
+    }
+}
     
 </script>
 

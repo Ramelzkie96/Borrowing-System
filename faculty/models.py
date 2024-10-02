@@ -5,16 +5,25 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from datetime import timedelta
 from django.utils import timezone
+import random
 
 class facultyItem(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    description = models.TextField(null=True, blank=True)  # Allow purpose to be optional
+    name = models.CharField(max_length=100)
+    property_id = models.CharField(max_length=10, blank=True, editable=False)  # Make property_id optional
+    description = models.TextField(null=True, blank=True)
     quantity = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     # Link each item to the custom user model
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    def save(self, *args, **kwargs):
+        # If the item is new (no primary key yet) and the property_id is not already set
+        if not self.pk and not self.property_id:
+            self.property_id = str(random.randint(1, 99999)).zfill(5)  # Generate a random number, pad with zeros if needed
+
+        super().save(*args, **kwargs)  # Call the original save() method to save the object
 
     def __str__(self):
         return f"{self.name} ({self.quantity})"

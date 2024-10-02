@@ -86,6 +86,6 @@ class SignUpForm(UserCreationForm):
         is_superuser = cleaned_data.get("is_superuser")
 
         if not (faculty or is_superuser):
-            raise forms.ValidationError('At least one of faculty or is_superuser must be selected. Go to Roles to select')
+            raise forms.ValidationError('At least one of faculty or IT Chairman must be selected. Go to Roles to select')
 
         return cleaned_data

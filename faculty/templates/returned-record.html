@@ -90,7 +90,7 @@
         ***********************************-->
         <div class="nav-header">
             <a href="index.html" class="brand-logo">
-                <img class="logo-abbr" src="{% static 'images/logo.png'%}" alt="">
+                <img class="logo-abbr" src="{% static 'images/pit_logo.png'%}" alt="">
                 <img class="brand-title" src="{% static 'images/faculty.png'%}" alt="">
             </a>
 
@@ -119,7 +119,14 @@
                             
                             <li class="nav-item dropdown header-profile">
                                 <a class="nav-link" href="#" role="button" data-toggle="dropdown">
-                                    <i class="mdi mdi-account"></i>
+                                    <a class="nav-link" href="#" role="button" data-toggle="dropdown">
+                                        {% if request.user.profile_picture %}
+                                            <img src="{{ request.user.profile_picture.url }}" alt="{{ request.user.username }}'s profile picture">
+                                        {% else %}
+                                            <img src="{% static 'images/users.jpg' %}" alt="Default profile picture">
+                                        {% endif %}
+                                    </a>
+                                    <span class="text-dark">{{ request.user.username }}</span>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-right">
                                     <a href="./app-profile.html" class="dropdown-item">
@@ -353,7 +360,7 @@
                             <div class="card-body">
                                 <div class="table-responsive">
                                     <div style="display: flex; justify-content: space-between;">
-                                        <a href="{% url 'borrowers' %}" class="btn btn-whatsapp mb-3" style="box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;">Add New Item <span class="btn-icon-right"><img src="{% static 'images/plus.png' %}" alt="" width="30" height="30"></span></a>
+                                        <a href="{% url 'borrowers' %}" class="btn btn-whatsapp mb-3" style="box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;">Add Borrower's <span class="btn-icon-right"><img src="{% static 'images/plus.png' %}" alt="" width="30" height="30"></span></a>
                                         <div class="sea" style="margin-right: 40px">
                                             <i class='bx bx-search-alt-2' style="color: #593bdb; position: absolute; font-size: 20px; right: 250px; top: 83px;"></i>
                                             <input type="search" id="searchInput" placeholder="Search" class="form-control intp" onkeyup="searchTable()">
@@ -391,6 +398,7 @@
                                                 <th scope="col">Quantity</th>
                                                 <th scope="col">Time Span</th>
                                                 <th scope="col">Status</th>
+                                                <th scope="col">Borrowers Report</th>
                                                 <th scope="col" style="width: 80px;">Action</th>
                                             </tr>
                                         </thead>
@@ -405,6 +413,7 @@
                                                         <td>{{ request.content_object.name }}</td>
                                                         <td>{{ request.quantity }}</td>
                                                         <td>{{ request.time_ago }}</td>
+                                                        <td style="display: none;">{{ request.date_return }}</td>
                                                         <td>
                                                             {% if request.status == "Borrowed" %}
                                                                 <div class="badge badge-success">{{ request.status }}</div>
@@ -413,6 +422,11 @@
                                                             {% else %}
                                                                 <div class="badge badge-danger">{{ request.status }}</div>
                                                             {% endif %}
+                                                        </td>
+                                                        <td class="text-center">
+                                                            <a class="btn btn-secondary text-white" href="{% url 'borrower-report' request.student_id %}">
+                                                                <i class="fa-solid fa-file-pdf"></i>
+                                                            </a>
                                                         </td>
                                                         <td style="text-align: center; vertical-align: middle;">
                                                             {% if request.status == "Returned" %}
@@ -431,7 +445,7 @@
                                                                 </button>
                                                             {% elif request.status == "Returned/Defect Item" %}
                                                                 <div class="dropdown">
-                                                                    <a class="btn btn-link font-24 p-0 line-height-1 no-arrow dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
+                                                                    <a class="btn btn-link font-24 p-0 line-height-1 no-arrow dropd" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
                                                                         <img src="{% static 'images/mores.png' %}" alt="" width="30" height="30">
                                                                     </a>
                                                                     <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
@@ -590,7 +604,7 @@ function searchTable() {
             td = tr[i].getElementsByTagName("td");
             for (j = 0; j < td.length; j++) {
                 // Ensure buttons, dropdowns, badges, and action columns are not affected
-                if (j === 7 || j === 8 || td[j].querySelector('.dropdown') || td[j].querySelector('.badge') || td[j].querySelector('.action-buttons')) {
+                if (j === 7 || j === 8 || j === 9 || j === 10 || td[j].querySelector('.dropdownnn') || td[j].querySelector('.badge') || td[j].querySelector('.action-buttons')) {
                     continue; // Skip "Status", "Action", and dropdowns, badges
                 }
                 td[j].innerHTML = td[j].textContent || td[j].innerText; // Reset text content
@@ -611,7 +625,7 @@ function searchTable() {
 
         // Iterate through each cell in the row
         for (j = 0; j < td.length; j++) {
-            if (j === 7 || j === 8) continue; // Skip "Status" and "Action" columns
+            if (j === 8 || j === 9 || j == 10) continue; // Skip "Status" and "Action" columns
             if (td[j]) {
                 txtValue = td[j].textContent || td[j].innerText;
                 if (txtValue.toUpperCase().indexOf(filter) > -1) {
@@ -758,7 +772,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         let hasVisibleRow = false;
         rows.forEach(row => {
-            const dateBorrowed = row.querySelector("td:nth-child(7)").textContent.trim();
+            const dateBorrowed = row.querySelector("td:nth-child(8)").textContent.trim();
             const dateBorrowedObj = new Date(dateBorrowed);
 
             if (dateBorrowedObj >= startDate && dateBorrowedObj <= endDate) {
@@ -825,7 +839,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Display Toastr notification based on the message type
         if (messageType === 'success') {
             toastr.success(messageContent);
-        } else if (messageType === 'danger') {
+        } else if (messageType === 'error') {
             toastr.error(messageContent);
         } else if (messageType === 'warning') {
             toastr.warning(messageContent);

@@ -1,24 +1,26 @@
-from django.core.paginator import Paginator # type: ignore
-from django.shortcuts import render, redirect, get_object_or_404 # type: ignore
+from django.core.paginator import Paginator 
+from django.shortcuts import render, redirect, get_object_or_404 
 from .models import facultyItem
-from django.contrib import messages # type: ignore
-from django.http import JsonResponse  # type: ignore
+from django.contrib import messages 
+from django.http import JsonResponse  
 from .models import BorrowRequest, facultyItem
 from .forms import BorrowRequestMultimediaForm
-from django.views.decorators.http import require_POST  # type: ignore
-from django.core.mail import send_mail # type: ignore
-from django.views.decorators.csrf import csrf_exempt  # type: ignore
+from django.views.decorators.http import require_POST  
+from django.core.mail import send_mail 
+from django.views.decorators.csrf import csrf_exempt  
 from .forms import EmailNotificationForm
-from django.conf import settings # type: ignore
-from django.contrib.contenttypes.models import ContentType  # type: ignore
+from django.conf import settings 
+from django.contrib.contenttypes.models import ContentType  
 from reservation.models import StudentReservation
-from django.contrib.auth.decorators import login_required  # type: ignore
-from django.contrib.auth.forms import PasswordChangeForm  # type: ignore
-from django.contrib.auth import update_session_auth_hash  # type: ignore
+from django.contrib.auth.decorators import login_required  
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash  
 import os
-from django.http import HttpResponseForbidden  # type: ignore
-from django.utils import timezone # type: ignore
+from django.templatetags.static import static
+from django.http import HttpResponseForbidden  
+from django.utils import timezone 
 from datetime import datetime
+from django.utils.timezone import now
 import pdfkit
 from django.http import HttpResponse
 from django.template.loader import render_to_string
@@ -27,6 +29,10 @@ from django.template.loader import render_to_string
 
 @login_required
 def add_item(request):
+    # Restrict access to faculty users only
+    if not request.user.faculty:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+    
     if request.method == 'POST':
         name = request.POST.get('name')
         description = request.POST.get('description')  # Retrieve the description field
@@ -34,19 +40,16 @@ def add_item(request):
 
         # Ensure all fields are filled
         if name and description and quantity:
-            # Check if the item already exists for this user
-            if facultyItem.objects.filter(name=name, user_id=request.user.id).exists():
-                messages.error(request, 'ERROR! An item with this name already exists for your account.')
-            else:
-                # Create the new item and associate it with the current user
-                facultyItem.objects.create(
-                    name=name,
-                    description=description,
-                    quantity=quantity,
-                    user_id=request.user.id  # Associate the item with the current user's ID
-                )
-                messages.success(request, 'SUCCESS! Item has been added successfully.')
-                return redirect('item-record')  # Redirect to item_record instead of add_item
+            # No need to check if an item with the same name already exists
+            # Create the new item and associate it with the current user
+            facultyItem.objects.create(
+                name=name,
+                description=description,
+                quantity=quantity,
+                user_id=request.user.id  # Associate the item with the current user's ID
+            )
+            messages.success(request, 'SUCCESS! Item has been added successfully.')
+            return redirect('item-record')  # Redirect to item_record after adding item
         else:
             messages.error(request, 'ERROR! Please fill out all fields.')
 
@@ -56,10 +59,15 @@ def add_item(request):
     return render(request, 'add-item.html')
 
 
+
 @login_required
 def item_record(request):
+    # Restrict access to faculty users only
+    if not request.user.faculty:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+    
     # Get only items that belong to the logged-in user
-    items = facultyItem.objects.filter(user_id=request.user.id)
+    items = facultyItem.objects.filter(user_id=request.user.id).order_by('-id')
     total_items = items.count()
 
     # Handle pagination based on 'show' parameter
@@ -79,6 +87,10 @@ def item_record(request):
 
 @login_required
 def update_item(request):
+    # Restrict access to faculty users only
+    if not request.user.faculty:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+    
     if request.method == 'POST':
         item_id = request.POST.get('item_id')
         name = request.POST.get('name')
@@ -106,6 +118,10 @@ def update_item(request):
 
 @login_required
 def delete_item(request, item_id):
+    # Restrict access to faculty users only
+    if not request.user.faculty:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+    
     if request.method == 'POST':
         item = get_object_or_404(facultyItem, id=item_id)
         item.delete()
@@ -113,8 +129,15 @@ def delete_item(request, item_id):
     return JsonResponse({'status': 'error'}, status=400)
 
 
+
+
+
 @login_required
 def borrowers(request):
+    # Restrict access to faculty users only
+    if not request.user.faculty:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+    
     multimedia_items = facultyItem.objects.filter(user=request.user)
     items = list(multimedia_items)
     
@@ -138,11 +161,17 @@ def borrowers(request):
             if other_borrower_type:
                 borrower_type = other_borrower_type  # Use the custom input
 
+            # Validate the date_borrow field
             if not date_borrow:
                 form.add_error('date_borrow', 'This field is required.')
                 messages.error(request, 'ERROR! Date Borrow is required!')
             else:
-                if selected_item.quantity >= requested_quantity:
+                # Check if the date_borrow is in the past (convert to date object for comparison)
+                date_borrow_obj = datetime.strptime(date_borrow, "%d %B, %Y").date()
+                if date_borrow_obj < now().date():
+                    form.add_error('date_borrow', 'Date Borrow cannot be in the past.')
+                    messages.error(request, 'ERROR! Date Borrow cannot be set to a past date.')
+                elif selected_item.quantity >= requested_quantity:
                     borrow_request = form.save(commit=False)
                     borrow_request.content_type = content_type
                     borrow_request.object_id = selected_item.id
@@ -174,8 +203,13 @@ def borrowers(request):
 
 
 
+
 @login_required
 def borrow_record(request):
+    # Restrict access to faculty users only
+    if not request.user.faculty:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+    
     # Fetch all borrow requests ordered by most recent first, excluding those with status "Returned" or "Defect Item"
     borrow_requests = BorrowRequest.objects.exclude(status__in=["Returned", "Returned/Defect Item"]).order_by('-id')
 
@@ -206,6 +240,10 @@ def borrow_record(request):
 
 @login_required
 def borrow_more_item(request):
+    # Restrict access to faculty users only
+    if not request.user.faculty:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+    
     if request.method == 'POST':
         # Get the original borrow request based on the request ID from the form
         request_id = request.POST.get('request_id')
@@ -264,6 +302,10 @@ def borrow_more_item(request):
 
 @login_required
 def update_borrow_request(request):
+    # Restrict access to faculty users only
+    if not request.user.faculty:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+    
     if request.method == 'POST':
         borrow_id = request.POST.get('id')
         student_id = request.POST.get('student_id')
@@ -276,6 +318,14 @@ def update_borrow_request(request):
         new_quantity = int(request.POST.get('quantityy'))
         date = request.POST.get('datepicker')
         purpose = request.POST.get('description')
+
+        # Get borrower_type values
+        borrower_type = request.POST.get('borrower_type')
+        other_borrower_type = request.POST.get('other_borrower_type', '').strip()  # Default to empty string
+
+        # If the "Others" field is filled, use its value
+        if other_borrower_type:
+            borrower_type = other_borrower_type
 
         try:
             # Get the BorrowRequest object, ensure it's tied to the logged-in user
@@ -311,6 +361,7 @@ def update_borrow_request(request):
             borrow_request.quantity = new_quantity
             borrow_request.date_borrow = date
             borrow_request.purpose = purpose
+            borrow_request.borrower_type = borrower_type  # Update borrower_type here
             borrow_request.save()
 
             # Update the item quantity
@@ -331,10 +382,16 @@ def update_borrow_request(request):
         messages.error(request, 'Invalid request method.')
         return redirect('borrow-record')
 
+
+
     
 
 @require_POST
 def return_item(request):
+    # Restrict access to faculty users only
+    if not request.user.faculty:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+    
     request_id = request.POST.get('request_id')
     date_return = request.POST.get('date_return')
     status = request.POST.get('status')
@@ -393,6 +450,10 @@ def return_item(request):
 
 @csrf_exempt
 def send_email_notification(request):
+    # Restrict access to faculty users only
+    if not request.user.faculty:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+    
     if request.method == 'POST':
         form = EmailNotificationForm(request.POST)
         if form.is_valid():
@@ -427,6 +488,10 @@ def send_email_notification(request):
 
 @login_required
 def returned_record(request):
+    # Restrict access to faculty users only
+    if not request.user.faculty:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+    
     
     returned_requests = BorrowRequest.objects.filter(status__in=["Returned", "Returned/Defect Item"]).order_by('-id')
 
@@ -449,6 +514,10 @@ def returned_record(request):
     
 @login_required
 def change_profile(request):
+    # Restrict access to faculty users only
+    if not request.user.faculty:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+    
     user = request.user
 
     if request.method == 'POST':
@@ -485,6 +554,10 @@ def change_profile(request):
     
 @login_required
 def change_password(request):
+    # Restrict access to faculty users only
+    if not request.user.faculty:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+    
     if request.method == 'POST':
         form = PasswordChangeForm(user=request.user, data=request.POST)
         if form.is_valid():
@@ -510,6 +583,10 @@ def change_password(request):
 
 @login_required
 def student_reservation(request):
+    # Restrict access to faculty users only
+    if not request.user.faculty:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+    
     # Get the logged-in user's ID
     user_id = request.session.get('user_id')
 
@@ -545,6 +622,10 @@ def student_reservation(request):
     
 @login_required
 def update_reservation_status(request):
+    # Restrict access to faculty users only
+    if not request.user.faculty:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+    
     if request.method == 'POST':
         reservation_id = request.POST.get('reservation_id')
         new_status = request.POST.get('status')
@@ -599,25 +680,25 @@ def update_reservation_status(request):
     return redirect('student-reservation')  # Adjust this to the appropriate URL name
 
 
-
+@login_required
 def generate_report(request, student_id):
-    # Fetch all BorrowRequests for the specific student ID
-    borrowers = BorrowRequest.objects.filter(student_id=student_id)
-
-    # Convert the string date to a datetime object if necessary
-    for borrower in borrowers:
-        if isinstance(borrower.date_borrow, str):
-            borrower.date_borrow = datetime.strptime(borrower.date_borrow, "%d %B, %Y")
-
+    # Restrict access to faculty users only
+    if not request.user.faculty:
+        return HttpResponseForbidden("You do not have permission to access this page.")
     
-
-    # Construct the full URL for the image
-    image_url = request.build_absolute_uri(f"{settings.STATIC_URL}images/borrower-report.png")
-
+    # Fetch all BorrowRequests for the specific student ID and order by latest date_borrow
+    borrowers = BorrowRequest.objects.filter(student_id=student_id).order_by('-id')[:5]  # Get the 5 latest records
+    
+    # Get the latest borrow record
+    latest_borrow = borrowers.first() 
+    
+    image_url = request.build_absolute_uri(static('images/logo.png'))
+    
     # Pass the data to the template
     context = {
         'borrowers': borrowers,
         'student_id': student_id,
+        'latest_borrow': latest_borrow,
         'image_url': image_url,
     }
     
@@ -632,7 +713,7 @@ def generate_report(request, student_id):
         options = {
             'no-stop-slow-scripts': '',
             'disable-smart-shrinking': '',
-            'enable-local-file-access': '',  # Important for loading local resources
+            'enable-local-file-access': '',  # Allows local file access
         }
         
         pdf = pdfkit.from_string(html_string, False, configuration=config, options=options)

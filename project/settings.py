@@ -56,6 +56,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'account.middleware.Custom404Middleware',
+    'account.middleware.UpdateLastActivityMiddleware',
 ]
 
 ROOT_URLCONF = 'project.urls'
@@ -94,7 +95,7 @@ WSGI_APPLICATION = 'project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'borrow',
+        'NAME': 'capstoneborrow',
         'USER': 'root',
         'PASSWORD': 'Password0012',
         'PORT': 3306,
@@ -132,6 +133,14 @@ EMAIL_HOST_PASSWORD = 'dtswsdbspwteihbh'
 
 
 
+
+# SESSION_COOKIE_AGE = 900  # 15 minutes (in seconds)
+# SESSION_COOKIE_AGE = 300  # 5 minutes in seconds
+SESSION_COOKIE_AGE = 900  # 2 minutes in seconds
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_SAVE_EVERY_REQUEST = True
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
@@ -148,8 +157,9 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # Where your static files are stored during development
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 AUTH_USER_MODEL = 'account.User'
 
 

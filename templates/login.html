@@ -2,32 +2,85 @@
 {% load static %}
 
 {% block extra_css %} 
-  <link rel="stylesheet" type="text/css" href="{% static 'css/login.css'%}"> 
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+  <link rel="stylesheet" type="text/css" href="{% static 'css/login.css' %}">
 {% endblock %}
 
 {% block extra_js %} 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script>
+  function showToast(message, type) {
+      const toastContainer = document.getElementById('toast-container');
+      
+      // Create a new toast element
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+
+      // Create an icon based on the type
+      let icon = '';
+      switch (type) {
+          case 'success':
+              icon = '✅'; // Check mark for success
+              break;
+          case 'error':
+              icon = '❎'; // Cross mark for error
+              break;
+          case 'warning':
+              icon = '⚠️'; // Warning sign
+              break;
+          case 'info':
+              icon = 'ℹ️'; // Info symbol
+              break;
+          default:
+              icon = 'ℹ️';
+      }
+
+      // Add loader to the toast
+      toast.innerHTML = `${icon} ${message}<div class="loader" style="width: 100%;"></div>`; // Icon + message + loader
+      
+      // Append to the container
+      toastContainer.appendChild(toast);
+
+      // Start the loader animation immediately
+      setTimeout(() => {
+        toast.querySelector('.loader').style.width = '0'; // Start loader animation
+    }, 0);
+      
+      // Automatically remove the toast after a timeout
+      setTimeout(() => {
+          toast.remove();
+      }, 4000); // Adjust time as necessary
+  }
+
+  // Example usage
+  document.addEventListener("DOMContentLoaded", function() {
+      // Display existing messages
+      document.querySelectorAll('#django-messages .message').forEach(function(el) {
+          var messageType = el.getAttribute('data-type');
+          var messageContent = el.getAttribute('data-content');
+          showToast(messageContent, messageType); // Call showToast function
+      });
+  });
+</script>
 {% endblock %}
 
 {% block content %}
-<div class="logo">
-  <img class="img1" src="{% static 'images/logo.png' %}" alt="">
-  <img class="img2" src="{% static 'images/cote.png' %}" alt="">
+<div class="logo" style="position: relative; top: 20px;">
+  
 </div>
-    <div class="container">
+<div class="container">
+  <div id="toast-container" class="toast-container"></div> <!-- Toast container added here -->
+  <div id="django-messages">
+      {% for message in messages %}
+          <div class="message" data-type="{{ message.tags }}" data-content="{{ message|escapejs }}"></div>
+      {% endfor %}
+  </div>
 
-
-
-      <<div id="django-messages">
-        {% for message in messages %}
-            <div class="message" data-type="{{ message.tags }}" data-content="{{ message|escapejs }}"></div>
-        {% endfor %}
-    </div>
-    
-
-      <div class="wrapper">
-        <div class="title"><span>IT Borrowing System</span></div>
+    <div class="wrapper">
+        <div class="title" style="display: flex; justify-content: space-around;">
+            <img class="img1" src="{% static 'images/pit_logo.png' %}" height="20" alt="">
+            <span class="title-login">IT Borrowing System</span>
+            <img class="img2" src="{% static 'images/cote.png' %}" height="20" alt="">
+        </div>
         <form action="#" method="POST">
             <span class="text-muted">
                 {% if msg %}
@@ -37,54 +90,26 @@
                 {% endif %}
             </span>
             {% csrf_token %}
-          <div class="row">
-            <i class="fas fa-user"></i>
-            {{form.username}}
-          </div>
-          <div class="row">
-            <i class="fas fa-lock"></i>
-            {{form.password}}
-          </div>
-          <div class="pass"><a href="{% url 'password_reset' %}">Forgot password?</a></div>
-          <div class="row button">
-            <input type="submit" id="toastr-success-bottom-left" value="Login">
-          </div>
-          <div class="">
-            <span class="text-center">For student reservation item &nbsp; <a href="{% url 'reservation-login' %}" style="text-decoration: underline; font-weight: 600;">Login</a></span>
-          </div>
+            <div class="row">
+                <i class="fas fa-user"></i>
+                {{form.username}}
+            </div>
+            <div class="row">
+                <i class="fas fa-lock"></i>
+                {{form.password}}
+            </div>
+            <div class="pass"><a href="{% url 'password_reset' %}">Forgot password?</a></div>
+            <div class="row button">
+                <input type="submit" id="toastr-success-bottom-left" value="Login">
+            </div>
+            <div class="">
+                <span class="text-center">For student reservation item &nbsp; <a href="{% url 'reservation-login' %}" style="text-decoration: underline; font-weight: 600;">Login</a></span>
+            </div>
         </form>
-      </div>
     </div>
+</div>
 
-    <script>
-      document.addEventListener("DOMContentLoaded", function() {
-        toastr.options = {
-            "closeButton": true,
-            "progressBar": true,
-            "timeOut": "5000",
-            "positionClass": "toast-bottom-right"
-        };
-      
-        // Test Toastr directly
-        toastr.success("Toastr is working!");
-      
-        // Loop through the hidden messages and display them
-        document.querySelectorAll('#django-messages .message').forEach(function(el) {
-            var messageType = el.getAttribute('data-type');
-            var messageContent = el.getAttribute('data-content');
-      
-            if (messageType === 'success') {
-                toastr.success(messageContent);
-            } else if (messageType === 'danger') {
-                toastr.error(messageContent);
-            } else if (messageType === 'warning') {
-                toastr.warning(messageContent);
-            } else if (messageType === 'info') {
-                toastr.info(messageContent);
-            }
-        });
-      });
-      
-    </script>
-    
+
+
+
 {% endblock content %}

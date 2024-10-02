@@ -12,6 +12,20 @@ from django.core.paginator import Paginator
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.hashers import check_password, make_password
+import json
+import re
+from django.utils.encoding import force_str
+from django.core.mail import EmailMultiAlternatives
+from .tokens import reservation_token_generator
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.template.loader import render_to_string
+from django.conf import settings
+from django.utils.http import urlsafe_base64_decode
 
 
 
@@ -74,18 +88,29 @@ def mark_notifications_read(request):
 
 
 
+@csrf_exempt
+def delete_notification(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            reservation_id = data.get('reservation_id')
 
-# @csrf_exempt  # Exempt CSRF check for this view if needed
-# def mark_as_read(request, reservation_id):
-#     if request.method == 'POST':
-#         try:
-#             reservation = StudentReservation.objects.get(id=reservation_id)
-#             reservation.is_read = True
-#             reservation.save()
-#             return JsonResponse({'success': True})
-#         except StudentReservation.DoesNotExist:
-#             return JsonResponse({'success': False, 'message': 'Notification not found'}, status=404)
-#     return JsonResponse({'success': False, 'message': 'Invalid request'}, status=400)
+            # Ensure the user is authenticated and owns the reservation
+            user_id = request.session.get('user_id')
+            if user_id:
+                # Find the reservation and clear the specified fields
+                reservation = StudentReservation.objects.filter(id=reservation_id, user_id=user_id).first()
+                if reservation:
+                    reservation.handled_by_profile_picture = None
+                    reservation.handled_by = None
+                    reservation.notification = None
+                    reservation.is_handled = False  # Set is_handled to False
+                    reservation.save()
+                    return JsonResponse({'success': True})
+            return JsonResponse({'success': False, 'message': 'Reservation not found or unauthorized'}, status=400)
+        except Exception as e:
+            return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    return JsonResponse({'success': False}, status=400)
 
 
 def reservation_login(request):
@@ -93,28 +118,38 @@ def reservation_login(request):
         student_id = request.POST.get('student_id')
         password = request.POST.get('password')
 
-        try:
-            # Look for the user by student ID
-            user = ReservationUser.objects.get(student_id=student_id)
+        # Remove hyphens from the input student ID
+        sanitized_student_id = student_id.replace("-", "")
 
-            # Check if the password matches
+        try:
+            # Search for the user by sanitizing the stored student IDs (removing hyphens)
+            user = ReservationUser.objects.get(student_id=sanitized_student_id)
+
+            # Debugging outputs
+            print(f"Attempting login for: {sanitized_student_id}")
+            print(f"Input Password: {password}")
+            print(f"Stored Hashed Password: {user.password}")
+
             if user.check_password(password):
-                # Store the user ID in the session
                 request.session['user_id'] = user.id
                 messages.success(request, "Login successful!")
-                return redirect('reservation-dashboard')  # Redirect to dashboard
+                return redirect('reservation-dashboard')
             else:
                 messages.error(request, "Invalid credentials. Please try again.")
         except ReservationUser.DoesNotExist:
             messages.error(request, "Student ID not found.")
-        
-        return redirect('reservation-login')  # Redirect back to login if there are errors
+
+        return redirect('reservation-login')
 
     return render(request, 'reservation-login.html')
 
 
+
+
+
+
 def reservation_register(request):
-    student_id_error = password_error = None  # Initialize error variables
+    student_id_error = password_error = email_error = None  # Initialize error variables
 
     if request.method == 'POST':
         name = request.POST['name']
@@ -126,23 +161,31 @@ def reservation_register(request):
         password = request.POST['password']
         confirm_password = request.POST['confirm_password']
 
-        # Validation for student_id length
-        if len(student_id) > 9 or len(student_id) < 6:
-            student_id_error = "Student ID must be between 6 and 9 characters long."
-            
-        # Check if student_id already exists
-        if ReservationUser.objects.filter(student_id=student_id).exists():
+        # Remove hyphens from the student ID
+        sanitized_student_id = student_id.replace("-", "")
+
+        # Validation: Ensure student_id is exactly 9 digits long after removing hyphens
+        if not re.match(r'^\d{9}$', sanitized_student_id):
+            student_id_error = "Student ID must contain exactly 9 digits. Example: 21-****-*** or 21*******"
+
+        # Check if student_id already exists (using the sanitized version)
+        if ReservationUser.objects.filter(student_id=sanitized_student_id).exists():
             student_id_error = "Student ID already exists."
+
+        # Check if email already exists
+        if ReservationUser.objects.filter(email=email).exists():
+            email_error = "Email already exists."
 
         # Validation for passwords matching
         if password != confirm_password:
             password_error = "Passwords do not match."
 
         # If there are errors, display a general error message
-        if student_id_error or password_error:
-            messages.error(request, "Please correct the errors below.")
+        if student_id_error or email_error or password_error:
+            messages.error(request, "Please correct the errors above.")
             return render(request, 'reservation-register.html', {
                 'student_id_error': student_id_error,
+                'email_error': email_error,
                 'password_error': password_error,
                 'request': request,
             })
@@ -150,7 +193,7 @@ def reservation_register(request):
         # If no errors, save the new user to the database
         new_user = ReservationUser(
             name=name,
-            student_id=student_id,
+            student_id=sanitized_student_id,  # Save the sanitized version of student_id
             year_level=year_level,
             email=email,
             phone_number=phone_number,
@@ -165,6 +208,7 @@ def reservation_register(request):
         return redirect('reservation-dashboard')  # Redirect to dashboard
 
     return render(request, 'reservation-register.html')
+
 
 
 
@@ -304,3 +348,184 @@ def reservation_status(request):
         # Handle case where the user is not found
         return redirect('reservation-login')  # Redirect to login if the user does not exist
 
+
+
+def changeprofile(request):
+    user_id = request.session.get('user_id')  # Retrieve user_id from session
+
+    if not user_id:
+        return redirect('reservation-login')  # Redirect to login if no user_id
+    
+    try:
+        # Fetch the ReservationUser instance
+        user = ReservationUser.objects.get(id=user_id)
+        
+        # Get only unread notifications that have been handled by staff
+        unread_notification = StudentReservation.objects.filter(user_id=user_id, is_read=False, is_handled=True).count()
+        
+        # Fetch reservations for this user, including handled_by and notification, ordered by the most recent first
+        reservations = StudentReservation.objects.filter(user_id=user_id, is_handled=True).order_by('-id')
+
+        if request.method == 'POST':
+            # Retrieve form data
+            name = request.POST.get('name')
+            student_id = request.POST.get('student_id')
+            email = request.POST.get('email')
+
+            # Update user fields
+            user.name = name
+            user.student_id = student_id
+            user.email = email
+
+            # If a new profile image is uploaded, update the profile image
+            if 'profilePicture' in request.FILES:
+                user.profile_image = request.FILES['profilePicture']
+
+            # Save changes to the user profile
+            user.save()
+
+            # Add a success message
+            messages.success(request, 'Profile updated successfully!')
+            return redirect('reservation-change-profile')  # Redirect to the profile page or another page
+        
+        # Handle GET request (render the form)
+        context = {
+            'user': user,
+            'profile_picture': user.profile_image.url if user.profile_image else None,
+            'default_image_url': '/media/profile_pics/users.jpg',  # URL to default image
+            'reservations': reservations,
+            'unread_notification': unread_notification,
+        }
+        return render(request, 'reservation-changeprofile.html', context)
+    
+    except ReservationUser.DoesNotExist:
+        return redirect('reservation-login')
+    
+    
+    
+def changepassword(request):
+    user_id = request.session.get('user_id')  # Retrieve user_id from session
+
+    if not user_id:
+        return redirect('reservation-login')  # Redirect to login if no user_id
+
+    try:
+        # Fetch the ReservationUser instance
+        user = ReservationUser.objects.get(id=user_id)
+        
+        # Get only unread notifications that have been handled by staff
+        unread_notification = StudentReservation.objects.filter(user_id=user_id, is_read=False, is_handled=True).count()
+        
+        # Fetch reservations for this user, including handled_by and notification, ordered by the most recent first
+        reservations = StudentReservation.objects.filter(user_id=user_id, is_handled=True).order_by('-id')
+        
+        if request.method == 'POST':
+            old_password = request.POST.get('old_password')
+            new_password = request.POST.get('new_password')
+            confirm_password = request.POST.get('confirm_password')
+            errors = {}
+
+            # Check if old password matches the stored password
+            if not user.check_password(old_password):
+                errors['old_password_error'] = 'Old password is incorrect.'
+                messages.error(request, 'Old password is incorrect.')
+
+            # Check if new password and confirm password match
+            if new_password != confirm_password:
+                errors['password_mismatch'] = 'New password and confirm password do not match.'
+                messages.error(request, 'New password and confirm password do not match.')
+
+            # If no errors, update password
+            if not errors:
+                # Hash the new password before saving it
+                user.password = make_password(new_password)
+                user.save()
+
+                # Keep the user logged in after password change
+                update_session_auth_hash(request, user)
+
+                messages.success(request, 'Your password was successfully updated!')
+                return redirect('reservation-change-password')  # Redirect to the same page after success
+
+            # If there are errors, render the form with errors
+            return render(request, 'reservation-changepassword.html', {'errors': errors})
+
+        # Handle GET request (render the form)
+        context = {
+            'user': user,
+            'profile_picture': user.profile_image.url if user.profile_image else None,
+            'default_image_url': '/media/profile_pics/users.jpg',  # URL to default image
+            'reservations': reservations,
+            'unread_notification': unread_notification,
+        }
+        # On GET request, render the form
+        return render(request, 'reservation-changepassword.html', context)
+
+    except ReservationUser.DoesNotExist:
+        return redirect('reservation-login')  # Redirect to login if user does not exist
+    
+    
+    
+    
+# Instantiate the token generator
+# token_generator = PasswordResetTokenGenerator()
+
+def reservation_forgot_password(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        try:
+            user = ReservationUser.objects.get(email=email)
+            
+            # Generate token and encode user ID
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = reservation_token_generator.make_token(user)
+            
+            # Construct password reset URL
+            reset_url = f"{request.scheme}://{request.get_host()}/reservation-reset-password/{uid}/{token}/"
+            
+            # Prepare email content
+            subject = 'Reset Your Password'
+            from_email = settings.DEFAULT_FROM_EMAIL
+            to_email = [user.email]
+            context = {
+                'user': user,
+                'reset_url': reset_url
+            }
+            html_content = render_to_string('reservation-reset_email_template.html', context)
+            
+            # Send email
+            email_message = EmailMultiAlternatives(subject, '', from_email, to_email)
+            email_message.attach_alternative(html_content, "text/html")
+            email_message.send()
+            
+            messages.success(request, 'A password reset link has been sent to your email.')
+        except ReservationUser.DoesNotExist:
+            messages.error(request, 'No account found with the provided email.')
+    
+    return render(request, 'reservation-reset-password.html')
+
+def reset_password(request, uidb64, token):
+    try:
+        # Decode the user ID
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = ReservationUser.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, ReservationUser.DoesNotExist):
+        user = None
+    
+    if user is not None and reservation_token_generator.check_token(user, token):
+        if request.method == 'POST':
+            new_password = request.POST.get('password')
+            confirm_password = request.POST.get('confirm_password')
+            
+            if new_password and new_password == confirm_password:
+                user.password = make_password(new_password)
+                user.save()
+                messages.success(request, 'Your password has been reset successfully. You can now log in.')
+                return redirect('reservation-login')  # Replace 'login' with your login URL name
+            else:
+                messages.error(request, 'Passwords do not match.')
+        
+        return render(request, 'reservation-password_reset_form.html')
+    else:
+        messages.error(request, 'The password reset link is invalid or has expired.')
+        return redirect('reservation_forgot_password')

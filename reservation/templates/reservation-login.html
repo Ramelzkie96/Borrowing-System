@@ -58,8 +58,9 @@
 	<div class="login-header box-shadow">
 		<div class="container-fluid d-flex justify-content-between align-items-center">
 			<div class="brand-logo">
-				<a href="login.html">
-					<img src="{%static 'vendorss/images/deskapp-logo.svg'%}" alt="">
+				<a href="javascript:void()">
+					<img src="{%static 'images/pit_logo.png'%}" alt="" width="65" height="65">
+					<span class="text-primary" style="font-weight: 800;">&nbsp; Student Reservation Item</span>
 				</a>
 			</div>
 			<div class="login-menu">
@@ -108,7 +109,7 @@
 							<div class="row pb-30">
 								<div class="col-6">
 									<div class="forgot-password" style="left: -30px; position: relative;">
-										<a href="forgot-password.html">Forgot Password</a>
+										<a href="{% url 'reservation-forgot-password' %}">Forgot Password</a>
 									</div>
 								</div>
 							</div>
@@ -169,7 +170,7 @@ document.addEventListener("DOMContentLoaded", function() {
         // Display Toastr notification based on the message type
         if (messageType === 'success') {
             toastr.success(messageContent);
-        } else if (messageType === 'danger') {
+        } else if (messageType === 'error') {
             toastr.error(messageContent);
         } else if (messageType === 'warning') {
             toastr.warning(messageContent);

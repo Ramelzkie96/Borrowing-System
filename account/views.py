@@ -1,13 +1,13 @@
-from django.shortcuts import render, redirect # type: ignore
+from django.shortcuts import render, redirect 
 from .forms import LoginForm
-from django.contrib.auth import authenticate, login, logout # type: ignore
-from django.contrib.auth.decorators import login_required # type: ignore
+from django.contrib.auth import authenticate, login, logout 
+from django.contrib.auth.decorators import login_required 
 from functools import wraps
 from faculty.models import BorrowRequest, facultyItem 
-from django.contrib import messages # type: ignore
-from django.conf import settings # type: ignore
-from django.contrib.auth import get_user_model # type: ignore
-from django.contrib.auth.views import PasswordResetView # type: ignore
+from django.contrib import messages 
+from django.conf import settings 
+from django.contrib.auth import get_user_model 
+from django.contrib.auth.views import PasswordResetView 
 from reservation.models import StudentReservation
 # Create your views here.
 
@@ -40,7 +40,7 @@ def login_view(request):
             msg = 'Error validating form'
 
     # Ensure that all messages are passed correctly
-    return render(request, 'login.html', {'form': form, 'msg': msg})
+    return render(request, 'login.html', {'form': form, 'msg': msg, messages: 'messages'})
 
 
 def logoutUser(request):

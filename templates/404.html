@@ -1,64 +1,46 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
+{% load static %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-    .frem{
-        width: 100%;
-        height: 100vh;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-        background: url('../static/images/gifs.gif');
-        background-position: center;
-        background-repeat: no-repeat;
-    }
-    .frem p{
-        position: absolute;
-        top: 3rem;
-        font-size: 7rem;
-        color: #00000063;
-    }
-    .frem h2{
-        position: absolute;
-        bottom: 8rem;
-        font-size: 34px;
-    }
-    .frem h5{
-        position: absolute;
-        bottom: 6rem;
-        color: #9c9c9c;
-    }
-    .frem a{
-        position: absolute;
-        bottom: 1rem;
-        background: linear-gradient(45deg, #ff0034, #ffbc00);
-        padding: 12px;
-        color: white;
-        text-decoration: none;
-        font-size: 23px;
-        border-radius: 13px;
-    }
-</style>
+{% block extra_css %} 
+  <!-- Site favicon -->
+	<link rel="apple-touch-icon" sizes="180x180" href="{% static 'vendorss/images/apple-touch-icon.png' %}">
+	<link rel="icon" type="image/png" sizes="32x32" href="{% static 'vendorss/images/favicon-32x32.png' %}">
+	<link rel="icon" type="image/png" sizes="16x16" href="{% static 'vendorss/images/favicon-16x16.png' %}">
+    <!-- Google Font -->
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+	<!-- CSS -->
+	<link rel="stylesheet" type="text/css" href="{% static 'vendorss/styles/core.css' %}">
+	<link rel="stylesheet" type="text/css" href="{% static 'vendorss/styles/icon-font.min.css' %}">
+	<link rel="stylesheet" type="text/css" href="{% static 'vendorss/styles/style.css' %}">
+{% endblock %}
 
-<body>
-    <div class="frem">
-        <p>404</p>
-        <h2>Look like you're lost</h2>
-        <h5>the page you are looking for not avaible!</h5>
-        <a href="/">Go to Home</a>
-    </div>
-</body>
+{% block extra_js %} 
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-119386393-1"></script>
+	<!-- js -->
+	<script src="{% static 'vendorss/scripts/core.js' %}"></script>
+	<script src="{% static 'vendorss/scripts/script.min.js' %}"></script>
+	<script src="{% static 'vendorss/scripts/process.js' %}"></script>
+	<script src="{% static 'vendorss/scripts/layout-settings.js' %}"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
 
-</html>
+		gtag('config', 'UA-119386393-1');
+	</script>
+{% endblock %}
+
+{% block content %}
+	<div class="error-page d-flex align-items-center flex-wrap justify-content-center pd-20">
+		<div class="pd-10">
+			<div class="error-page-wrap text-center">
+				<h1>404</h1>
+				<h3>Error: 404 Page Not Found</h3>
+				<p>Sorry, the page you’re looking for cannot be accessed.<br>Either check the URL</p>
+				<div class="pt-20 mx-auto max-width-200">
+					<a href="javascript:window.history.back();" class="btn btn-primary btn-block btn-lg">Back to Previous</a>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock content %}

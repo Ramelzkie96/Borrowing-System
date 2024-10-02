@@ -7,6 +7,7 @@
 <!-- CSS -->
 <link rel="stylesheet" type="text/css" href="{%static 'vendorss/styles/core.css'%}">
 <link rel="stylesheet" type="text/css" href="{%static 'vendorss/styles/icon-font.min.css'%}">
+<link rel="stylesheet" href="{% static 'vendor/select2/css/select2.min.css'%}">
 <link rel="stylesheet" type="text/css" href="{%static 'vendorss/styles/style.css'%}">
 <link rel="stylesheet" href="{% static 'vendor/pickadate/themes/default.css' %}">
 <link rel="stylesheet" href="{% static 'vendor/pickadate/themes/default.date.css' %}">
@@ -114,6 +115,38 @@
     .notification-content {
         padding-right: 30px; /* Space for the close icon */
     }
+    .dropdown-container {
+        position: relative;
+        display: inline-block;
+        width: 100%;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        box-sizing: border-box;
+    }
+    
+    .dropdown-items {
+        display: none; /* Hidden by default */
+        position: absolute;
+        background-color: white;
+        max-height: 200px;
+        overflow-y: auto;
+        width: 100%;
+        border: 1px solid #ddd;
+        z-index: 1;
+    }
+    
+    .dropdown-item {
+        padding: 10px;
+        cursor: pointer;
+    }
+    
+    .dropdown-item:hover {
+        background-color: #f1f1f1;
+    }
+    
     
     
 </style>
@@ -127,12 +160,62 @@
 <script src="{%static 'vendorss/scripts/process.js'%}"></script>
 <script src="{%static 'vendorss/scripts/layout-settings.js'%}"></script>
 <script src="{%static 'vendorss/scripts/dashboard.js'%}"></script>
+<script src="{% static 'vendor/select2/js/select2.full.min.js'%}"></script>
+<script src="{% static 'js/plugins-init/select2-init.js'%}"></script>
 <!-- pickadate -->
 <script src="{% static 'vendor/pickadate/picker.js' %}"></script>
 <script src="{% static 'vendor/pickadate/picker.time.js' %}"></script>
 <script src="{% static 'vendor/pickadate/picker.date.js' %}"></script>
 <script src="{% static 'js/plugins-init/pickadate-init.js' %}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script>
+    function filterFunction() {
+        let input = document.getElementById('searchInput');
+        let filter = input.value.toLowerCase();
+        let dropdown = document.getElementById('dropdownItems');
+        let items = dropdown.getElementsByClassName('dropdown-item');
+    
+        for (let i = 0; i < items.length; i++) {
+            let txtValue = items[i].textContent || items[i].innerText;
+            if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                items[i].style.display = '';
+            } else {
+                items[i].style.display = 'none';
+            }
+        }
+    }
+    
+    // Show the dropdown when focusing on the search input
+    document.getElementById('searchInput').addEventListener('focus', function() {
+        document.getElementById('dropdownItems').style.display = 'block';
+    });
+    
+    // Close the dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.matches('#searchInput') && !e.target.matches('.dropdown-item')) {
+            document.getElementById('dropdownItems').style.display = 'none';
+        }
+    });
+    
+    // Handle item selection
+    let dropdownItems = document.getElementsByClassName('dropdown-item');
+    for (let i = 0; i < dropdownItems.length; i++) {
+        dropdownItems[i].addEventListener('click', function() {
+            let selectedValue = this.getAttribute('data-value');
+            let selectedText = this.textContent;
+    
+            // Set the hidden input value
+            document.getElementById('selectedItem').value = selectedValue;
+    
+            // Set the search input to the selected item
+            document.getElementById('searchInput').value = selectedText;
+    
+            // Hide the dropdown
+            document.getElementById('dropdownItems').style.display = 'none';
+        });
+    }
+    
+</script>
 {% endblock %}
 
 
@@ -230,15 +313,15 @@
         <div class="user-info-dropdown">
             <div class="dropdown">
                 <a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown">
-                    <span class="user-icon">
-                        <img src="{{ user.profile_image.url }}" alt="Profile Image">
+                    <span class="user-icon" style="display: inline-block; width: 50px; height: 50px; overflow: hidden; border-radius: 50%;">
+                        <img src="{{ user.profile_image.url }}" alt="Profile Image" style="width: 100%; height: 100%; object-fit: cover;">
                     </span>
+                    
                     <span class="user-name">{{ user.name }}</span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
-                    <a class="dropdown-item" href="profile.html"><i class="dw dw-user1"></i> Profile</a>
-                    <a class="dropdown-item" href="profile.html"><i class="dw dw-settings2"></i> Setting</a>
-                    <a class="dropdown-item" href="faq.html"><i class="dw dw-help"></i> Help</a>
+                    <a class="dropdown-item" href="{% url 'reservation-change-profile' %}"><i class="dw dw-user1"></i>Edit Profile</a>
+                    <a class="dropdown-item" href="{% url 'reservation-change-password' %}"><i class="dw dw-user1"></i>Change Password</a>
                     <a class="dropdown-item" href="{% url 'reservation-logout' %}"><i class="dw dw-logout"></i> Log Out</a>
                 </div>
             </div>
@@ -324,9 +407,9 @@
 
 <div class="left-side-bar">
     <div class="brand-logo">
-        <a href="index.html">
-            <img src="{%static 'vendorss/images/deskapp-logo.svg'%}" alt="" class="dark-logo">
-            <img src="{%static 'vendorss/images/deskapp-logo-white.svg'%}" alt="" class="light-logo">
+        <a href="{% url 'reservation-dashboard' %}">
+            <img src="{%static 'images/pit_logo.png'%}" alt="" width="50" height="50">
+            <span class="text-white" style="font-weight: 800; font-size: 14px;">&nbsp; Student Reservation</span>
         </a>
         <div class="close-sidebar" data-toggle="left-sidebar-close">
             <i class="ion-close-round"></i>
@@ -337,14 +420,14 @@
             <ul id="accordion-menu">
                 <li>
                     <a href="javascript:void()" class="dropdown-toggle no-arrow">
-                        <span class="micon dw dw-calendar1"></span><span class="mtext">Home</span>
+                        <span class="micon fa-solid fa-gauge" style="font-size: 25px;"></span><span class="mtext">Home</span>
                     </a>
                 </li>
                 
                 
                 <li>
                     <a href="{% url 'reservation-status' %}" class="dropdown-toggle no-arrow">
-                        <span class="micon dw dw-calendar1"></span><span class="mtext">Status</span>
+                        <span class="micon fa-solid fa-spinner"></span><span class="mtext">Status</span>
                     </a>
                 </li>
                 
@@ -354,16 +437,16 @@
                 
                 <li class="dropdown">
                     <a href="javascript:;" class="dropdown-toggle">
-                        <span class="micon dw dw-apartment"></span><span class="mtext"> Manage Account </span>
+                        <img src="{% static 'images/manage-account.png' %}" width="15" height="15" class="micon" alt=""><span class="mtext"> Manage Account </span>
                     </a>
                     <ul class="submenu">
-                        <li><a href="ui-buttons.html">Edit Profile</a></li>
-                        <li><a href="ui-cards.html">Change Password</a></li>
+                        <li><a href="{% url 'reservation-change-profile' %}">Edit Profile</a></li>
+                        <li><a href="{% url 'reservation-change-password' %}">Change Password</a></li>
                     </ul>
                 </li>
                 <li>
                     <a href="{% url 'reservation-logout' %}" class="dropdown-toggle no-arrow">
-                        <span class="micon dw dw-calendar1"></span><span class="mtext">Logout</span>
+                        <span class="micon fa-solid fa-right-from-bracket"></span><span class="mtext">Logout</span>
                     </a>
                 </li>
             </ul>
@@ -472,11 +555,17 @@
                                                     <h4 class="card-title">Items</h4>
                                                     <p>Select Item you want to borrow</p>
                                                 </div>
-                                                <select id="item-select" name="itemm" class="form-control" aria-hidden="true">
-                                                    {% for item in items %}
-                                                        <option value="{{ item.id }}">{{ item.name }} ({{ item.quantity }})</option>
-                                                    {% endfor %}
-                                                </select>
+                                                
+                                                <div class="dropdown-container">
+                                                    <input type="text" id="searchInput" placeholder="Search for an item..." class="form-control" onkeyup="filterFunction()">
+                                                    <div id="dropdownItems" class="dropdown-items">
+                                                        {% for item in items %}
+                                                            <div class="dropdown-item" data-value="{{ item.id }}">{{ item.name }} ({{ item.quantity }}) - {{ item.user.username }}</div>
+                                                        {% endfor %}
+                                                    </div>
+                                                    <input type="hidden" id="selectedItem" name="itemm" value="">
+                                                </div>
+                                                
                                                 <div class="mt-4">
                                                     <label class="text-dark">Quantity</label>
                                                     <input type="number" name="quantityy" id="quantityy" class="form-control col-md-3" style="border: 1px solid #bebebe;" value="1" min="1" oninput="if(this.value < 1) { this.value = 1; }">
@@ -583,6 +672,47 @@
     });
 
 
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get all delete buttons
+        const deleteButtons = document.querySelectorAll('.notification-close');
+    
+        deleteButtons.forEach(function(button) {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Get the reservation id from the button's data-id attribute
+                const reservationId = this.getAttribute('data-id');
+    
+                // Send an AJAX request to delete the notification and reset is_handled to false
+                fetch('/delete-notification/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'  // Ensure CSRF token is set
+                    },
+                    body: JSON.stringify({ 'reservation_id': reservationId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // If successful, remove the notification item from the list
+                        const notificationItem = document.querySelector(`li[data-id="${reservationId}"]`);
+                        if (notificationItem) {
+                            notificationItem.remove();  // Remove the entire notification
+                        }
+                    } else {
+                        console.error('Error:', data.message || 'Failed to delete notification');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
+        });
+    });
+    
+
+
 
 
 
@@ -606,7 +736,7 @@ document.addEventListener("DOMContentLoaded", function() {
         // Display Toastr notification based on the message type
         if (messageType === 'success') {
             toastr.success(messageContent);
-        } else if (messageType === 'danger') {
+        } else if (messageType === 'error') {
             toastr.error(messageContent);
         } else if (messageType === 'warning') {
             toastr.warning(messageContent);

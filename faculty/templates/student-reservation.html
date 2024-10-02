@@ -108,7 +108,7 @@
         ***********************************-->
         <div class="nav-header">
             <a href="index.html" class="brand-logo">
-                <img class="logo-abbr" src="{% static 'images/logo.png'%}" alt="">
+                <img class="logo-abbr" src="{% static 'images/pit_logo.png'%}" alt="">
                 <img class="brand-title" src="{% static 'images/faculty.png'%}" alt="">
             </a>
 
@@ -137,7 +137,14 @@
                             
                             <li class="nav-item dropdown header-profile">
                                 <a class="nav-link" href="#" role="button" data-toggle="dropdown">
-                                    <i class="mdi mdi-account"></i>
+                                    <a class="nav-link" href="#" role="button" data-toggle="dropdown">
+                                        {% if request.user.profile_picture %}
+                                            <img src="{{ request.user.profile_picture.url }}" alt="{{ request.user.username }}'s profile picture">
+                                        {% else %}
+                                            <img src="{% static 'images/users.jpg' %}" alt="Default profile picture">
+                                        {% endif %}
+                                    </a>
+                                    <span class="text-dark">{{ request.user.username }}</span>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-right">
                                     <a href="./app-profile.html" class="dropdown-item">
@@ -270,6 +277,10 @@
                     <p id="modal-year" class="text-dark mt-1" style="font-size: 15px; margin-left: 20px;"></p>
                 </div>
                 <div class="form-group row" style="margin-top: -20px;">
+                    <label class="col-form-label text-md-left font-weight-bold col-12 col-md-4 col-lg-4 text-dark" style="font-size: 15px;">Phone Number:</label>
+                    <p id="modal-phone" class="text-dark mt-1" style="font-size: 15px; margin-left: 20px;"></p>
+                </div>
+                <div class="form-group row" style="margin-top: -20px;">
                     <label class="col-form-label text-md-left font-weight-bold col-12 col-md-4 col-lg-4 text-dark" style="font-size: 15px;">Email:</label>
                     <p id="modal-email" class="text-dark mt-1" style="font-size: 15px; margin-left: 20px;"></p>
                 </div>
@@ -282,7 +293,7 @@
                     <p id="modal-quantity" class="text-dark mt-1" style="font-size: 15px; margin-left: 20px;"></p>
                 </div>
                 <div class="form-group row" style="margin-top: -20px;">
-                    <label class="col-form-label text-md-left font-weight-bold col-12 col-md-4 col-lg-4 text-dark" style="font-size: 15px;">Date Returned:</label>
+                    <label class="col-form-label text-md-left font-weight-bold col-12 col-md-4 col-lg-4 text-dark" style="font-size: 15px;">Date Reserved:</label>
                     <p id="modal-date-borrow" class="text-dark mt-1" style="font-size: 15px; margin-left: 20px;"></p>
                 </div>
                 <div class="form-group row" style="margin-top: -20px;">
@@ -424,7 +435,18 @@
                                                                     <button class="dropdown-item" onclick="openNotificationModal('{{ request.id }}', 'Denied')">
                                                                         <img src="{% static 'images/deny-btn.png' %}" alt="" width="25" height="25">&nbsp; Denied
                                                                     </button>
-                                                                    <button class="dropdown-item view-item-btn">
+                                                                    <button class="dropdown-item view-item-btn" data-toggle="modal" data-target="#exampleModalCenter"
+                                                                        data-student-id="{{ request.student_id }}"
+                                                                        data-name="{{ request.name }}"
+                                                                        data-course="{{ request.course }}"
+                                                                        data-year="{{ request.year_level }}"
+                                                                        data-email="{{ request.email }}"
+                                                                        data-phone="{{ request.phone_number }}"
+                                                                        data-item="{{ request.content_object.name }}"
+                                                                        data-quantity="{{ request.quantity }}"
+                                                                        data-date="{{ request.reserve_date }}"
+                                                                        data-purpose="{{ request.purpose }}"
+                                                                        data-status="{{ request.status }}">
                                                                         <img src="{% static 'images/eye-btn.png' %}" alt="" width="25" height="25">&nbsp; View
                                                                     </button>
                                                                 </div>
@@ -654,6 +676,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const name = button.getAttribute('data-name');
             const course = button.getAttribute('data-course');
             const year = button.getAttribute('data-year');
+            const phone = button.getAttribute('data-phone');
             const email = button.getAttribute('data-email');
             const item = button.getAttribute('data-item');
             const quantity = button.getAttribute('data-quantity');
@@ -665,6 +688,7 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('modal-name').innerText = name;
             document.getElementById('modal-course').innerText = course;
             document.getElementById('modal-year').innerText = year;
+            document.getElementById('modal-phone').innerText = phone;
             document.getElementById('modal-email').innerText = email;
             document.getElementById('modal-item').innerText = item;
             document.getElementById('modal-quantity').innerText = quantity;
@@ -797,7 +821,7 @@ function closeModal() {
             // Display Toastr notification based on the message type
             if (messageType === 'success') {
                 toastr.success(messageContent);
-            } else if (messageType === 'danger') {
+            } else if (messageType === 'error') {
                 toastr.error(messageContent);
             } else if (messageType === 'warning') {
                 toastr.warning(messageContent);

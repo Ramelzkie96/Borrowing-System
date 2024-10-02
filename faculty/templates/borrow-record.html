@@ -102,7 +102,7 @@
         ***********************************-->
         <div class="nav-header">
             <a href="index.html" class="brand-logo">
-                <img class="logo-abbr" src="{% static 'images/logo.png'%}" alt="">
+                <img class="logo-abbr" src="{% static 'images/pit_logo.png'%}" alt="">
                 <img class="brand-title" src="{% static 'images/faculty.png'%}" alt="">
             </a>
 
@@ -131,7 +131,14 @@
                             
                             <li class="nav-item dropdown header-profile">
                                 <a class="nav-link" href="#" role="button" data-toggle="dropdown">
-                                    <i class="mdi mdi-account"></i>
+                                    <a class="nav-link" href="#" role="button" data-toggle="dropdown">
+                                        {% if request.user.profile_picture %}
+                                            <img src="{{ request.user.profile_picture.url }}" alt="{{ request.user.username }}'s profile picture">
+                                        {% else %}
+                                        <img src="{% static 'images/users.jpg' %}" alt="Default profile picture">
+                                        {% endif %}
+                                    </a>
+                                    <span class="text-dark">{{ request.user.username }}</span>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-right">
                                     <a href="./app-profile.html" class="dropdown-item">
@@ -613,7 +620,7 @@
                                                 <th scope="col">Quantity</th>
                                                 <th scope="col">Time Span</th>
                                                 <th scope="col">Status</th>
-                                                <th scope="col">Generate Report</th>
+                                                <th scope="col">Borrower Report</th>
                                                 <th scope="col" style="width: 80px;">Action</th>
                                             </tr>
                                         </thead>
@@ -628,6 +635,7 @@
                                                         <td>{{ request.content_object.name }}</td>
                                                         <td>{{ request.quantity }}</td>
                                                         <td>{{ request.time_ago }}</td>
+                                                        <td style="display: none;">{{ request.date_borrow }}</td>
                                                         <td>
                                                             {% if request.status == "Borrowed" %}
                                                                 <div class="badge badge-success" style="color: white;">{{ request.status }}</div>
@@ -684,7 +692,8 @@
                                                                         data-item-name="{{ request.content_object.name }}"
                                                                         data-quantity="{{ request.quantity }}"
                                                                         data-date="{{ request.date_borrow }}"
-                                                                        data-purpose="{{ request.purpose }}">
+                                                                        data-purpose="{{ request.purpose }}"
+                                                                        data-borrower-type="{{ request.borrower_type }}">
                                                                         <i class="fas fa-edit"></i>&nbsp; Edit
                                                                     </button>
                                                                 {% endif %}
@@ -832,7 +841,7 @@ function searchTable() {
             td = tr[i].getElementsByTagName("td");
             for (j = 0; j < td.length; j++) {
                 // Ensure buttons, dropdowns, badges, and action columns are not affected
-                if (j === 7 || j === 8 || td[j].querySelector('.dropdownnn') || td[j].querySelector('.badge') || td[j].querySelector('.action-buttons')) {
+                if (j === 7 || j === 8 || j === 9 || td[j].querySelector('.dropdownnn') || td[j].querySelector('.badge') || td[j].querySelector('.action-buttons')) {
                     continue; // Skip "Status", "Action", and dropdowns, badges
                 }
                 td[j].innerHTML = td[j].textContent || td[j].innerText; // Reset text content
@@ -853,7 +862,7 @@ function searchTable() {
 
         // Iterate through each cell in the row
         for (j = 0; j < td.length; j++) {
-            if (j === 7 || j === 8 || j == 9) continue; // Skip "Status" and "Action" columns
+            if (j === 8 || j === 9 || j == 10) continue; // Skip "Status" and "Action" columns
             if (td[j]) {
                 txtValue = td[j].textContent || td[j].innerText;
                 if (txtValue.toUpperCase().indexOf(filter) > -1) {
@@ -1008,6 +1017,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 //edit js
+// Edit JS
 document.addEventListener('DOMContentLoaded', function() {
     const editButtons = document.querySelectorAll('.edit-item-btn');
     
@@ -1025,6 +1035,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const date = this.getAttribute('data-date');
             const purpose = this.getAttribute('data-purpose');
             const id = this.getAttribute('data-id'); // Get the id attribute
+            const borrowerType = this.getAttribute('data-borrower-type'); // Get borrower type
 
             // Populate modal fields
             document.querySelector('.modal input[name="student_id"]').value = studentId;
@@ -1042,9 +1053,24 @@ document.addEventListener('DOMContentLoaded', function() {
             const itemSelect = document.querySelector('.modal select#single-selectt');
             itemSelect.value = itemId;
             $(itemSelect).trigger('change'); // Update select dropdown if used (especially with select2)
+
+            // Handle borrower type radio buttons and "Others" input
+            if (borrowerType === 'Student') {
+                document.getElementById('student_radio').checked = true;
+                document.getElementById('other_borrower_type').value = ''; // Clear "Others" input
+            } else if (borrowerType === 'Teacher') {
+                document.getElementById('teacher_radio').checked = true;
+                document.getElementById('other_borrower_type').value = ''; // Clear "Others" input
+            } else {
+                // If it's neither Student nor Teacher, assume it's Others
+                document.getElementById('student_radio').checked = false;
+                document.getElementById('teacher_radio').checked = false;
+                document.getElementById('other_borrower_type').value = borrowerType; // Set "Others" input
+            }
         });
     });
 });
+
 
 
 
@@ -1132,7 +1158,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         let hasVisibleRow = false;
         rows.forEach(row => {
-            const dateBorrowed = row.querySelector("td:nth-child(7)").textContent.trim();
+            const dateBorrowed = row.querySelector("td:nth-child(8)").textContent.trim();
             const dateBorrowedObj = new Date(dateBorrowed);
 
             if (dateBorrowedObj >= startDate && dateBorrowedObj <= endDate) {
@@ -1200,7 +1226,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Display Toastr notification based on the message type
                 if (messageType === 'success') {
                     toastr.success(messageContent);
-                } else if (messageType === 'danger') {
+                } else if (messageType === 'error') {
                     toastr.error(messageContent);
                 } else if (messageType === 'warning') {
                     toastr.warning(messageContent);
@@ -1210,6 +1236,31 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         });
 
+
+
+// Get the radio buttons and the "Others" input field
+const studentRadio = document.getElementById('student_radio');
+const teacherRadio = document.getElementById('teacher_radio');
+const otherInput = document.getElementById('other_borrower_type');
+
+// Function to enable or disable and clear the "Others" input field
+function toggleOtherInput() {
+    if (studentRadio.checked || teacherRadio.checked) {
+        otherInput.value = '';  // Clear the input field
+        otherInput.disabled = true;
+        otherInput.style.cursor = 'not-allowed';  // Show disabled cursor
+    } else {
+        otherInput.disabled = false;
+        otherInput.style.cursor = 'text';  // Show normal text cursor when enabled
+    }
+}
+
+// Add event listeners for the radio buttons
+studentRadio.addEventListener('change', toggleOtherInput);
+teacherRadio.addEventListener('change', toggleOtherInput);
+
+// Initialize on page load
+toggleOtherInput();
 
 
 

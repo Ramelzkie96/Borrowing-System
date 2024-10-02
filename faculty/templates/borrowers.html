@@ -67,7 +67,7 @@
         ***********************************-->
         <div class="nav-header">
             <a href="index.html" class="brand-logo">
-                <img class="logo-abbr" src="{% static 'images/logo.png'%}" alt="">
+                <img class="logo-abbr" src="{% static 'images/pit_logo.png'%}" alt="">
                 <img class="brand-title" src="{% static 'images/faculty.png'%}" alt="">
             </a>
 
@@ -96,7 +96,14 @@
                             
                             <li class="nav-item dropdown header-profile">
                                 <a class="nav-link" href="#" role="button" data-toggle="dropdown">
-                                    <i class="mdi mdi-account"></i>
+                                    <a class="nav-link" href="#" role="button" data-toggle="dropdown">
+                                        {% if request.user.profile_picture %}
+                                            <img src="{{ request.user.profile_picture.url }}" alt="{{ request.user.username }}'s profile picture">
+                                        {% else %}
+                                        <img src="{% static 'images/users.jpg' %}" alt="Default profile picture">
+                                        {% endif %}
+                                    </a>
+                                    <span class="text-dark">{{ request.user.username }}</span>
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-right">
                                     <a href="./app-profile.html" class="dropdown-item">
@@ -340,7 +347,7 @@
                         // Display Toastr notification based on the message type
                         if (messageType === 'success') {
                             toastr.success(messageContent);
-                        } else if (messageType === 'danger') {
+                        } else if (messageType === 'error') {
                             toastr.error(messageContent);
                         } else if (messageType === 'warning') {
                             toastr.warning(messageContent);
@@ -353,28 +360,30 @@
 
 
 
-                // Get the radio buttons and the "Others" input field
-    const studentRadio = document.getElementById('student_radio');
-    const teacherRadio = document.getElementById('teacher_radio');
-    const otherInput = document.getElementById('other_borrower_type');
+   // Get the radio buttons and the "Others" input field
+const studentRadio = document.getElementById('student_radio');
+const teacherRadio = document.getElementById('teacher_radio');
+const otherInput = document.getElementById('other_borrower_type');
 
-    // Function to enable or disable the "Others" input field
-    function toggleOtherInput() {
-        if (studentRadio.checked || teacherRadio.checked) {
-            otherInput.disabled = true;
-            otherInput.style.cursor = 'not-allowed';  // Show disabled cursor
-        } else {
-            otherInput.disabled = false;
-            otherInput.style.cursor = 'text';  // Show normal text cursor when enabled
-        }
+// Function to enable or disable and clear the "Others" input field
+function toggleOtherInput() {
+    if (studentRadio.checked || teacherRadio.checked) {
+        otherInput.value = '';  // Clear the input field
+        otherInput.disabled = true;
+        otherInput.style.cursor = 'not-allowed';  // Show disabled cursor
+    } else {
+        otherInput.disabled = false;
+        otherInput.style.cursor = 'text';  // Show normal text cursor when enabled
     }
+}
 
-    // Add event listeners for the radio buttons
-    studentRadio.addEventListener('change', toggleOtherInput);
-    teacherRadio.addEventListener('change', toggleOtherInput);
+// Add event listeners for the radio buttons
+studentRadio.addEventListener('change', toggleOtherInput);
+teacherRadio.addEventListener('change', toggleOtherInput);
 
-    // Initialize on page load
-    toggleOtherInput();
+// Initialize on page load
+toggleOtherInput();
+
         
     </script>
 
