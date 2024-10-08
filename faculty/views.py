@@ -22,6 +22,7 @@ from django.utils import timezone
 from datetime import datetime
 from django.utils.timezone import now
 import pdfkit
+from django.db.models import Q 
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 
@@ -210,8 +211,10 @@ def borrow_record(request):
     if not request.user.faculty:
         return HttpResponseForbidden("You do not have permission to access this page.")
     
-    # Fetch all borrow requests ordered by most recent first, excluding those with status "Returned" or "Defect Item"
-    borrow_requests = BorrowRequest.objects.exclude(status__in=["Returned", "Returned/Defect Item"]).order_by('-id')
+    # Fetch borrow requests that are either created by the user (borrower) or handled by the user (faculty handler)
+    borrow_requests = BorrowRequest.objects.filter(
+        Q(user=request.user) | Q(handled_by=request.user)  # Include requests where the user is either the borrower or handler
+    ).exclude(status__in=["Returned", "Returned/Defect Item"]).order_by('-id')
 
     total_borrow_requests = borrow_requests.count()
 
@@ -221,7 +224,7 @@ def borrow_record(request):
     # Pagination setup
     show_entries = request.GET.get('show', 'all')
     if show_entries == 'all':
-        paginator = Paginator(borrow_requests, 1000000)  # Large number to ensure all items are on one page
+        paginator = Paginator(borrow_requests, 1000000)  # Large number to show all records on one page
         current_show = 'all'
     else:
         paginator = Paginator(borrow_requests, int(show_entries))
@@ -234,8 +237,9 @@ def borrow_record(request):
         'page_obj': page_obj,
         'total_borrow_requests': total_borrow_requests,
         'current_show': current_show,
-        'items': user_items,  # Pass only user's items to the template
+        'items': user_items,  # Pass only the user's items to the template
     })
+
     
 
 @login_required
@@ -492,12 +496,16 @@ def returned_record(request):
     if not request.user.faculty:
         return HttpResponseForbidden("You do not have permission to access this page.")
     
-    
-    returned_requests = BorrowRequest.objects.filter(status__in=["Returned", "Returned/Defect Item"]).order_by('-id')
+    # Fetch returned requests handled by or created by the current user
+    returned_requests = BorrowRequest.objects.filter(
+        Q(user=request.user) | Q(handled_by=request.user), 
+        status__in=["Returned", "Returned/Defect Item"]
+    ).order_by('-id')
 
+    # Pagination setup
     show_entries = request.GET.get('show', 'all')
     if show_entries == 'all':
-        paginator = Paginator(returned_requests, 1000000)  # Large number to ensure all items are on one page
+        paginator = Paginator(returned_requests, 1000000)  # Show all records
         current_show = 'all'
     else:
         paginator = Paginator(returned_requests, int(show_entries))
@@ -509,8 +517,8 @@ def returned_record(request):
     return render(request, 'returned-record.html', {
         'page_obj': page_obj,
         'current_show': current_show,
-        'returned_requests': returned_requests
-        })
+        'returned_requests': returned_requests,
+    })
     
 @login_required
 def change_profile(request):

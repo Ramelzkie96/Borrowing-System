@@ -650,7 +650,7 @@
                                                                 <i class="fa-solid fa-file-pdf"></i>
                                                             </a>
                                                         </td>
-
+                                        
                                                         <td style="text-align: center; vertical-align: middle;">
                                                             <div class="dropdownnn">
                                                                 <a class="btn btn-link font-24 p-0 line-height-1 no-arrow -toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
@@ -671,34 +671,32 @@
                                                                         data-status="{{ request.status }}">
                                                                         <i class="fas fa-eye"></i>&nbsp; View
                                                                     </button>
-
-                                                                   
-                                                                    {% if request.user_id == user.id %} <!-- Ensure the request is associated with the current user -->
-                                                                    <button type="button" class="dropdown-item borrow-item-btn" data-toggle="modal" data-target="#modalGrid1"
-                                                                        data-request-id="{{ request.id }}"
-                                                                        data-borrow="{{ request.date_borrow }}">
-                                                                        <i class="fa-solid fa-plus"></i>&nbsp; Borrow More Item
-                                                                    </button>
-                                                                
-                                                                    <button type="button" class="dropdown-item edit-item-btn" data-toggle="modal" data-target=".bd-example-modal-lg"
-                                                                        data-id="{{ request.id }}"
-                                                                        data-student-id="{{ request.student_id }}"
-                                                                        data-name="{{ request.name }}"
-                                                                        data-course="{{ request.course }}"
-                                                                        data-year="{{ request.year }}"
-                                                                        data-email="{{ request.email }}"
-                                                                        data-phone="{{ request.phone }}"
-                                                                        data-item-id="{{ request.content_object.id }}"
-                                                                        data-item-name="{{ request.content_object.name }}"
-                                                                        data-quantity="{{ request.quantity }}"
-                                                                        data-date="{{ request.date_borrow }}"
-                                                                        data-purpose="{{ request.purpose }}"
-                                                                        data-borrower-type="{{ request.borrower_type }}">
-                                                                        <i class="fas fa-edit"></i>&nbsp; Edit
-                                                                    </button>
-                                                                {% endif %}
-                                                                
                                         
+                                                                    {% if request.user_id == user.id or request.handled_by_id == user.id %}  <!-- Ensure the request is associated with the current user or handled by the user -->
+                                                                        <button type="button" class="dropdown-item borrow-item-btn" data-toggle="modal" data-target="#modalGrid1"
+                                                                            data-request-id="{{ request.id }}"
+                                                                            data-borrow="{{ request.date_borrow }}">
+                                                                            <i class="fa-solid fa-plus"></i>&nbsp; Borrow More Item
+                                                                        </button>
+                                                                    
+                                                                        <button type="button" class="dropdown-item edit-item-btn" data-toggle="modal" data-target=".bd-example-modal-lg"
+                                                                            data-id="{{ request.id }}"
+                                                                            data-student-id="{{ request.student_id }}"
+                                                                            data-name="{{ request.name }}"
+                                                                            data-course="{{ request.course }}"
+                                                                            data-year="{{ request.year }}"
+                                                                            data-email="{{ request.email }}"
+                                                                            data-phone="{{ request.phone }}"
+                                                                            data-item-id="{{ request.content_object.id }}"
+                                                                            data-item-name="{{ request.content_object.name }}"
+                                                                            data-quantity="{{ request.quantity }}"
+                                                                            data-date="{{ request.date_borrow }}"
+                                                                            data-purpose="{{ request.purpose }}"
+                                                                            data-borrower-type="{{ request.borrower_type }}">
+                                                                            <i class="fas fa-edit"></i>&nbsp; Edit
+                                                                        </button>
+                                                                    {% endif %}
+                                                                    
                                                                     <button type="button" class="dropdown-item return-item-btn" data-toggle="modal" data-target="#modalGrid"
                                                                         data-request-id="{{ request.id }}"
                                                                         data-status="{{ request.status }}"
@@ -723,6 +721,7 @@
                                                 </tr>
                                             {% endif %}
                                         </tbody>
+                                        
                                         
                                     </table>
                                     

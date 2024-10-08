@@ -560,7 +560,7 @@
                                                     <input type="text" id="searchInput" placeholder="Search for an item..." class="form-control" onkeyup="filterFunction()">
                                                     <div id="dropdownItems" class="dropdown-items">
                                                         {% for item in items %}
-                                                            <div class="dropdown-item" data-value="{{ item.id }}">{{ item.name }} ({{ item.quantity }}) - {{ item.user.username }}</div>
+                                                            <div class="dropdown-item" data-value="{{ item.id }}">{{ item.name }} ({{ item.quantity }}) - {{ item.description }}</div>
                                                         {% endfor %}
                                                     </div>
                                                     <input type="hidden" id="selectedItem" name="itemm" value="">

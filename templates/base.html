@@ -15,49 +15,7 @@
     <link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
 
 
-    <style>
-      /* Popup container */
-      .popup {
-        display: none;
-        position: fixed;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        padding: 20px;
-        background-color: white;
-        border: 1px solid #ccc;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        text-align: center;
-        z-index: 1000;
-        width: 300px;
-        font-family: Arial, sans-serif;
-    }
-
-    /* Warning icon */
-    .popup .warning {
-        width: 50px;
-        height: 50px;
-        margin-bottom: 15px;
-    }
-
-    /* Countdown text */
-    .popup p {
-        font-size: 18px;
-        margin: 0;
-    }
-
-    /* Overlay background */
-    .overlayy {
-        display: none;
-        position: fixed;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 999;
-    }
-    </style>
+   
     
 
   </head>
@@ -66,10 +24,7 @@
 
     <div class="overlayy" id="overlay"></div>
 
-            <div class="popup" id="warning-popup">
-                <img class="warning" src="https://img.icons8.com/color/96/warning-shield.png" alt="Warning Icon">
-                <p>You will be logged out in <span id="countdown">60</span> seconds due to inactivity.</p>
-            </div>
+   
 
     {% block content %}
 
@@ -78,66 +33,7 @@
     {% block extra_js %} {% endblock %}
 
 
-            <!-- Example div to store the last activity timestamp -->
-<div id="activity-data" data-last-activity="{% if request.session.last_activity %}{{ request.session.last_activity }}{% else %}0{% endif %}"></div>
 
-<script>
-  let inactivityTimeout;
-  let warningTimeout;
-  let countdownInterval;
-  let countdownTime = 60;  // 60 seconds countdown before logout
-
-  const maxInactiveTime = 15 * 60 * 1000;  // 2 minutes in milliseconds
-  const warningTime = maxInactiveTime - (1 * 60 * 1000);  // Show warning 1 minute before logout
-
-  // Access the last activity data from the HTML element
-  let lastActivity = document.getElementById("activity-data").getAttribute("data-last-activity");
-
-  function resetInactivityTimer() {
-      clearTimeout(inactivityTimeout);
-      clearTimeout(warningTimeout);
-      hideWarning();  // Hide the warning popup if the user interacts
-
-      // Set warning to show 1 minute before actual logout
-      warningTimeout = setTimeout(showWarning, warningTime);
-      inactivityTimeout = setTimeout(logoutUser, maxInactiveTime);
-  }
-
-  function showWarning() {
-      document.getElementById("warning-popup").style.display = "block";  // Show the warning popup
-      countdownTime = 60;  // Reset countdown time to 60 seconds
-      document.getElementById("countdown").textContent = countdownTime;
-
-      // Start a countdown to update the time remaining every second
-      countdownInterval = setInterval(function() {
-          countdownTime--;
-          document.getElementById("countdown").textContent = countdownTime;
-
-          if (countdownTime <= 0) {
-              clearInterval(countdownInterval);  // Stop the countdown when it reaches 0
-          }
-      }, 1000);
-  }
-
-  function hideWarning() {
-      document.getElementById("warning-popup").style.display = "none";  // Hide the warning popup
-      clearInterval(countdownInterval);  // Clear the countdown interval
-  }
-
-  function logoutUser() {
-      // Call the backend to logout the user
-      window.location.href = "{% url 'logout' %}";
-  }
-
-  // Reset the timer on user interactions
-  window.onload = resetInactivityTimer;
-  window.onmousemove = resetInactivityTimer;
-  window.onmousedown = resetInactivityTimer;  // Mouse clicks
-  window.ontouchstart = resetInactivityTimer;  // Touchscreen taps
-  window.onclick = resetInactivityTimer;
-  window.onkeypress = resetInactivityTimer;
-  window.addEventListener('scroll', resetInactivityTimer);
-</script>
     
   </body>
 </html>

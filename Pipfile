@@ -8,7 +8,6 @@ requests = "*"
 django = "*"
 mysqlclient = "*"
 pillow = "*"
-django-jazzmin = "*"
 django-stubs = "*"
 pdfkit = "*"
 

@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
-from .juzmin import JAZZMIN_SETTINGS
+
 
 
 
@@ -35,10 +35,9 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'account',
+    'DapartmentChair',
     'faculty',
     'reservation',
-    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -55,8 +54,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'account.middleware.Custom404Middleware',
-    'account.middleware.UpdateLastActivityMiddleware',
+    'DapartmentChair.middleware.Custom404Middleware',
 ]
 
 ROOT_URLCONF = 'project.urls'
@@ -95,7 +93,7 @@ WSGI_APPLICATION = 'project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'capstoneborrow',
+        'NAME': 'capsborrow',
         'USER': 'root',
         'PASSWORD': 'Password0012',
         'PORT': 3306,
@@ -134,11 +132,7 @@ EMAIL_HOST_PASSWORD = 'dtswsdbspwteihbh'
 
 
 
-# SESSION_COOKIE_AGE = 900  # 15 minutes (in seconds)
-# SESSION_COOKIE_AGE = 300  # 5 minutes in seconds
-SESSION_COOKIE_AGE = 900  # 2 minutes in seconds
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-SESSION_SAVE_EVERY_REQUEST = True
+
 
 
 # Internationalization
@@ -160,13 +154,12 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # Where your static files are stored during development
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-AUTH_USER_MODEL = 'account.User'
+AUTH_USER_MODEL = 'DapartmentChair.User'
 
 
+MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Define the URL prefix for media files
-MEDIA_URL = '/media/'
 
 
 # Specify the session engine to use (default is database-backed sessions)
@@ -177,39 +170,3 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-JAZZMIN_SETTING = JAZZMIN_SETTINGS
-
-JAZZMIN_SETTINGS["show_ui_builder"] = True
-
-
-JAZZMIN_UI_TWEAKS = {
-    "navbar_small_text": False,
-    "footer_small_text": False,
-    "body_small_text": False,
-    "brand_small_text": False,
-    "brand_colour": False,
-    "accent": "accent-primary",
-    "navbar": "navbar-dark",
-    "no_navbar_border": False,
-    "navbar_fixed": False,
-    "layout_boxed": False,
-    "footer_fixed": False,
-    "sidebar_fixed": False,
-    "sidebar": "sidebar-dark-primary",
-    "sidebar_nav_small_text": False,
-    "sidebar_disable_expand": False,
-    "sidebar_nav_child_indent": False,
-    "sidebar_nav_compact_style": False,
-    "sidebar_nav_legacy_style": False,
-    "sidebar_nav_flat_style": False,
-    "theme": "cyborg",
-    "dark_mode_theme": "darkly",
-    "button_classes": {
-        "primary": "btn-primary",
-        "secondary": "btn-secondary",
-        "info": "btn-info",
-        "warning": "btn-warning",
-        "danger": "btn-danger",
-        "success": "btn-success"
-    }
-}

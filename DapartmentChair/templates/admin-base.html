@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AdminLTE 3 | Dashboard 2</title>
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <!-- overlayScrollbars -->
+  <link rel="stylesheet" href="{% static 'plugins/overlayScrollbars/css/OverlayScrollbars.min.css' %}">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="{% static 'dist/css/adminlte.min.css' %}">
+
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
+
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+  
+
+  {% block extra_css %} {% endblock %}
+
+
+
+  
+
+    {% block extra_js %} {% endblock %}
+  
+</head>
+<body class="hold-transition dark-mode sidebar-mini layout-fixed layout-navbar-fixed layout-footer-fixed">
+  <div id="django-messages" style="display:none;">
+    {% for message in messages %}
+      <div class="message" data-type="{{ message.tags }}" data-content="{{ message|escapejs }}"></div>
+    {% endfor %}
+  </div>
+    {% block content %}
+
+    {% endblock content %}
+
+
+    <script>
+                  //toaster message
+document.addEventListener("DOMContentLoaded", function() {
+  // Configure Toastr options
+  toastr.options = {
+      "closeButton": true,
+      "progressBar": true,
+      "timeOut": "5000",
+      "positionClass": "toast-bottom-right"
+  };
+
+  // Loop through the hidden messages and display them
+  document.querySelectorAll('#django-messages .message').forEach(function(el) {
+      console.log(el);  // Add this for debugging
+      var messageType = el.getAttribute('data-type');
+      var messageContent = el.getAttribute('data-content');
+  
+
+      // Display Toastr notification based on the message type
+      if (messageType === 'success') {
+          toastr.success(messageContent);
+      } else if (messageType === 'error') {
+          toastr.error(messageContent);
+      } else if (messageType === 'warning') {
+          toastr.warning(messageContent);
+      } else if (messageType === 'info') {
+          toastr.info(messageContent);
+      }
+  });
+});
+    </script>
+
+</body>
+</html>

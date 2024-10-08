@@ -58,6 +58,7 @@ class BorrowRequest(models.Model):
     note = models.CharField(max_length=200, null=True, blank=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     borrower_type = models.CharField(max_length=100, null=True)
+    handled_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='handled_requests', on_delete=models.CASCADE, null=True, blank=True)
     
     # New field to store the timestamp
     created_at = models.DateTimeField(auto_now_add=True)
