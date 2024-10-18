@@ -1,0 +1,1315 @@
+{% extends "admin-base.html" %}
+{% load static %}
+
+{% block extra_css %} 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+<!-- Include Pickadate CSS from CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pickadate.js/3.6.2/compressed/themes/default.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pickadate.js/3.6.2/compressed/themes/default.date.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<style>
+  .pagination-container {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 20px;
+        padding-right: 20px;
+    }
+    
+    .pagination {
+        margin-bottom: 0;
+        font-size: 0.9rem;
+    }
+    
+    .page-item.active .page-link {
+        background-color: #007bff;
+        border-color: #007bff;
+        color: white;
+    }
+    
+    .page-item .page-link {
+        color: #007bff;
+    }
+    
+    .page-link:hover {
+        background-color: #f1f1f1;
+    }
+    
+    .page-item.disabled .page-link {
+        color: #6c757d;
+    }
+    .custom-modal .modal-dialog {
+      overflow: hidden;
+  }
+
+  .custom-modal .modal-content {
+      overflow: hidden;
+  }
+  .custom-modal .modal-body {
+      overflow-y: auto;
+      max-height: calc(100vh - 200px); /* Adjust this value as needed */
+  }
+  .error-border.form-control {
+  border-color: red !important;
+  border-width: 1px !important; /* Adjust as needed */
+}
+.picker__holder {
+  overflow-y: hidden !important; /* Hide vertical scrollbar */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
+}
+
+.picker__frame {
+  overflow: hidden !important; /* Remove scrollbars inside the frame */
+  width: 100% !important;      /* Ensure full width without triggering overflow */
+}
+
+.picker__header select {
+  background-color: #ffffff !important; /* Set background color to white */
+  border: none !important;              /* Remove the border */
+  color: #000000 !important;            /* Set the text color to black for contrast */
+  padding: 5px;                         /* Add some padding for spacing */
+  border-radius: 4px;                   /* Slight rounding of corners for a modern look */
+}
+
+/* Style adjustments for the picker container */
+.picker__holder {
+  display: block !important;  /* Ensure the picker is properly displayed */
+  visibility: visible !important;
+}
+
+/* Customize navigation buttons (arrows) */
+.picker__nav--prev,
+.picker__nav--next {
+  background-color: transparent;        /* Remove any background color */
+  color: #000000 !important;            /* Set the arrow color to black */
+}
+
+/* Additional style for a clean look */
+.picker__day--today {
+  background-color: #e0e0e0;            /* Set a light background for today */
+  color: #000;                          /* Black text color for today */
+}
+</style>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<!-- jQuery -->
+<script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
+<!-- Bootstrap -->
+<script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<!-- overlayScrollbars -->
+<script src="{% static 'plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js' %}"></script>
+<!-- AdminLTE App -->
+<script src="{% static 'dist/js/adminlte.js' %}"></script>
+<!-- PAGE PLUGINS -->
+<!-- jQuery Mapael -->
+<script src="{% static 'plugins/jquery-mousewheel/jquery.mousewheel.js' %}"></script>
+<!-- AdminLTE dashboard demo (This is only for demo purposes) -->
+<script src="dist/js/pages/dashboard2.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+<!-- Include Pickadate JS from CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pickadate.js/3.6.2/compressed/picker.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pickadate.js/3.6.2/compressed/picker.date.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<!-- Initialize Pickadate with Desired Format -->
+<script>
+  $(document).ready(function() {
+    // Initialize Pickadate on the input field
+    var $datePicker = $('#dateReturn').pickadate({
+        format: 'd mmmm, yyyy',  // Format as "20 September, 2024"
+        selectMonths: true,      // Enable dropdown to select month
+        selectYears: 10,         // Enable dropdown for selecting year
+        today: 'Today',
+        clear: 'Clear',
+        close: 'Close',
+        closeOnSelect: true,     // Close picker on date selection
+        onSet: function(context) {
+            // Ensure the input is blurred to prevent duplicate appearances
+            if (context.select) {
+                this.$node.blur(); // Unfocus the input to avoid re-triggering the picker
+            }
+        }
+    });
+    
+    // Optional: Ensure no duplicate initialization
+    if ($datePicker.data('pickadate')) {
+        return; // Prevent duplicate initialization
+    }
+});
+
+$(document).ready(function() {
+    // Initialize Pickadate on the input field
+    var $datePicker = $('#borrowerMore').pickadate({
+        format: 'd mmmm, yyyy',  // Format as "20 September, 2024"
+        selectMonths: true,      // Enable dropdown to select month
+        selectYears: 10,         // Enable dropdown for selecting year
+        today: 'Today',
+        clear: 'Clear',
+        close: 'Close',
+        closeOnSelect: true,     // Close picker on date selection
+        onSet: function(context) {
+            // Ensure the input is blurred to prevent duplicate appearances
+            if (context.select) {
+                this.$node.blur(); // Unfocus the input to avoid re-triggering the picker
+            }
+        }
+    });
+    
+    // Optional: Ensure no duplicate initialization
+    if ($datePicker.data('pickadate')) {
+        return; // Prevent duplicate initialization
+    }
+});
+</script>
+{% endblock %}
+
+
+  
+{% block content %}
+
+<div class="wrapper">
+
+    <!-- Preloader -->
+    <div class="preloader flex-column justify-content-center align-items-center">
+      <img class="animation__wobble" src="{% static 'dist/img/pit_logo.png' %}" alt="AdminLTELogo" height="60" width="60">
+    </div>
+  
+    <!-- Navbar -->
+    <nav class="main-header navbar navbar-expand navbar-dark">
+      <!-- Left navbar links -->
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
+        </li>
+        <li class="nav-item d-none d-sm-inline-block">
+          <a href="{% url 'admin-dashboard' %}" class="nav-link">Home</a>
+        </li>
+      </ul>
+  
+      <!-- Right navbar links -->
+      <ul class="navbar-nav ml-auto">
+        <!-- Navbar Search -->
+        <li class="nav-item">
+          <a class="nav-link" data-widget="navbar-search" href="#" role="button">
+            <i class="fas fa-search"></i>
+          </a>
+          <div class="navbar-search-block">
+            <form class="form-inline">
+              <div class="input-group input-group-sm">
+                <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search">
+                <div class="input-group-append">
+                  <button class="btn btn-navbar" type="submit">
+                    <i class="fas fa-search"></i>
+                  </button>
+                  <button class="btn btn-navbar" type="button" data-widget="navbar-search">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </li>
+  
+   
+        <li class="nav-item">
+          <a class="nav-link" data-widget="fullscreen" href="#" role="button">
+            <i class="fas fa-expand-arrows-alt"></i>
+          </a>
+        </li>
+      
+      </ul>
+    </nav>
+    <!-- /.navbar -->
+  
+    <!-- Main Sidebar Container -->
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+      <!-- Brand Logo -->
+      <a href="index3.html" class="brand-link">
+        <img src="{% static 'dist/img/pit_logo.png' %}" alt="AdminLTE Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
+        <span class="brand-text font-weight-light">IT CHAIRMAN</span>
+      </a>
+  
+      <!-- Sidebar -->
+      <div class="sidebar">
+        <!-- Sidebar user panel (optional) -->
+        <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+          <div class="image">
+              {% if request.user.profile_picture %}
+                  <img src="{{ request.user.profile_picture.url }}" class="img-circle elevation-2" alt="{{ request.user.username }}'s profile picture">
+              {% else %}
+                  <img src="{% static 'images/users.jpg' %}" class="img-circle elevation-2" alt="Default profile picture">
+              {% endif %}
+          </div>
+          <div class="info">
+              <a href="{% url 'admin-dashboard' %}" class="d-block">{{ request.user.username }}</a>
+          </div>
+      </div>
+      
+      
+      
+      
+  
+      
+  
+        <!-- Sidebar Menu -->
+        <nav class="mt-2">
+          <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+            <li class="nav-header">Main Menu</li>
+            <li class="nav-item">
+              <a href="{% url 'admin-dashboard' %}" class="nav-link">
+                <i class="nav-icon fas fa-tachometer-alt"></i>
+                <p>
+                  Dashboard
+                </p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'admin-users' %}" class="nav-link">
+                <i class="nav-icon fas fa-users"></i>
+                <p>
+                  Users
+                </p>
+              </a>
+            </li>
+            <li class="nav-header">Items</li>
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="nav-icon fas fa-box"></i>
+                <p>
+                  Manage Items
+                  <i class="right fas fa-angle-left"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a href="{% url 'admin-add-item' %}" class="nav-link">
+                    <i class="far fa-circle nav-icon"></i>
+                    <p>Add Item</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="{% url 'admin-item-record' %}" class="nav-link">
+                    <i class="far fa-circle nav-icon"></i>
+                    <p>Item Records</p>
+                  </a>
+                </li>
+  
+              </ul>
+            </li>
+            <li class="nav-item "> <!--pang hover menu-open-->
+              <a href="{% url 'admin-borrowers' %}" class="nav-link">
+                <i class="nav-icon fas fa-plus"></i>
+                <p>
+                  Add Borrow Item
+                </p>
+              </a>
+            </li>
+            <li class="nav-item ">
+              <a href="{% url 'admin-borrow-record' %}" class="nav-link active">
+                <i class="nav-icon fas fa-clipboard"></i>
+                <p>
+                  Borrowed Records
+                </p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{% url 'admin-returned-record' %}" class="nav-link">
+                <i class="nav-icon fa-solid fa-arrow-rotate-left"></i>
+                <p>
+                  Returned Records
+                </p>
+              </a>
+            </li>
+  
+            <li class="nav-header">Borrowers Reservation</li>
+            <li class="nav-item">
+              <a href="{% url 'admin-student-reservation' %}" class="nav-link">
+                <i class="nav-icon fas fa-list"></i>
+                <p>
+                  Reservation List
+                </p>
+              </a>
+            </li>
+  
+  
+            <li class="nav-header">Accounts</li>
+            <li class="nav-item">
+              <a href="#" class="nav-link">
+                <i class="nav-icon fas fa-users-gear"></i>
+                <p>
+                  Manage accounts
+                  <i class="right fas fa-angle-left"></i>
+                </p>
+              </a>
+              <ul class="nav nav-treeview">
+                <li class="nav-item">
+                  <a href="{% url 'admin-change-profile' %}" class="nav-link">
+                    <i class="far fa-circle nav-icon"></i>
+                    <p>Change Profile</p>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a href="{% url 'admin-change-password' %}" class="nav-link">
+                    <i class="far fa-circle nav-icon"></i>
+                    <p>Change Password</p>
+                  </a>
+                </li>
+              </ul>
+              <li class="nav-item">
+                <a href="{% url 'admin-logout' %}" class="nav-link">
+                  <i class="nav-icon fa-solid fa-right-from-bracket"></i>
+                  <p>
+                    Logout
+                  </p>
+                </a>
+              </li>
+  
+            </li>
+          </ul>
+        </nav>
+        <!-- /.sidebar-menu -->
+      </div>
+      <!-- /.sidebar -->
+    </aside>
+  
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+      <!-- Content Header (Page header) -->
+   
+      <!-- /.content-header -->
+  
+      <!-- Main content -->
+      <section class="content">
+        <div class="container-fluid">
+
+
+             <!-- Modal for Viewing Item -->
+             <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header" style="border-bottom: 2px solid #593bdb;">
+                            <h5 class="modal-title" id="exampleModalCenterTitle" style="font-size: 25px; color: white; font-weight: 700;">View Item</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group row mb-1">
+                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; color: white;">Student ID:</label>
+                                <p id="modal-student-id" class=" mt-1" style="font-size: 15px; color: rgba(255, 255, 255, .75);"></p>
+                            </div>
+                            <div class="form-group row mb-1">
+                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; color: white;">Name:</label>
+                                <p id="modal-name" class=" mt-1" style="font-size: 15px; color: rgba(255, 255, 255, .75);"></p>
+                            </div>
+                            <div class="form-group row mb-0">
+                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; color: white;">Course:</label>
+                                <p id="modal-course" class=" mt-1" style="font-size: 15px; color: rgba(255, 255, 255, .75);"></p>
+                            </div>
+                            <div class="form-group row mb-0">
+                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; color: white;">Year:</label>
+                                <p id="modal-year" class=" mt-1" style="font-size: 15px; color: rgba(255, 255, 255, .75);"></p>
+                            </div>
+                            <div class="form-group row mb-0">
+                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; color: white;">Email:</label>
+                                <p id="modal-email" class=" mt-1" style="font-size: 15px; color: rgba(255, 255, 255, .75);"></p>
+                            </div>
+                            <div class="form-group row mb-0">
+                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; color: white;">Phone:</label>
+                                <p id="modal-phone" class=" mt-1" style="font-size: 15px; color: rgba(255, 255, 255, .75);"></p>
+                            </div>
+                            <div class="form-group row mb-0">
+                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; color: white;">Item:</label>
+                                <p id="modal-item" class=" mt-1" style="font-size: 15px; color: rgba(255, 255, 255, .75);"></p>
+                            </div>
+                            <div class="form-group row mb-0">
+                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; color: white;">Quantity:</label>
+                                <p id="modal-quantity" class=" mt-1" style="font-size: 15px; color: rgba(255, 255, 255, .75);"></p>
+                            </div>
+                            <div class="form-group row mb-0">
+                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; color: white;">Date Borrow:</label>
+                                <p id="modal-date-borrow" class=" mt-1" style="font-size: 15px; color: rgba(255, 255, 255, .75);"></p>
+                            </div>
+                            <div class="form-group row mb-0">
+                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; color: white;">Purpose:</label>
+                                <p id="modal-purpose" class=" mt-1" style="font-size: 15px; color: rgba(255, 255, 255, .75);"></p>
+                            </div>
+                            <div class="form-group row mb-0">
+                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; color: white;">Status:</label>
+                                <p id="modal-status" class=" mt-1" style="font-size: 15px; color: rgba(255, 255, 255, .75);"></p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal for Editing Item -->
+            <div class="modal fade" id="exampleModalCenter">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title text-white" style="font-size: 25px; font-weight: 700;">Edit Item</h5>
+                            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="POST" action="{% url 'admin-update_item' %}">
+                                {% csrf_token %}
+                                <input type="hidden" name="item_id" value="">
+                                <div class="form-group row mb-4">
+                                    <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 text-white" style="font-size: 15px">Name</label>
+                                    <div class="col-sm-12 col-md-7">
+                                        <input type="text" name="name" class="form-control" style="border: 1px solid rgba(255, 255, 255, .75);">
+                                    </div>
+                                </div>
+                                <div class="form-group row mb-4">
+                                    <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 text-white" style="font-size: 15px">Description</label>
+                                    <div class="col-sm-12 col-md-7">
+                                        <textarea type="text" name="description" class="form-control" style="border: 1px solid rgba(255, 255, 255, .75);"></textarea>
+                                    </div>
+                                </div>
+                                <div class="form-group row mb-4">
+                                    <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 text-white" style="font-size: 15px">Quantity</label>
+                                    <div class="col-sm-12 col-md-7">
+                                        <input type="number" name="quantity" style="width: 100px; border: 1px solid rgba(255, 255, 255, .75);" class="form-control" min="1" max="100">
+                                    </div>
+                                </div>
+                                <div class="form-group row mb-4">
+                                    <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3"></label>
+                                    <div class="col-sm-12 col-md-7">
+                                        <button class="btn btn-primary" type="submit" id="toastr-success-bottom-left">Update</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- borrow more item modal -->
+            <div class="modal fade custom-modal" id="modalGrid1">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <form id="borrowItemForm" method="POST" action="{% url 'admin-borrow_more_item' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="request_id" id="modalRequestIdd">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Borrow More Item</h5>
+                                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="container-fluid">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-4 col-form-label text-white">Date Borrow</label>
+                                        <div class="col-sm-8">
+                                            <div class="input-group">
+                                                <input name="date_borrow" id="borrowerMore" class="form-control datepicker-default cal" style="border: 1px solid #474747;">
+                                                <i class="fas fa-calendar-alt" style="position: absolute; right: 10px; top: 10px; color: rgba(255, 255, 255, .75);"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-4 col-form-label text-white">Items</label>
+                                        <div class="col-sm-8">
+                                            <select id="single-select" name="item" class="select2-hidden-accessible form-control" aria-hidden="true">
+                                                {% for item in items %}
+                                                    <option value="{{ item.id }}">{{ item.name }} ({{ item.quantity }})</option>
+                                                {% endfor %}
+                                            </select>
+                                            
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <label class="col-sm-4 col-form-label text-white">Quantity</label>
+                                        <div class="col-sm-8">
+                                            <input type="number" name="quantity" id="quantity" class="form-control col-md-3" style="border: 1px solid #bebebe;" value="1" min="1">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Save changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Return Modal -->
+            <div class="modal fade custom-modal" id="modalGrid">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <form id="returnItemForm" method="POST" action="{% url 'admin-return-item' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="request_id" id="modalRequestId">
+                            <div class="modal-header">
+                                <h5 class="modal-title" style="color: white; font-weight: 700;">Returned Item</h5>
+                                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="container-fluid">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-4 col-form-label" style="color: white;">Date Returned</label>
+                                        <div class="col-sm-8">
+                                            <div class="input-group">
+                                                <input type="text" id="dateReturn" name="date_return" class="form-control" style="border: 1px solid rgba(255, 255, 255, .75);">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-4 col-form-label" style="color: white;">Status</label>
+                                        <div class="col-sm-8">
+                                            <select class="form-select form-control" name="status" id="status" style="border: 1px solid rgba(255, 255, 255, .75);">
+                                                <option selected disabled>----</option>
+                                                <option value="Borrowed">Borrowed</option>
+                                                <option value="Returned">Returned</option>
+                                                <option value="Returned/Defect Item">Returned/Defect Item</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <label class="col-sm-4 col-form-label" style="color: white;">Note</label>
+                                        <div class="col-sm-8">
+                                            <textarea name="note" id="note" class="form-control" style="border: 1px solid rgba(255, 255, 255, .75);"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Save changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+
+        
+        
+                <!-- Send Email Notification Modal -->
+                <div class="modal fade" id="exampleModalLong" aria-hidden="true" style="display: none;">
+                  <div class="modal-dialog">
+                      <div class="modal-content">
+                          <div class="modal-header" style="border-bottom: 2px solid #593bdb;">
+                              <h5 class="modal-title" style="color: white; font-weight: 700;">Send Email Notification</h5>
+                              <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
+                          </div>
+                          <form id="emailNotificationForm" method="post" action="{% url 'admin-send_email' %}">
+                              {% csrf_token %}
+                              <div class="modal-body">
+                                  <div class="form-group">
+                                      <label for="emailTitle" style="color: white;">Title</label>
+                                      <input type="text" class="form-control" id="emailTitle" name="title" required style="border: 1px solid rgba(255, 255, 255, .75);">
+                                  </div>
+                                  <div class="form-group">
+                                      <label for="emailAddress" style="color: white;">Email</label>
+                                      <input type="email" class="form-control" id="emailAddress" name="email" required style="border: 1px solid rgba(255, 255, 255, .75);">
+                                  </div>
+                                  <div class="form-group">
+                                      <label for="emailMessage" style="color: white;">Message</label>
+                                      <textarea class="form-control" id="emailMessage" name="message" rows="4" required style="border: 1px solid rgba(255, 255, 255, .75);"></textarea>
+                                  </div>
+                              </div>
+                              <div class="modal-footer">
+                                  <!-- Close and Submit Buttons -->
+                                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                  <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Send Email</button>
+        
+                                  <!-- Loader (hidden by default) -->
+                                  <div id="loader" style="display:none; margin-left: 10px;">
+                                      <div class="loader"></div>
+                                  </div>
+                              </div>
+                          </form>
+                      </div>
+                  </div>
+              </div>
+          
+          <!-- /.row -->
+  
+          <div class="row">
+            <div class="container-fluid">
+
+                <div class="card mt-5" style="border-top: 4px solid #593bdb; box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 4px;">
+                    <div class="card-header">
+                        <h4 class="card-title" style="font-size: 25px;color: white; font-weight: 700;">Borrower's Record</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <div style="display: flex; justify-content: space-between;">
+                                <a href="{% url 'admin-borrowers' %}" class="btn btn-success mb-3" style="box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;">Add Borrower's <span class="btn-icon-right"><img src="{% static 'images/plus.png' %}" alt="" width="30" height="30"></span></a>
+                                <div class="sea" style="margin-right: 40px">
+                                    <i class='bx bx-search-alt-2' style="color: #593bdb; position: absolute; font-size: 20px; right: 250px; top: 83px;"></i>
+                                    <input type="search" id="searchInput" placeholder="Search" class="form-control intp" onkeyup="searchTable()">
+                                </div>
+                            </div>
+
+                            <div style="display: flex; justify-content: space-between;">
+                                <div class="dataTables_length" id="example_length" style="color: rgba(255, 255, 255, .75); width: 140px;">
+                                    <label>Show entries 
+                                        <select name="example_length" aria-controls="example" class="form-control" onchange="updateShowEntries(this.value)">
+                                            <option value="all" {% if current_show == 'all' %}selected{% endif %}>All</option>
+                                            <option value="5" {% if current_show == 5 %}selected{% endif %}>5</option>
+                                            <option value="10" {% if current_show == 10 %}selected{% endif %}>10</option>
+                                            <option value="25" {% if current_show == 25 %}selected{% endif %}>25</option>
+                                            <option value="50" {% if current_show == 50 %}selected{% endif %}>50</option>
+                                            <option value="100" {% if current_show == 100 %}selected{% endif %}>100</option>
+                                        </select>
+                                    </label>
+                                </div>
+
+                                <div class="dataTables_length" id="example_length" style="color: rgba(255, 255, 255, .75); width: 140px; margin-right: 200px">
+                                    <input type="text" id="date-range-picker" class="form-control" placeholder="Select a date range to show record" style="width: 300px; padding: 5px;">
+                                    <i class="fa-solid fa-x" style="position: absolute; right: 70px; top: 135px; display: none;"  id="clear-icon"></i>
+                                </div>
+                            </div>
+
+                    
+        
+                            <table id="itemTable" class="table table-bordered table-striped table-responsive-sm mt-3">
+                                <thead class="thead-primary">
+                                    <tr>
+                                        <th scope="col" style="width: 100px;">Student ID</th>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Course</th>
+                                        <th scope="col">Year</th>
+                                        <th scope="col">Item</th>
+                                        <th scope="col">Quantity</th>
+                                        <th scope="col">Time Span</th>
+                                        <th scope="col">Status</th>
+                                        <th scope="col">Borrower Report</th>
+                                        <th scope="col" style="width: 80px;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody style="color: rgba(255, 255, 255, .75);">
+                                    {% if page_obj %}
+                                        {% for request in page_obj %}
+                                            <tr>
+                                                <td>{{ request.student_id }}</td>
+                                                <td>{{ request.name }}</td>
+                                                <td>{{ request.course }}</td>
+                                                <td>{{ request.year }}</td>
+                                                <td>{{ request.content_object.name }}</td>
+                                                <td>{{ request.quantity }}</td>
+                                                <td>{{ request.time_ago }}</td>
+                                                <td style="display: none;">{{ request.date_borrow }}</td>
+                                                <td>
+                                                    {% if request.status == "Borrowed" %}
+                                                        <div class="badge badge-success" style="color: white;">{{ request.status }}</div>
+                                                    {% elif request.status == "Returned" %}
+                                                        <div class="badge badge-danger">{{ request.status }}</div>
+                                                    {% else %}
+                                                        <div class="badge badge-secondary">{{ request.status }}</div>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-center">
+                                                    <a class="btn btn-secondary text-white" href="{% url 'admin-borrower-report' request.student_id %}">
+                                                        <i class="fa-solid fa-file-pdf"></i>
+                                                    </a>
+                                                </td>
+                                
+                                                <td style="text-align: center; vertical-align: middle;">
+                                                    <div class="dropdownnn">
+                                                        <a class="btn btn-link font-24 p-0 line-height-1 no-arrow -toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
+                                                            <img src="{% static 'images/mores.png' %}" alt="" width="30" height="30">
+                                                        </a>
+                                                        <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
+                                                            <button type="button" class="dropdown-item view-item-btn" data-toggle="modal" data-target="#exampleModalCenter"
+                                                                      data-student-id="{{ request.student_id }}"
+                                                                      data-name="{{ request.name }}"
+                                                                      data-course="{{ request.course }}"
+                                                                      data-year="{{ request.year }}"
+                                                                      data-email="{{ request.email }}"
+                                                                      data-phone="{{ request.phone }}"
+                                                                      data-item="{{ request.content_object.name }}"
+                                                                      data-quantity="{{ request.quantity }}"
+                                                                      data-date="{{ request.date_borrow }}"
+                                                                      data-purpose="{{ request.purpose }}"
+                                                                      data-status="{{ request.status }}">
+                                                                      <i class="fas fa-eye"></i>&nbsp; View
+                                                                  </button>
+                                
+                                                            {% if request.user_id == user.id or request.handled_by_id == user.id %}  <!-- Ensure the request is associated with the current user or handled by the user -->
+                                                                <button type="button" class="dropdown-item borrow-item-btn" data-toggle="modal" data-target="#modalGrid1"
+                                                                    data-request-id="{{ request.id }}"
+                                                                    data-borrow="{{ request.date_borrow }}">
+                                                                    <i class="fa-solid fa-plus"></i>&nbsp; Borrow More Item
+                                                                </button>
+                                                            
+                                                                <button type="button" class="dropdown-item edit-item-btn" data-toggle="modal" data-target=".bd-example-modal-lg"
+                                                                    data-id="{{ request.id }}"
+                                                                    data-student-id="{{ request.student_id }}"
+                                                                    data-name="{{ request.name }}"
+                                                                    data-course="{{ request.course }}"
+                                                                    data-year="{{ request.year }}"
+                                                                    data-email="{{ request.email }}"
+                                                                    data-phone="{{ request.phone }}"
+                                                                    data-item-id="{{ request.content_object.id }}"
+                                                                    data-item-name="{{ request.content_object.name }}"
+                                                                    data-quantity="{{ request.quantity }}"
+                                                                    data-date="{{ request.date_borrow }}"
+                                                                    data-purpose="{{ request.purpose }}"
+                                                                    data-borrower-type="{{ request.borrower_type }}">
+                                                                    <i class="fas fa-edit"></i>&nbsp; Edit
+                                                                </button>
+                                                            {% endif %}
+                                                            
+                                                            <button type="button" class="dropdown-item return-item-btn" data-toggle="modal" data-target="#modalGrid"
+                                                                      data-request-id="{{ request.id }}"
+                                                                      data-status="{{ request.status }}"
+                                                                      data-note="{{ request.note }}">
+                                                                      <i class="fa-solid fa-rotate-left"></i>&nbsp; Return Item
+                                                                  </button>
+                                                            <button type="button" class="dropdown-item send-email-btn" data-toggle="modal" data-target="#exampleModalLong" data-email="{{ request.email }}">
+                                                                <i class="fa-regular fa-envelope"></i>&nbsp; Send Notification
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <tr style="color: rgba(255, 255, 255, .75);">
+                                            <td colspan="10" class="text-center">
+                                                <div style="color: rgba(255, 255, 255, .75);">
+                                                    No borrow requests found.
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                </tbody>
+                                
+                                
+                            </table>
+                            
+                            
+        
+                            <nav aria-label="Page navigation" class="pagination-container">
+                                <ul class="pagination">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}&show={{ current_show }}" aria-label="Previous">
+                                                <span aria-hidden="true">&laquo;</span>
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="javascript:void(0)" aria-label="Previous">
+                                                <span aria-hidden="true">&laquo;</span>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+    
+                                    {% for num in page_obj.paginator.page_range %}
+                                        {% if page_obj.number == num %}
+                                            <li class="page-item active">
+                                                <a class="page-link" href="javascript:void(0)">{{ num }}</a>
+                                            </li>
+                                        {% else %}
+                                            <li class="page-item">
+                                                <a class="page-link" href="?page={{ num }}&show={{ current_show }}">{{ num }}</a>
+                                            </li>
+                                        {% endif %}
+                                    {% endfor %}
+    
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}&show={{ current_show }}" aria-label="Next">
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="javascript:void(0)" aria-label="Next">
+                                                <span aria-hidden="true">&raquo;</span>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+        
+
+
+
+
+                
+
+
+      
+
+
+
+
+           
+              
+          </div>
+          </div>
+          <!-- /.row -->
+  
+          
+          <!-- /.row -->
+        </div><!--/. container-fluid -->
+      </section>
+      <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+  
+    <!-- Control Sidebar -->
+    <aside class="control-sidebar control-sidebar-dark">
+      <!-- Control sidebar content goes here -->
+    </aside>
+    <!-- /.control-sidebar -->
+  
+    <!-- Main Footer -->
+    <footer class="main-footer">
+      <strong>Copyright &copy; 2014-2021 <a href="https://adminlte.io">AdminLTE.io</a>.</strong>
+      All rights reserved.
+      <div class="float-right d-none d-sm-inline-block">
+        <b>Version</b> 3.1.0
+      </div>
+    </footer>
+  </div>
+
+
+
+<script>
+    function updateShowEntries(value) {
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set('show', value);
+        window.location.search = urlParams.toString();
+    }
+
+    //edit
+    document.addEventListener('DOMContentLoaded', function() {
+        var editButtons = document.querySelectorAll('.edit-item-btn');
+        
+        editButtons.forEach(function(button) {
+            button.addEventListener('click', function() {
+                var itemId = this.getAttribute('data-id');
+                var itemName = this.getAttribute('data-name');
+                var itemDescription = this.getAttribute('data-description')
+                var itemQuantity = this.getAttribute('data-quantity');
+
+                // Set the modal input values
+                document.querySelector('#exampleModalCenter input[name="item_id"]').value = itemId;
+                document.querySelector('#exampleModalCenter input[name="name"]').value = itemName;
+                document.querySelector('#exampleModalCenter textarea[name="description"]').value = itemDescription;
+                document.querySelector('#exampleModalCenter input[name="quantity"]').value = itemQuantity;
+            });
+        });
+    });
+
+
+    // delete button sweetalert
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.deleteButton').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const itemId = this.getAttribute('data-item-id');
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch(`/admin-delete-item/${itemId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'),
+                            'Content-Type': 'application/json',
+                        },
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            Swal.fire(
+                                'Deleted!',
+                                'Your item has been deleted.',
+                                'success'
+                            ).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire(
+                                'Error!',
+                                'There was a problem deleting your item.',
+                                'error'
+                            );
+                        }
+                    });
+                }
+            });
+        });
+    });
+});
+
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+
+document.getElementById("searchInput").addEventListener("input", function () {
+  searchTable();
+});
+
+function searchTable() {
+  var input, filter, table, tbody, tr, td, i, j, txtValue, regex;
+  input = document.getElementById("searchInput");
+  filter = input.value.toUpperCase();
+  regex = new RegExp(`(${filter})`, 'gi');
+  table = document.getElementById("itemTable");
+  tbody = table.getElementsByTagName("tbody")[0];  // Work only with tbody
+  tr = tbody.getElementsByTagName("tr");  // Get rows only from tbody
+  var noMatch = true;
+
+  // If the input is empty, reset table to show all rows and keep the badge and action button intact
+  if (!filter) {
+      for (i = 0; i < tr.length; i++) {
+          if (tr[i].classList.contains("no-record-row")) continue; // Skip the "No record found" row
+          tr[i].style.display = ""; // Show all rows
+          td = tr[i].getElementsByTagName("td");
+          for (j = 0; j < td.length; j++) {
+              // Ensure buttons, dropdowns, badges, and action columns are not affected
+              if (j === 7 || j === 8 || j === 9 || td[j].querySelector('.dropdownnn') || td[j].querySelector('.badge') || td[j].querySelector('.action-buttons')) {
+                  continue; // Skip "Status", "Action", and dropdowns, badges
+              }
+              td[j].innerHTML = td[j].textContent || td[j].innerText; // Reset text content
+          }
+      }
+      removeNoRecordRow();  // Remove "No record found" if it exists
+      return; // Exit function if input is empty
+  }
+
+  // If there's input, filter the table rows
+  noMatch = true;  // Reset noMatch for the filtering
+  for (i = 0; i < tr.length; i++) {
+      if (tr[i].classList.contains("no-record-row")) continue; // Skip "No record found" row
+
+      tr[i].style.display = "none"; // Hide all rows initially
+      td = tr[i].getElementsByTagName("td");
+      let rowContainsFilter = false;
+
+      // Iterate through each cell in the row
+      for (j = 0; j < td.length; j++) {
+          if (j === 8 || j === 9 || j == 10) continue; // Skip "Status" and "Action" columns
+          if (td[j]) {
+              txtValue = td[j].textContent || td[j].innerText;
+              if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                  rowContainsFilter = true;
+                  // Highlight matched text only in non-dropdown cells
+                  if (!td[j].querySelector('.dropdown')) {
+                      td[j].innerHTML = txtValue.replace(regex, "<span style='background-color: #3f6791;'>$1</span>");
+                  }
+              } else {
+                  // Remove highlights if no match
+                  if (!td[j].querySelector('.dropdown')) {
+                      td[j].innerHTML = txtValue.replace(/<span style='background-color: rgb\(0, 255, 13\);'>(.*?)<\/span>/g, "$1");
+                  }
+              }
+          }
+      }
+
+      // If the row contains the filter, show it
+      if (rowContainsFilter) {
+          tr[i].style.display = "";
+          noMatch = false;
+      }
+  }
+
+  // Show or hide "No record found" message based on matches
+  if (noMatch) {
+      showNoRecordRow();
+  } else {
+      removeNoRecordRow(); // Remove the "No record found" row if there are matches
+  }
+
+  // Remove existing "no record found" row if present
+  var noRecordRow = document.getElementById("noRecordRow");
+  if (noRecordRow) {
+      noRecordRow.remove();
+  }
+
+  // If no matches found, add a "no record found" row
+  if (noMatch) {
+      var newRow = tbody.insertRow();
+      newRow.setAttribute("id", "noRecordRow");
+      var cell = newRow.insertCell(0);
+      cell.colSpan = table.getElementsByTagName("th").length;
+      cell.style.textAlign = "center";
+      cell.textContent = "No borrow requests found.";
+  }
+}
+
+function showNoRecordRow() {
+  var noRecordRow = document.querySelector(".no-record-row");
+  if (noRecordRow) {
+      noRecordRow.style.display = "";
+  }
+}
+
+function removeNoRecordRow() {
+  var noRecordRow = document.querySelector(".no-record-row");
+  if (noRecordRow) {
+      noRecordRow.style.display = "none";
+  }
+}
+
+
+
+// viewing modal
+document.addEventListener('DOMContentLoaded', function () {
+    const viewItemButtons = document.querySelectorAll('.view-item-btn');
+  
+    viewItemButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const studentId = button.getAttribute('data-student-id');
+            const name = button.getAttribute('data-name');
+            const course = button.getAttribute('data-course');
+            const year = button.getAttribute('data-year');
+            const email = button.getAttribute('data-email');
+            const phone = button.getAttribute('data-phone');
+            const item = button.getAttribute('data-item');
+            const quantity = button.getAttribute('data-quantity');
+            const date = button.getAttribute('data-date');
+            const purpose = button.getAttribute('data-purpose');
+            const status = button.getAttribute('data-status');
+  
+            document.getElementById('modal-student-id').innerText = studentId;
+            document.getElementById('modal-name').innerText = name;
+            document.getElementById('modal-course').innerText = course;
+            document.getElementById('modal-year').innerText = year;
+            document.getElementById('modal-email').innerText = email;
+            document.getElementById('modal-phone').innerText = phone;
+            document.getElementById('modal-item').innerText = item;
+            document.getElementById('modal-quantity').innerText = quantity;
+            document.getElementById('modal-date-borrow').innerText = date;
+            document.getElementById('modal-purpose').innerText = purpose;
+            document.getElementById('modal-status').innerText = status;
+        });
+    });
+  });
+  
+  
+  
+  // date return
+  document.addEventListener('DOMContentLoaded', function() {
+    // Set up the event listener for the "Return Item" buttons
+    document.querySelectorAll('.return-item-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const requestId = this.getAttribute('data-request-id');
+            const status = this.getAttribute('data-status');
+            const note = this.getAttribute('data-note');
+  
+            // Populate modal fields
+            document.getElementById('modalRequestId').value = requestId;
+            document.getElementById('status').value = status;
+            document.getElementById('note').value = note;
+  
+            // Remove error-border class if previously added
+            document.getElementById('dateReturn').classList.remove('error-border');
+        });
+    });
+  });
+  
+  
+  
+  //send email notification
+  document.addEventListener('DOMContentLoaded', function() {
+    // Add click event listener to the send email buttons
+    document.querySelectorAll('.send-email-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+            // Get the email from the data attribute
+            const email = this.getAttribute('data-email');
+            
+            // Set the email in the modal
+            document.getElementById('emailAddress').value = email;
+        });
+    });
+  
+  });
+
+  //date range
+document.addEventListener('DOMContentLoaded', function () {
+    const dateRangePicker = flatpickr("#date-range-picker", {
+        mode: "range",
+        dateFormat: "d F, Y",
+        onChange: function(selectedDates, dateStr, instance) {
+            const clearIcon = document.getElementById('clear-icon');
+            
+            if (selectedDates.length === 2) {
+                clearIcon.style.display = "inline";  // Show the clear icon when a date is selected
+                filterTableByDateRange(selectedDates[0], selectedDates[1]);
+            }
+        }
+    });
+
+    const clearIcon = document.getElementById('clear-icon');
+    clearIcon.addEventListener('click', function() {
+        dateRangePicker.clear();  // Clear the date range picker input
+        clearIcon.style.display = "none";  // Hide the clear icon
+        resetTable();  // Reset the table to show all records
+    });
+
+    function filterTableByDateRange(startDate, endDate) {
+        const rows = document.querySelectorAll("#itemTable tbody tr");
+
+        let hasVisibleRow = false;
+        rows.forEach(row => {
+            const dateBorrowed = row.querySelector("td:nth-child(8)").textContent.trim();
+            const dateBorrowedObj = new Date(dateBorrowed);
+
+            if (dateBorrowedObj >= startDate && dateBorrowedObj <= endDate) {
+                row.style.display = "";  // Show row
+                hasVisibleRow = true;
+            } else {
+                row.style.display = "none";  // Hide row
+            }
+        });
+
+        if (!hasVisibleRow) {
+            showNoRecordsMessage();
+        }
+    }
+
+    function resetTable() {
+        const rows = document.querySelectorAll("#itemTable tbody tr");
+        const noRecordsRow = document.querySelector("#itemTable tbody .no-records-row");
+
+        if (noRecordsRow) {
+            noRecordsRow.remove();  // Remove the "No records found" row if it exists
+        }
+
+        rows.forEach(row => {
+            row.style.display = "";  // Show all rows
+        });
+    }
+
+    function showNoRecordsMessage() {
+        const tbody = document.querySelector("#itemTable tbody");
+        const noRecordsRow = document.querySelector("#itemTable tbody .no-records-row");
+
+        if (!noRecordsRow) {
+            const noRecordsHTML = `
+                <tr class="no-records-row">
+                    <td colspan="9" class="text-center" style="color: #333;">
+                        No records found.
+                    </td>
+                </tr>
+            `;
+            tbody.innerHTML += noRecordsHTML;
+        }
+    }
+});
+
+
+
+document.getElementById('returnItemForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the default form submission
+
+    // Clear previous error messages and is-invalid classes
+    const errorMessages = document.querySelectorAll('.invalid-feedback');
+    errorMessages.forEach(msg => msg.remove());
+    const invalidFields = document.querySelectorAll('.is-invalid');
+    invalidFields.forEach(field => field.classList.remove('is-invalid'));
+
+    const form = event.target;
+    const formData = new FormData(form);
+    const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    fetch(form.action, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.field_errors) {
+            // Loop through each field error and display the message below the respective input field
+            for (const [fieldName, errorMessage] of Object.entries(data.field_errors)) {
+                // Ensure we handle underscores to match the form field names correctly
+                const correctedFieldName = fieldName.replace(/([A-Z])/g, '_$1').toLowerCase();
+                const field = form.querySelector(`[name=${correctedFieldName}]`);
+
+                if (field) {
+                    field.classList.add('is-invalid');
+                    const errorDiv = document.createElement('div');
+                    errorDiv.className = 'invalid-feedback';
+                    errorDiv.style.display = 'block'; // Ensure the error message is visible
+                    errorDiv.textContent = errorMessage;
+                    field.parentNode.appendChild(errorDiv);
+                }
+            }
+        } else if (data.success) {
+            // Close the modal
+            $('#modalGrid').modal('hide');
+
+            // Use Django's messages.success to show the success message and then reload the page
+            setTimeout(function() {
+                location.reload(); // Reload the page only if the operation was successful
+            }, 1000); // Adjust the delay as needed
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+});
+
+
+
+
+// borrow more item
+document.addEventListener('DOMContentLoaded', function() {
+    const borrowButtons = document.querySelectorAll('.borrow-item-btn');
+    
+    borrowButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const dateBorrow = this.getAttribute('data-borrow');
+            const requestId = this.getAttribute('data-request-id');  // corrected 'data-request-id'
+
+            // Populate modal fields
+            document.querySelector('#modalGrid1 #borrowerMore').value = dateBorrow;
+            document.querySelector('#modalGrid1 #modalRequestIdd').value = requestId;  // corrected to 'modalRequestIdd'
+        });
+    });
+});
+
+
+</script>
+
+{% endblock content %}
+  
+
+
+  
+

@@ -275,7 +275,7 @@
               </ul>
             </li>
             <li class="nav-item "> <!--pang hover menu-open-->
-              <a href="./index2.html" class="nav-link">
+              <a href="{% url 'admin-borrowers' %}" class="nav-link">
                 <i class="nav-icon fas fa-plus"></i>
                 <p>
                   Add Borrow Item
@@ -283,7 +283,7 @@
               </a>
             </li>
             <li class="nav-item ">
-              <a href="./index2.html" class="nav-link">
+              <a href="{% url 'admin-borrow-record' %}" class="nav-link">
                 <i class="nav-icon fas fa-clipboard"></i>
                 <p>
                   Borrowed Records
@@ -291,7 +291,7 @@
               </a>
             </li>
             <li class="nav-item">
-              <a href="./index2.html" class="nav-link">
+              <a href="{% url 'admin-returned-record' %}" class="nav-link">
                 <i class="nav-icon fa-solid fa-arrow-rotate-left"></i>
                 <p>
                   Returned Records
@@ -301,7 +301,7 @@
   
             <li class="nav-header">Borrowers Reservation</li>
             <li class="nav-item">
-              <a href="./index2.html" class="nav-link">
+              <a href="{% url 'admin-student-reservation' %}" class="nav-link">
                 <i class="nav-icon fas fa-list"></i>
                 <p>
                   Reservation List
@@ -321,13 +321,13 @@
               </a>
               <ul class="nav nav-treeview">
                 <li class="nav-item">
-                  <a href="pages/charts/chartjs.html" class="nav-link">
+                  <a href="{% url 'admin-change-profile' %}" class="nav-link">
                     <i class="far fa-circle nav-icon"></i>
                     <p>Change Profile</p>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a href="pages/charts/flot.html" class="nav-link">
+                  <a href="{% url 'admin-change-password' %}" class="nav-link">
                     <i class="far fa-circle nav-icon"></i>
                     <p>Change Password</p>
                   </a>
@@ -415,7 +415,7 @@
                     <div class="card-body">
                         <div class="table-responsive">
                             <div style="display: flex; justify-content: space-between;">
-                                <a href="{% url 'add-item' %}" class="btn btn-success mb-3" style="box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;">Add New Item <span class="btn-icon-right"><img src="{% static 'images/plus.png' %}" alt="" width="30" height="30"></span></a>
+                                <a href="{% url 'admin-add-item' %}" class="btn btn-success mb-3" style="box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;">Add New Item <span class="btn-icon-right"><img src="{% static 'images/plus.png' %}" alt="" width="30" height="30"></span></a>
                                 <div class="sea">
                                     <i class='bx bx-search-alt-2' style="color: #593bdb; position: absolute; font-size: 20px; right: 200px; top: 83px;"></i>
                                     <input type="search" id="searchInput" placeholder="Search" class="form-control intp" onkeyup="searchTable()">

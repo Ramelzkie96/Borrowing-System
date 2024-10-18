@@ -336,10 +336,11 @@
                 </div>
                 <div class="modal-footer">
                     <!-- Close and Submit Buttons -->
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Close</button>
-                    <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Send Email</button>
-
-                     
+                  <button type="button" class="btn btn-secondary" onclick="closeModal()">Close</button>
+                  <button type="submit" class="btn btn-primary" id="submitButton">
+                      <span id="buttonText">Send Email</span>
+                      <span id="buttonSpinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
+                  </button> 
                 </div>
             </form>
         </div>
@@ -832,6 +833,26 @@ function closeModal() {
     });
 
 
+// Get the form and submit button elements
+const emailNotificationForm = document.getElementById('emailNotificationForm');
+const submitButton = document.getElementById('submitButton');
+const buttonText = document.getElementById('buttonText');
+const buttonSpinner = document.getElementById('buttonSpinner');
+
+// Add event listener to the form submission
+emailNotificationForm.addEventListener('submit', function () {
+    // Disable the button and show the spinner
+    submitButton.disabled = true;
+    buttonText.style.display = 'none';
+    buttonSpinner.style.display = 'inline-block';
+});
+
+// Optional: Re-enable the button and hide the spinner after a successful form submission
+function stopLoading() {
+    submitButton.disabled = false;
+    buttonText.style.display = 'inline';
+    buttonSpinner.style.display = 'none';
+}
 
 
 

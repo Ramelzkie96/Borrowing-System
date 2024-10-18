@@ -6,6 +6,8 @@
 <!-- Include Pickadate CSS from CDN -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pickadate.js/3.6.2/compressed/themes/default.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pickadate.js/3.6.2/compressed/themes/default.date.css">
+
+
 <style>
   .pagination-container {
         display: flex;
@@ -107,8 +109,37 @@
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 <script src="dist/js/pages/dashboard2.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-
 <!-- Include Pickadate JS from CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pickadate.js/3.6.2/compressed/picker.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pickadate.js/3.6.2/compressed/picker.date.js"></script>
+
+<!-- Initialize Pickadate with Desired Format -->
+<script>
+  $(document).ready(function() {
+    // Initialize Pickadate on the input field
+    var $datePicker = $('#datepicker').pickadate({
+        format: 'd mmmm, yyyy',  // Format as "20 September, 2024"
+        selectMonths: true,      // Enable dropdown to select month
+        selectYears: 10,         // Enable dropdown for selecting year
+        today: 'Today',
+        clear: 'Clear',
+        close: 'Close',
+        closeOnSelect: true,     // Close picker on date selection
+        onSet: function(context) {
+            // Ensure the input is blurred to prevent duplicate appearances
+            if (context.select) {
+                this.$node.blur(); // Unfocus the input to avoid re-triggering the picker
+            }
+        }
+    });
+    
+    // Optional: Ensure no duplicate initialization
+    if ($datePicker.data('pickadate')) {
+        return; // Prevent duplicate initialization
+    }
+});
+</script>
+
 
 {% endblock %}
 
@@ -190,7 +221,7 @@
               {% endif %}
           </div>
           <div class="info">
-              <a href="#" class="d-block">{{ request.user.username }}</a>
+              <a href="{% url 'admin-dashboard' %}" class="d-block">{{ request.user.username }}</a>
           </div>
       </div>
       
@@ -221,7 +252,7 @@
               </a>
             </li>
             <li class="nav-header">Items</li>
-            <li class="nav-item menu-open">
+            <li class="nav-item">
               <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-box"></i>
                 <p>
@@ -231,7 +262,7 @@
               </a>
               <ul class="nav nav-treeview">
                 <li class="nav-item">
-                  <a href="{% url 'admin-add-item' %}" class="nav-link active">
+                  <a href="{% url 'admin-add-item' %}" class="nav-link">
                     <i class="far fa-circle nav-icon"></i>
                     <p>Add Item</p>
                   </a>
@@ -246,7 +277,7 @@
               </ul>
             </li>
             <li class="nav-item "> <!--pang hover menu-open-->
-              <a href="{% url 'admin-borrowers' %}" class="nav-link">
+              <a href="{% url 'admin-borrowers' %}" class="nav-link active">
                 <i class="nav-icon fas fa-plus"></i>
                 <p>
                   Add Borrow Item
@@ -336,48 +367,109 @@
           <div class="row">
             <div class="container-fluid">
 
-                <div class="card mt-5" style="border-top: 4px solid #593bdb; box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 4px;">
+                <div class="card mt-3" style="border-top: 4px solid #593bdb; box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 4px;">
                     <div class="card-header">
-                        <h4 class="card-title text-white" style="font-size: 30px; font-weight: 700;">Add New Item</h4>
+                        <h4 class="card-title text-white" style="font-size: 30px; font-weight: 700;">Add New Borrower</h4>
                     </div>
                     <div class="card-body">
                         <div class="basic-form">
                             <form method="post">
                                 {% csrf_token %}
-                    
-                                <div class="form-group row mb-4">
-                                    <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 text-white" style="font-size: 15px">Name</label>
-                                    <div class="col-sm-12 col-md-7">
-                                        <input type="text" name="name" class="form-control" style="border: 1px solid rgba(255, 255, 255, .75);" value="{{ name }}" required>
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label class="text-white">Student ID</label>
+                                        {{ form.student_id }}
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label class="text-white">Name</label>
+                                        {{ form.name }}
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label class="text-white">Course</label>
+                                        {{ form.course }}
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label class="text-white">Year</label>
+                                        {{ form.year }}
                                     </div>
                                 </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label class="text-white">Email</label>
+                                        {{ form.email }}
+                                    </div>
+                    
+                                    <div class="form-group col-md-3">
+                                        <label class="text-white">Phone</label>
+                                        {{ form.phone }}
+                                    </div>
+                    
+                                    <div class="form-group col-md-3">
+                                        <label class="text-white">Date Borrow</label>
+                                        <div class="input-group">
+                                            {{ form.date_borrow }}
+                                            <div class="input-group-append">
+                                                <i class="fas fa-calendar-alt" style="position: absolute; right: 14px; top: 8px; font-size: 18px;"></i>
+                                            </div>
+                                        </div>
+                                        {% if form.date_borrow.errors %}
+                                            <script>
+                                                document.querySelector('#datepicker').classList.add('error-border');
+                                            </script>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-2">
+                                        <label class="text-white">
+                                            <input type="radio" name="borrower_type" value="Student" id="student_radio" style="width: 20px; height: 20px;">&nbsp;
+                                            Student
+                                        </label>
+                                    </div>
+                                    <div class="form-group col-md-2">
+                                        <label class="text-white">
+                                            <input type="radio" name="borrower_type" value="Teacher" id="teacher_radio" style="width: 20px; height: 20px;">&nbsp;
+                                            Teacher
+                                        </label>
+                                    </div>
+                                    <div class="form-group col-md-2">
+                                        <label class="text-white">
+                                            Others:
+                                            <input type="text" name="other_borrower_type" id="other_borrower_type" style="width: 130px; height: 20px; border-top: 1px solid white; border-right: 1px solid white; border-left: 1px solid white;">&nbsp;
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                
+                            
     
-                                <div class="form-group row mb-4">
-                                    <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 text-white" style="font-size: 15px">Description</label>
-                                    <div class="col-sm-12 col-md-7">
-                                        <textarea name="description" class="form-control" style="border: 1px solid rgba(255, 255, 255, .75);" required>{{ description }}</textarea>
+                                <div class="form-row">
+                                    <div class="col-xl-6">
+                                       
+                                            <div class="card-body">
+                                                <div class="mb-2">
+                                                    <h4 class="card-title">Items</h4>
+                                                    <p>Select Item you want to borrow</p>
+                                                </div>
+                                                {{ form.item }}
+                                                <div class="mt-4">
+                                                    <label class="text-white">Quantity</label>
+                                                    {{ form.quantity }}
+                                                </div>
+                                            </div>
+                                      
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label class="text-white">Purpose for borrow</label>
+                                        {{ form.purpose }}
                                     </div>
                                 </div>
-                               
-                    
-                                <div class="form-group row mb-4">
-                                    <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 text-white" style="font-size: 15px">Quantity</label>
-                                    <div class="col-sm-12 col-md-7">
-                                        <input type="number" id="quantity" style="width: 100px; border: 1px solid rgba(255, 255, 255, .75);" class="form-control" name="quantity" value="{{ quantity|default:1 }}" min="1" max="100" required>
-                                    </div>
-                                </div>
-                    
-                                <div class="form-group row mb-4">
-                                    <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3"></label>
-                                    <div class="col-sm-12 col-md-7">
-                                        <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Add Item</button>
-                                    </div>
-                                </div>
+                                <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Save</button>
                             </form>
                         </div>
                     </div>
                     
-                    </div>
+                </div>
         
 
 
@@ -422,6 +514,34 @@
   </div>
 
 
+
+  <script>
+       // Get the radio buttons and the "Others" input field
+const studentRadio = document.getElementById('student_radio');
+const teacherRadio = document.getElementById('teacher_radio');
+const otherInput = document.getElementById('other_borrower_type');
+
+// Function to enable or disable and clear the "Others" input field
+function toggleOtherInput() {
+    if (studentRadio.checked || teacherRadio.checked) {
+        otherInput.value = '';  // Clear the input field
+        otherInput.disabled = true;
+        otherInput.style.cursor = 'not-allowed';  // Show disabled cursor
+    } else {
+        otherInput.disabled = false;
+        otherInput.style.cursor = 'text';  // Show normal text cursor when enabled
+    }
+}
+
+// Add event listeners for the radio buttons
+studentRadio.addEventListener('change', toggleOtherInput);
+teacherRadio.addEventListener('change', toggleOtherInput);
+
+// Initialize on page load
+toggleOtherInput();
+
+        
+  </script>
 
 {% endblock content %}
   

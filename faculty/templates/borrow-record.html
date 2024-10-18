@@ -307,55 +307,55 @@
             </div>
 
 
-<!-- borrow more item modal -->
-<div class="modal fade custom-modal" id="modalGrid1">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <form id="borrowItemForm" method="POST" action="{% url 'borrow_more_item' %}">
-                {% csrf_token %}
-                <input type="hidden" name="request_id" id="modalRequestIdd">
-                <div class="modal-header">
-                    <h5 class="modal-title">Borrow More Item</h5>
-                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                </div>
-                <div class="modal-body">
-                    <div class="container-fluid">
-                        <div class="row mb-3">
-                            <label class="col-sm-4 col-form-label text-dark">Date Borrow</label>
-                            <div class="col-sm-8">
-                                <div class="input-group">
-                                    <input name="date_borrow" id="dateBorrow" class="form-control datepicker-default cal" style="border: 1px solid #474747;">
-                                    <i class="fas fa-calendar-alt" style="position: absolute; right: 10px; top: 10px; color: #333;"></i>
+            <!-- borrow more item modal -->
+            <div class="modal fade custom-modal" id="modalGrid1">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <form id="borrowItemForm" method="POST" action="{% url 'borrow_more_item' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="request_id" id="modalRequestIdd">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Borrow More Item</h5>
+                                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="container-fluid">
+                                    <div class="row mb-3">
+                                        <label class="col-sm-4 col-form-label text-dark">Date Borrow</label>
+                                        <div class="col-sm-8">
+                                            <div class="input-group">
+                                                <input name="date_borrow" id="dateBorrow" class="form-control datepicker-default cal" style="border: 1px solid #474747;">
+                                                <i class="fas fa-calendar-alt" style="position: absolute; right: 10px; top: 10px; color: #333;"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <label class="col-sm-4 col-form-label text-dark">Items</label>
+                                        <div class="col-sm-8">
+                                            <select id="single-select" name="item" class="select2-hidden-accessible" aria-hidden="true">
+                                                {% for item in items %}
+                                                    <option value="{{ item.id }}">{{ item.name }} ({{ item.quantity }})</option>
+                                                {% endfor %}
+                                            </select>
+                                            
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <label class="col-sm-4 col-form-label text-dark">Quantity</label>
+                                        <div class="col-sm-8">
+                                            <input type="number" name="quantity" id="quantity" class="form-control col-md-3" style="border: 1px solid #bebebe;" value="1" min="1">
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="row mb-3">
-                            <label class="col-sm-4 col-form-label text-dark">Items</label>
-                            <div class="col-sm-8">
-                                <select id="single-select" name="item" class="select2-hidden-accessible" aria-hidden="true">
-                                    {% for item in items %}
-                                        <option value="{{ item.id }}">{{ item.name }} ({{ item.quantity }})</option>
-                                    {% endfor %}
-                                </select>
-                                
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Save changes</button>
                             </div>
-                        </div>
-                        <div class="row">
-                            <label class="col-sm-4 col-form-label text-dark">Quantity</label>
-                            <div class="col-sm-8">
-                                <input type="number" name="quantity" id="quantity" class="form-control col-md-3" style="border: 1px solid #bebebe;" value="1" min="1">
-                            </div>
-                        </div>
+                        </form>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Save changes</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+            </div>
 
 
 
@@ -1072,8 +1072,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-
-//borrow more item
 // borrow more item
 document.addEventListener('DOMContentLoaded', function() {
     const borrowButtons = document.querySelectorAll('.borrow-item-btn');

@@ -218,7 +218,7 @@
               {% endif %}
           </div>
           <div class="info">
-              <a href="#" class="d-block">{{ request.user.username }}</a>
+              <a href="{% url 'admin-dashboard' %}" class="d-block">{{ request.user.username }}</a>
           </div>
       </div>
       
@@ -233,7 +233,7 @@
           <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
             <li class="nav-header">Main Menu</li>
             <li class="nav-item menu-open">
-              <a href="./index2.html" class="nav-link active">
+              <a href="{% url 'admin-dashboard' %}" class="nav-link active">
                 <i class="nav-icon fas fa-tachometer-alt"></i>
                 <p>
                   Dashboard
@@ -274,7 +274,7 @@
               </ul>
             </li>
             <li class="nav-item "> <!--pang hover menu-open-->
-              <a href="./index2.html" class="nav-link">
+              <a href="{% url 'admin-borrowers' %}" class="nav-link">
                 <i class="nav-icon fas fa-plus"></i>
                 <p>
                   Add Borrow Item
@@ -282,7 +282,7 @@
               </a>
             </li>
             <li class="nav-item ">
-              <a href="./index2.html" class="nav-link">
+              <a href="{% url 'admin-borrow-record' %}" class="nav-link">
                 <i class="nav-icon fas fa-clipboard"></i>
                 <p>
                   Borrowed Records
@@ -290,7 +290,7 @@
               </a>
             </li>
             <li class="nav-item">
-              <a href="./index2.html" class="nav-link">
+              <a href="{% url 'admin-returned-record' %}" class="nav-link">
                 <i class="nav-icon fa-solid fa-arrow-rotate-left"></i>
                 <p>
                   Returned Records
@@ -300,7 +300,7 @@
   
             <li class="nav-header">Borrowers Reservation</li>
             <li class="nav-item">
-              <a href="./index2.html" class="nav-link">
+              <a href="{% url 'admin-student-reservation' %}" class="nav-link">
                 <i class="nav-icon fas fa-list"></i>
                 <p>
                   Reservation List
@@ -320,13 +320,13 @@
               </a>
               <ul class="nav nav-treeview">
                 <li class="nav-item">
-                  <a href="pages/charts/chartjs.html" class="nav-link">
+                  <a href="{% url 'admin-change-profile' %}" class="nav-link">
                     <i class="far fa-circle nav-icon"></i>
                     <p>Change Profile</p>
                   </a>
                 </li>
                 <li class="nav-item">
-                  <a href="pages/charts/flot.html" class="nav-link">
+                  <a href="{% url 'admin-change-password' %}" class="nav-link">
                     <i class="far fa-circle nav-icon"></i>
                     <p>Change Password</p>
                   </a>
@@ -425,7 +425,7 @@
   
                 <div class="info-box-content">
                   <span class="info-box-text">Student Reservations</span>
-                  <span class="info-box-number">2,000</span>
+                  <span class="info-box-number">{{ student_reservation_count }}</span>
                 </div>
                 <!-- /.info-box-content -->
               </div>
@@ -438,7 +438,7 @@
   
                 <div class="info-box-content">
                   <span class="info-box-text">Defect Item Returned</span>
-                  <span class="info-box-number">2,000</span>
+                  <span class="info-box-number">{{ defect_item_count }}</span>
                 </div>
                 <!-- /.info-box-content -->
               </div>
@@ -516,6 +516,55 @@
           </div>
 
 
+          <!-- borrow more item modal -->
+          <div class="modal fade custom-modal" id="modalGrid1">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <form id="borrowItemForm" method="POST" action="{% url 'admin-borrow_more_item' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="request_id" id="modalRequestIdd">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Borrow More Item</h5>
+                            <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="container-fluid">
+                                <div class="row mb-3">
+                                    <label class="col-sm-4 col-form-label text-white">Date Borrow</label>
+                                    <div class="col-sm-8">
+                                        <div class="input-group">
+                                            <input name="date_borrow" id="borrowerMore" class="form-control datepicker-default cal" style="border: 1px solid #474747;">
+                                            <i class="fas fa-calendar-alt" style="position: absolute; right: 10px; top: 10px; color: rgba(255, 255, 255, .75);"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <label class="col-sm-4 col-form-label text-white">Items</label>
+                                    <div class="col-sm-8">
+                                        <select id="single-select" name="item" class="select2-hidden-accessible form-control" aria-hidden="true">
+                                            {% for item in items %}
+                                                <option value="{{ item.id }}">{{ item.name }} ({{ item.quantity }})</option>
+                                            {% endfor %}
+                                        </select>
+                                        
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <label class="col-sm-4 col-form-label text-white">Quantity</label>
+                                    <div class="col-sm-8">
+                                        <input type="number" name="quantity" id="quantity" class="form-control col-md-3" style="border: 1px solid #bebebe;" value="1" min="1">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Save changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
 
 
           <!-- return modal -->
@@ -531,14 +580,14 @@
                         </div>
                         <div class="modal-body">
                             <div class="container-fluid">
-                              <div class="row mb-3">
-                                <label class="col-sm-4 col-form-label" style="color: white;">Date Returned</label>
-                                <div class="col-sm-8">
-                                    <div class="input-group">
-                                        <input type="text" id="dateReturn" name="date_return" class="form-control" style="border: 1px solid rgba(255, 255, 255, .75);">
+                                <div class="row mb-3">
+                                    <label class="col-sm-4 col-form-label" style="color: white;">Date Returned</label>
+                                    <div class="col-sm-8">
+                                        <div class="input-group">
+                                            <input type="text" id="dateReturn" name="date_return" class="form-control" style="border: 1px solid rgba(255, 255, 255, .75);">
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
                                 <div class="row mb-3">
                                     <label class="col-sm-4 col-form-label" style="color: white;">Status</label>
                                     <div class="col-sm-8">
@@ -640,9 +689,9 @@
 
                                   <div style="display: flex; justify-content: space-between;">
                                       
-                                    <a href="{% url 'borrowers' %}" class="btn btn-whatsapp mb-1" style="box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px; visibility: hidden;">Add Borrower's <span class="btn-icon-right"><img src="{% static 'images/plus.png' %}" alt="" width="30" height="30"></span></a>
+                                    <a href="{% url 'admin-borrowers' %}" class="btn btn-whatsapp mb-1" style="box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px; visibility: hidden;">Add Borrower's <span class="btn-icon-right"><img src="{% static 'images/plus.png' %}" alt="" width="30" height="30"></span></a>
                                       <div class="dataTables_length" id="example_length" style="color: rgba(255, 255, 255, .75); width: 140px; margin-right: 200px">
-                                          <input type="text" id="date-range-picker" placeholder="Select a date range to show record" style="width: 300px; padding: 5px;">
+                                          <input type="text" id="date-range-picker" class="form-control" placeholder="Select a date range to show record" style="width: 300px; padding: 5px;">
                                           <i class="fa-solid fa-x" style="position: absolute; right: 70px; top: 135px; display: none;"  id="clear-icon"></i>
                                       </div>
                                   </div>
@@ -707,30 +756,6 @@
                                                                       <i class="fas fa-eye"></i>&nbsp; View
                                                                   </button>
                                       
-                                                                  {% if request.user_id == user.id or request.handled_by_id == user.id %}  <!-- Ensure the request is associated with the current user or handled by the user -->
-                                                                      <button type="button" class="dropdown-item borrow-item-btn" data-toggle="modal" data-target="#modalGrid1"
-                                                                          data-request-id="{{ request.id }}"
-                                                                          data-borrow="{{ request.date_borrow }}">
-                                                                          <i class="fa-solid fa-plus"></i>&nbsp; Borrow More Item
-                                                                      </button>
-                                                                  
-                                                                      <button type="button" class="dropdown-item edit-item-btn" data-toggle="modal" data-target=".bd-example-modal-lg"
-                                                                          data-id="{{ request.id }}"
-                                                                          data-student-id="{{ request.student_id }}"
-                                                                          data-name="{{ request.name }}"
-                                                                          data-course="{{ request.course }}"
-                                                                          data-year="{{ request.year }}"
-                                                                          data-email="{{ request.email }}"
-                                                                          data-phone="{{ request.phone }}"
-                                                                          data-item-id="{{ request.content_object.id }}"
-                                                                          data-item-name="{{ request.content_object.name }}"
-                                                                          data-quantity="{{ request.quantity }}"
-                                                                          data-date="{{ request.date_borrow }}"
-                                                                          data-purpose="{{ request.purpose }}"
-                                                                          data-borrower-type="{{ request.borrower_type }}">
-                                                                          <i class="fas fa-edit"></i>&nbsp; Edit
-                                                                      </button>
-                                                                  {% endif %}
                                                                   
                                                                   <button type="button" class="dropdown-item return-item-btn" data-toggle="modal" data-target="#modalGrid"
                                                                       data-request-id="{{ request.id }}"
@@ -1102,6 +1127,84 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
 });
+
+
+
+
+
+document.getElementById('returnItemForm').addEventListener('submit', function(event) {
+  event.preventDefault(); // Prevent the default form submission
+
+  // Clear previous error messages and is-invalid classes
+  const errorMessages = document.querySelectorAll('.invalid-feedback');
+  errorMessages.forEach(msg => msg.remove());
+  const invalidFields = document.querySelectorAll('.is-invalid');
+  invalidFields.forEach(field => field.classList.remove('is-invalid'));
+
+  const form = event.target;
+  const formData = new FormData(form);
+  const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+
+  fetch(form.action, {
+      method: 'POST',
+      headers: {
+          'X-CSRFToken': csrfToken,
+          'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: formData
+  })
+  .then(response => response.json())
+  .then(data => {
+      if (data.field_errors) {
+          // Loop through each field error and display the message below the respective input field
+          for (const [fieldName, errorMessage] of Object.entries(data.field_errors)) {
+              // Ensure we handle underscores to match the form field names correctly
+              const correctedFieldName = fieldName.replace(/([A-Z])/g, '_$1').toLowerCase();
+              const field = form.querySelector(`[name=${correctedFieldName}]`);
+
+              if (field) {
+                  field.classList.add('is-invalid');
+                  const errorDiv = document.createElement('div');
+                  errorDiv.className = 'invalid-feedback';
+                  errorDiv.style.display = 'block'; // Ensure the error message is visible
+                  errorDiv.textContent = errorMessage;
+                  field.parentNode.appendChild(errorDiv);
+              }
+          }
+      } else if (data.success) {
+          // Close the modal
+          $('#modalGrid').modal('hide');
+
+          // Use Django's messages.success to show the success message and then reload the page
+          setTimeout(function() {
+              location.reload(); // Reload the page only if the operation was successful
+          }, 1000); // Adjust the delay as needed
+      }
+  })
+  .catch(error => {
+      console.error('Error:', error);
+  });
+});
+
+
+
+
+// borrow more item
+document.addEventListener('DOMContentLoaded', function() {
+  const borrowButtons = document.querySelectorAll('.borrow-item-btn');
+  
+  borrowButtons.forEach(button => {
+      button.addEventListener('click', function() {
+          const dateBorrow = this.getAttribute('data-borrow');
+          const requestId = this.getAttribute('data-request-id');  // corrected 'data-request-id'
+
+          // Populate modal fields
+          document.querySelector('#modalGrid1 #borrowerMore').value = dateBorrow;
+          document.querySelector('#modalGrid1 #modalRequestIdd').value = requestId;  // corrected to 'modalRequestIdd'
+      });
+  });
+});
+
 </script>
 
 {% endblock content %}
