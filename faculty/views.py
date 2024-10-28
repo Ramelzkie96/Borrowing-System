@@ -440,7 +440,7 @@ def return_item(request):
         borrow_request.save()
 
         messages.success(request, 'Item returned successfully!')
-        return redirect('returned-record')
+        return redirect('borrow-record')
 
     except Exception as e:
         messages.error(request, f'An error occurred: {str(e)}')
@@ -695,7 +695,9 @@ def generate_report(request, student_id):
         return HttpResponseForbidden("You do not have permission to access this page.")
     
     # Fetch all BorrowRequests for the specific student ID and order by latest date_borrow
-    borrowers = BorrowRequest.objects.filter(student_id=student_id).order_by('-id')[:5]  # Get the 5 latest records
+    borrowers = BorrowRequest.objects.filter(
+        Q(student_id=student_id) & (Q(user=request.user) | Q(handled_by=request.user))
+    ).order_by('-id')[:5] 
     
     # Get the latest borrow record
     latest_borrow = borrowers.first() 

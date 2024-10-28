@@ -31,6 +31,7 @@ urlpatterns = [
     path('admin-borrowers', views.borrowers, name='admin-borrowers'),
     path('admin-borrow-record', views.borrow_record, name='admin-borrow-record'),
     path('admin-borrow-more-item/', views.borrow_more_item, name='admin-borrow_more_item'),
+    path('admin-update-borrow-request/', views.update_borrow_request, name='admin-update_borrow_request'),
     path('admin-borrower-report/<str:student_id>/', views.generate_report, name='admin-borrower-report'),
     path('admin-returned-record/', views.returned_record, name="admin-returned-record"),
     path('admin-student-reservation/', views.admin_student_reservation, name='admin-student-reservation'),

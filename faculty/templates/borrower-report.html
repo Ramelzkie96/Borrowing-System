@@ -247,13 +247,9 @@
 						<td style="text-align: center; font-size: 11px;">{{ borrower.content_object.name }}</td> <!-- Accessing name from facultyItem -->
 				
 						<td style="text-align: center; font-size: 11px;">
-							{% if borrower.status == "Returned" %}
+						
 								[/] Yes [ ] No
-							{% elif borrower.status == "Returned/Defect Item" %}
-								[ ] Yes [/] No
-							{% else %}
-								[ ] Yes [ ] No
-							{% endif %}
+							
 						</td>
 				
 						<td style="text-align: center; font-size: 11px;">[/]&nbsp;{{ borrower.date_borrow }}</td>

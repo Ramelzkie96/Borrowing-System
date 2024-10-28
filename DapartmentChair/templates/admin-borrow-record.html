@@ -165,6 +165,30 @@ $(document).ready(function() {
         return; // Prevent duplicate initialization
     }
 });
+
+$(document).ready(function() {
+    // Initialize Pickadate on the input field
+    var $datePicker = $('#dateBorrow').pickadate({
+        format: 'd mmmm, yyyy',  // Format as "20 September, 2024"
+        selectMonths: true,      // Enable dropdown to select month
+        selectYears: 10,         // Enable dropdown for selecting year
+        today: 'Today',
+        clear: 'Clear',
+        close: 'Close',
+        closeOnSelect: true,     // Close picker on date selection
+        onSet: function(context) {
+            // Ensure the input is blurred to prevent duplicate appearances
+            if (context.select) {
+                this.$node.blur(); // Unfocus the input to avoid re-triggering the picker
+            }
+        }
+    });
+    
+    // Optional: Ensure no duplicate initialization
+    if ($datePicker.data('pickadate')) {
+        return; // Prevent duplicate initialization
+    }
+});
 </script>
 {% endblock %}
 
@@ -179,52 +203,7 @@ $(document).ready(function() {
       <img class="animation__wobble" src="{% static 'dist/img/pit_logo.png' %}" alt="AdminLTELogo" height="60" width="60">
     </div>
   
-    <!-- Navbar -->
-    <nav class="main-header navbar navbar-expand navbar-dark">
-      <!-- Left navbar links -->
-      <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
-        </li>
-        <li class="nav-item d-none d-sm-inline-block">
-          <a href="{% url 'admin-dashboard' %}" class="nav-link">Home</a>
-        </li>
-      </ul>
-  
-      <!-- Right navbar links -->
-      <ul class="navbar-nav ml-auto">
-        <!-- Navbar Search -->
-        <li class="nav-item">
-          <a class="nav-link" data-widget="navbar-search" href="#" role="button">
-            <i class="fas fa-search"></i>
-          </a>
-          <div class="navbar-search-block">
-            <form class="form-inline">
-              <div class="input-group input-group-sm">
-                <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search">
-                <div class="input-group-append">
-                  <button class="btn btn-navbar" type="submit">
-                    <i class="fas fa-search"></i>
-                  </button>
-                  <button class="btn btn-navbar" type="button" data-widget="navbar-search">
-                    <i class="fas fa-times"></i>
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </li>
-  
-   
-        <li class="nav-item">
-          <a class="nav-link" data-widget="fullscreen" href="#" role="button">
-            <i class="fas fa-expand-arrows-alt"></i>
-          </a>
-        </li>
-      
-      </ul>
-    </nav>
-    <!-- /.navbar -->
+
   
     <!-- Main Sidebar Container -->
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
@@ -393,55 +372,55 @@ $(document).ready(function() {
                 <div class="modal-dialog modal-dialog-centered" role="document">
                     <div class="modal-content">
                         <div class="modal-header" style="border-bottom: 2px solid #593bdb;">
-                            <h5 class="modal-title" id="exampleModalCenterTitle" style="font-size: 25px; color: white; font-weight: 700;">View Item</h5>
+                            <h5 class="modal-title" id="exampleModalCenterTitle" style="font-size: 25px; font-weight: 700;">View Item</h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
                         <div class="modal-body">
                             <div class="form-group row mb-1">
-                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; color: white;">Student ID:</label>
-                                <p id="modal-student-id" class=" mt-1" style="font-size: 15px; color: rgba(255, 255, 255, .75);"></p>
+                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px;">Student ID:</label>
+                                <p id="modal-student-id" class=" mt-1" style="font-size: 15px;"></p>
                             </div>
                             <div class="form-group row mb-1">
-                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; color: white;">Name:</label>
-                                <p id="modal-name" class=" mt-1" style="font-size: 15px; color: rgba(255, 255, 255, .75);"></p>
+                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px;">Name:</label>
+                                <p id="modal-name" class=" mt-1" style="font-size: 15px;"></p>
                             </div>
                             <div class="form-group row mb-0">
-                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; color: white;">Course:</label>
-                                <p id="modal-course" class=" mt-1" style="font-size: 15px; color: rgba(255, 255, 255, .75);"></p>
+                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px;">Course:</label>
+                                <p id="modal-course" class=" mt-1" style="font-size: 15px;"></p>
                             </div>
                             <div class="form-group row mb-0">
-                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; color: white;">Year:</label>
-                                <p id="modal-year" class=" mt-1" style="font-size: 15px; color: rgba(255, 255, 255, .75);"></p>
+                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px;">Year:</label>
+                                <p id="modal-year" class=" mt-1" style="font-size: 15px;"></p>
                             </div>
                             <div class="form-group row mb-0">
-                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; color: white;">Email:</label>
-                                <p id="modal-email" class=" mt-1" style="font-size: 15px; color: rgba(255, 255, 255, .75);"></p>
+                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px;">Email:</label>
+                                <p id="modal-email" class=" mt-1" style="font-size: 15px;"></p>
                             </div>
                             <div class="form-group row mb-0">
-                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; color: white;">Phone:</label>
-                                <p id="modal-phone" class=" mt-1" style="font-size: 15px; color: rgba(255, 255, 255, .75);"></p>
+                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px;">Phone:</label>
+                                <p id="modal-phone" class=" mt-1" style="font-size: 15px;"></p>
                             </div>
                             <div class="form-group row mb-0">
-                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; color: white;">Item:</label>
-                                <p id="modal-item" class=" mt-1" style="font-size: 15px; color: rgba(255, 255, 255, .75);"></p>
+                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px;">Item:</label>
+                                <p id="modal-item" class=" mt-1" style="font-size: 15px;"></p>
                             </div>
                             <div class="form-group row mb-0">
-                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; color: white;">Quantity:</label>
-                                <p id="modal-quantity" class=" mt-1" style="font-size: 15px; color: rgba(255, 255, 255, .75);"></p>
+                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px;">Quantity:</label>
+                                <p id="modal-quantity" class=" mt-1" style="font-size: 15px;"></p>
                             </div>
                             <div class="form-group row mb-0">
-                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; color: white;">Date Borrow:</label>
-                                <p id="modal-date-borrow" class=" mt-1" style="font-size: 15px; color: rgba(255, 255, 255, .75);"></p>
+                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px;">Date Borrow:</label>
+                                <p id="modal-date-borrow" class=" mt-1" style="font-size: 15px;"></p>
                             </div>
                             <div class="form-group row mb-0">
-                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; color: white;">Purpose:</label>
-                                <p id="modal-purpose" class=" mt-1" style="font-size: 15px; color: rgba(255, 255, 255, .75);"></p>
+                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px;">Purpose:</label>
+                                <p id="modal-purpose" class=" mt-1" style="font-size: 15px;"></p>
                             </div>
                             <div class="form-group row mb-0">
-                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; color: white;">Status:</label>
-                                <p id="modal-status" class=" mt-1" style="font-size: 15px; color: rgba(255, 255, 255, .75);"></p>
+                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px;">Status:</label>
+                                <p id="modal-status" class=" mt-1" style="font-size: 15px;"></p>
                             </div>
                         </div>
                         <div class="modal-footer">
@@ -451,43 +430,115 @@ $(document).ready(function() {
                 </div>
             </div>
 
-            <!-- Modal for Editing Item -->
-            <div class="modal fade" id="exampleModalCenter">
-                <div class="modal-dialog modal-dialog-centered" role="document">
+            <!-- edit modal -->
+            <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-lg" style="overflow: hidden;">
                     <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title text-white" style="font-size: 25px; font-weight: 700;">Edit Item</h5>
+                        <div class="modal-header" style="border-bottom: 2px solid #593bdb;">
+                            <h2 class="modal-title" style="font-weight: 800;">Edit Borrower's</h2>
                             <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                         </div>
-                        <div class="modal-body">
-                            <form method="POST" action="{% url 'admin-update_item' %}">
-                                {% csrf_token %}
-                                <input type="hidden" name="item_id" value="">
-                                <div class="form-group row mb-4">
-                                    <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 text-white" style="font-size: 15px">Name</label>
-                                    <div class="col-sm-12 col-md-7">
-                                        <input type="text" name="name" class="form-control" style="border: 1px solid rgba(255, 255, 255, .75);">
+                        <div class="card-body">
+                            <div class="basic-form">
+                                <form id="editBorrowerForm" method="post" action="{% url 'admin-update_borrow_request' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="id">
+                                    <div class="form-row">
+                                        <div class="form-group col-md-6">
+                                            <label>Student ID</label>
+                                            <input type="text" name="student_id" class="form-control" >
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label>Name</label>
+                                            <input type="text" name="name" class="form-control" >
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label>Course</label>
+                                            <input type="text" name="course" class="form-control" >
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label>Year</label>
+                                            <select class="form-select form-control" name="year" style="border:1px solid rgba(0, 0, 0, 0.2);" aria-label="Default select example">
+                                                <option selected>----</option>
+                                                <option value="1st Year">1st Year</option>
+                                                <option value="2nd Year">2nd Year</option>
+                                                <option value="3rd Year">3rd Year</option>
+                                                <option value="4th Year">4th Year</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="form-group row mb-4">
-                                    <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 text-white" style="font-size: 15px">Description</label>
-                                    <div class="col-sm-12 col-md-7">
-                                        <textarea type="text" name="description" class="form-control" style="border: 1px solid rgba(255, 255, 255, .75);"></textarea>
+                                    <div class="form-row">
+                                        <div class="form-group col-md-6">
+                                            <label>Email</label>
+                                            <input type="text" name="email" class="form-control" >
+                                        </div>
+                                        <div class="form-group col-md-3">
+                                            <label>Phone</label>
+                                            <input type="text" name="phone" class="form-control" >
+                                        </div>
+                                        <div class="form-group col-md-3">
+                                            <label>Date Borrow</label>
+                                            <div class="input-with-icon">
+                                                <input name="datepicker" id="dateBorrow" class="datepicker-default form-control" style="border: 1px solid #bebebe; width: 180px;">
+                                                <i class="fas fa-calendar-alt" style="position: absolute; top: 38px; right: -50px;"></i>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="form-group row mb-4">
-                                    <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 text-white" style="font-size: 15px">Quantity</label>
-                                    <div class="col-sm-12 col-md-7">
-                                        <input type="number" name="quantity" style="width: 100px; border: 1px solid rgba(255, 255, 255, .75);" class="form-control" min="1" max="100">
+
+                                    <div class="form-row">
+                                        <div class="form-group col-md-2">
+                                            <label>
+                                                <input type="radio" name="borrower_type" value="Student" id="student_radio" style="width: 20px; height: 20px;">&nbsp;
+                                                Student
+                                            </label>
+                                        </div>
+                                        <div class="form-group col-md-2">
+                                            <label>
+                                                <input type="radio" name="borrower_type" value="Teacher" id="teacher_radio" style="width: 20px; height: 20px;">&nbsp;
+                                                Teacher
+                                            </label>
+                                        </div>
+                                        <div class="form-group col-md-2">
+                                            <label>
+                                                Others:
+                                                <input type="text" name="other_borrower_type" id="other_borrower_type" style="width: 100px; height: 20px; border-top: 1px solid white; border-right: 1px solid white; border-left: 1px solid white;">&nbsp;
+                                            </label>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="form-group row mb-4">
-                                    <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3"></label>
-                                    <div class="col-sm-12 col-md-7">
-                                        <button class="btn btn-primary" type="submit" id="toastr-success-bottom-left">Update</button>
+
+
+                                    <div class="form-row">
+                                        <div class="col-xl-6">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <div class="mb-2">
+                                                        <h4 class="card-title">Items</h4>
+                                                        <p>Select Item you want to borrow</p>
+                                                    </div>
+                                                    <select id="single-selectt" name="itemm" class="form-control" aria-hidden="true">
+                                                        {% for item in items %}
+                                                            <option value="{{ item.id }}">{{ item.name }} ({{ item.quantity }})</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                    
+                                                    <div class="mt-4">
+                                                        <label>Quantity</label>
+                                                        <input type="number" name="quantityy" id="quantityy" class="form-control col-md-3" >
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label>Purpose for borrow</label>
+                                            <textarea name="description" class="form-control"></textarea>
+                                        </div>
                                     </div>
-                                </div>
-                            </form>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Update</button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -501,22 +552,22 @@ $(document).ready(function() {
                             {% csrf_token %}
                             <input type="hidden" name="request_id" id="modalRequestIdd">
                             <div class="modal-header">
-                                <h5 class="modal-title">Borrow More Item</h5>
+                                <h5 class="modal-title" style="font-weight: 800;">Borrow More Item</h5>
                                 <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                             </div>
                             <div class="modal-body">
                                 <div class="container-fluid">
                                     <div class="row mb-3">
-                                        <label class="col-sm-4 col-form-label text-white">Date Borrow</label>
+                                        <label class="col-sm-4 col-form-label">Date Borrow</label>
                                         <div class="col-sm-8">
                                             <div class="input-group">
                                                 <input name="date_borrow" id="borrowerMore" class="form-control datepicker-default cal" style="border: 1px solid #474747;">
-                                                <i class="fas fa-calendar-alt" style="position: absolute; right: 10px; top: 10px; color: rgba(255, 255, 255, .75);"></i>
+                                                <i class="fas fa-calendar-alt" style="position: absolute; right: 10px; top: 10px;"></i>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
-                                        <label class="col-sm-4 col-form-label text-white">Items</label>
+                                        <label class="col-sm-4 col-form-label">Items</label>
                                         <div class="col-sm-8">
                                             <select id="single-select" name="item" class="select2-hidden-accessible form-control" aria-hidden="true">
                                                 {% for item in items %}
@@ -527,9 +578,9 @@ $(document).ready(function() {
                                         </div>
                                     </div>
                                     <div class="row">
-                                        <label class="col-sm-4 col-form-label text-white">Quantity</label>
+                                        <label class="col-sm-4 col-form-label">Quantity</label>
                                         <div class="col-sm-8">
-                                            <input type="number" name="quantity" id="quantity" class="form-control col-md-3" style="border: 1px solid #bebebe;" value="1" min="1">
+                                            <input type="number" name="quantity" id="quantity" class="form-control col-md-3"  value="1" min="1">
                                         </div>
                                     </div>
                                 </div>
@@ -552,23 +603,23 @@ $(document).ready(function() {
                             {% csrf_token %}
                             <input type="hidden" name="request_id" id="modalRequestId">
                             <div class="modal-header">
-                                <h5 class="modal-title" style="color: white; font-weight: 700;">Returned Item</h5>
+                                <h5 class="modal-title" style=" font-weight: 700;">Returned Item</h5>
                                 <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                             </div>
                             <div class="modal-body">
                                 <div class="container-fluid">
                                     <div class="row mb-3">
-                                        <label class="col-sm-4 col-form-label" style="color: white;">Date Returned</label>
+                                        <label class="col-sm-4 col-form-label" >Date Returned</label>
                                         <div class="col-sm-8">
                                             <div class="input-group">
-                                                <input type="text" id="dateReturn" name="date_return" class="form-control" style="border: 1px solid rgba(255, 255, 255, .75);">
+                                                <input type="text" id="dateReturn" name="date_return" class="form-control">
                                             </div>
                                         </div>
                                     </div>
                                     <div class="row mb-3">
-                                        <label class="col-sm-4 col-form-label" style="color: white;">Status</label>
+                                        <label class="col-sm-4 col-form-label" >Status</label>
                                         <div class="col-sm-8">
-                                            <select class="form-select form-control" name="status" id="status" style="border: 1px solid rgba(255, 255, 255, .75);">
+                                            <select class="form-select form-control" name="status" id="status">
                                                 <option selected disabled>----</option>
                                                 <option value="Borrowed">Borrowed</option>
                                                 <option value="Returned">Returned</option>
@@ -577,9 +628,9 @@ $(document).ready(function() {
                                         </div>
                                     </div>
                                     <div class="row">
-                                        <label class="col-sm-4 col-form-label" style="color: white;">Note</label>
+                                        <label class="col-sm-4 col-form-label" >Note</label>
                                         <div class="col-sm-8">
-                                            <textarea name="note" id="note" class="form-control" style="border: 1px solid rgba(255, 255, 255, .75);"></textarea>
+                                            <textarea name="note" id="note" class="form-control"></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -601,23 +652,23 @@ $(document).ready(function() {
                   <div class="modal-dialog">
                       <div class="modal-content">
                           <div class="modal-header" style="border-bottom: 2px solid #593bdb;">
-                              <h5 class="modal-title" style="color: white; font-weight: 700;">Send Email Notification</h5>
+                              <h5 class="modal-title" style=" font-weight: 700;">Send Email Notification</h5>
                               <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
                           </div>
                           <form id="emailNotificationForm" method="post" action="{% url 'admin-send_email' %}">
                               {% csrf_token %}
                               <div class="modal-body">
                                   <div class="form-group">
-                                      <label for="emailTitle" style="color: white;">Title</label>
-                                      <input type="text" class="form-control" id="emailTitle" name="title" required style="border: 1px solid rgba(255, 255, 255, .75);">
+                                      <label for="emailTitle">Title</label>
+                                      <input type="text" class="form-control" id="emailTitle" name="title" required>
                                   </div>
                                   <div class="form-group">
-                                      <label for="emailAddress" style="color: white;">Email</label>
-                                      <input type="email" class="form-control" id="emailAddress" name="email" required style="border: 1px solid rgba(255, 255, 255, .75);">
+                                      <label for="emailAddress">Email</label>
+                                      <input type="email" class="form-control" id="emailAddress" name="email" required>
                                   </div>
                                   <div class="form-group">
-                                      <label for="emailMessage" style="color: white;">Message</label>
-                                      <textarea class="form-control" id="emailMessage" name="message" rows="4" required style="border: 1px solid rgba(255, 255, 255, .75);"></textarea>
+                                      <label for="emailMessage">Message</label>
+                                      <textarea class="form-control" id="emailMessage" name="message" rows="4" required></textarea>
                                   </div>
                               </div>
                               <div class="modal-footer">
@@ -642,7 +693,7 @@ $(document).ready(function() {
 
                 <div class="card mt-5" style="border-top: 4px solid #593bdb; box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 4px;">
                     <div class="card-header">
-                        <h4 class="card-title" style="font-size: 25px;color: white; font-weight: 700;">Borrower's Record</h4>
+                        <h4 class="card-title" style="font-size: 25px;font-weight: 700;">Borrower's Record</h4>
                     </div>
                     <div class="card-body">
                         <div class="table-responsive">
@@ -655,7 +706,7 @@ $(document).ready(function() {
                             </div>
 
                             <div style="display: flex; justify-content: space-between;">
-                                <div class="dataTables_length" id="example_length" style="color: rgba(255, 255, 255, .75); width: 140px;">
+                                <div class="dataTables_length" id="example_length" style=" width: 140px;">
                                     <label>Show entries 
                                         <select name="example_length" aria-controls="example" class="form-control" onchange="updateShowEntries(this.value)">
                                             <option value="all" {% if current_show == 'all' %}selected{% endif %}>All</option>
@@ -668,7 +719,7 @@ $(document).ready(function() {
                                     </label>
                                 </div>
 
-                                <div class="dataTables_length" id="example_length" style="color: rgba(255, 255, 255, .75); width: 140px; margin-right: 200px">
+                                <div class="dataTables_length" id="example_length" style=" width: 140px; margin-right: 200px">
                                     <input type="text" id="date-range-picker" class="form-control" placeholder="Select a date range to show record" style="width: 300px; padding: 5px;">
                                     <i class="fa-solid fa-x" style="position: absolute; right: 70px; top: 135px; display: none;"  id="clear-icon"></i>
                                 </div>
@@ -677,7 +728,7 @@ $(document).ready(function() {
                     
         
                             <table id="itemTable" class="table table-bordered table-striped table-responsive-sm mt-3">
-                                <thead class="thead-primary">
+                                <thead class="dark-mode">
                                     <tr>
                                         <th scope="col" style="width: 100px;">Student ID</th>
                                         <th scope="col">Name</th>
@@ -691,7 +742,7 @@ $(document).ready(function() {
                                         <th scope="col" style="width: 80px;">Action</th>
                                     </tr>
                                 </thead>
-                                <tbody style="color: rgba(255, 255, 255, .75);">
+                                <tbody>
                                     {% if page_obj %}
                                         {% for request in page_obj %}
                                             <tr>
@@ -779,9 +830,9 @@ $(document).ready(function() {
                                             </tr>
                                         {% endfor %}
                                     {% else %}
-                                        <tr style="color: rgba(255, 255, 255, .75);">
+                                        <tr>
                                             <td colspan="10" class="text-center">
-                                                <div style="color: rgba(255, 255, 255, .75);">
+                                                <div>
                                                     No borrow requests found.
                                                 </div>
                                             </td>
@@ -875,12 +926,10 @@ $(document).ready(function() {
   
     <!-- Main Footer -->
     <footer class="main-footer">
-      <strong>Copyright &copy; 2014-2021 <a href="https://adminlte.io">AdminLTE.io</a>.</strong>
-      All rights reserved.
-      <div class="float-right d-none d-sm-inline-block">
-        <b>Version</b> 3.1.0
-      </div>
-    </footer>
+        <strong>Borrowing System By: </strong>
+        Run Time Terror.
+        
+      </footer>
   </div>
 
 
@@ -1026,7 +1075,7 @@ function searchTable() {
                   rowContainsFilter = true;
                   // Highlight matched text only in non-dropdown cells
                   if (!td[j].querySelector('.dropdown')) {
-                      td[j].innerHTML = txtValue.replace(regex, "<span style='background-color: #3f6791;'>$1</span>");
+                      td[j].innerHTML = txtValue.replace(regex, "<span style='background-color: #3f6791; color: white;'>$1</span>");
                   }
               } else {
                   // Remove highlights if no match
@@ -1219,7 +1268,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!noRecordsRow) {
             const noRecordsHTML = `
                 <tr class="no-records-row">
-                    <td colspan="9" class="text-center" style="color: #333;">
+                    <td colspan="9" class="text-center" >
                         No records found.
                     </td>
                 </tr>
@@ -1303,6 +1352,62 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+
+// Edit JS
+document.addEventListener('DOMContentLoaded', function() {
+    const editButtons = document.querySelectorAll('.edit-item-btn');
+    
+    editButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const studentId = this.getAttribute('data-student-id');
+            const name = this.getAttribute('data-name');
+            const course = this.getAttribute('data-course');
+            const year = this.getAttribute('data-year');
+            const email = this.getAttribute('data-email');
+            const phone = this.getAttribute('data-phone');
+            const itemId = this.getAttribute('data-item-id');
+            const itemName = this.getAttribute('data-item-name');
+            const quantity = this.getAttribute('data-quantity');
+            const date = this.getAttribute('data-date');
+            const purpose = this.getAttribute('data-purpose');
+            const id = this.getAttribute('data-id'); // Get the id attribute
+            const borrowerType = this.getAttribute('data-borrower-type'); // Get borrower type
+
+            // Populate modal fields
+            document.querySelector('.modal input[name="student_id"]').value = studentId;
+            document.querySelector('.modal input[name="name"]').value = name;
+            document.querySelector('.modal input[name="course"]').value = course;
+            document.querySelector('.modal select[name="year"]').value = year;
+            document.querySelector('.modal input[name="email"]').value = email;
+            document.querySelector('.modal input[name="phone"]').value = phone;
+            document.querySelector('.modal input[name="quantityy"]').value = quantity;
+            document.querySelector('.modal input[name="datepicker"]').value = date;
+            document.querySelector('.modal textarea[name="description"]').value = purpose;
+            document.querySelector('.modal input[name="id"]').value = id; // Set the id field
+
+            // Set the selected item in the dropdown
+            const itemSelect = document.querySelector('.modal select#single-selectt');
+            itemSelect.value = itemId;
+            $(itemSelect).trigger('change'); // Update select dropdown if used (especially with select2)
+
+            // Handle borrower type radio buttons and "Others" input
+            if (borrowerType === 'Student') {
+                document.getElementById('student_radio').checked = true;
+                document.getElementById('other_borrower_type').value = ''; // Clear "Others" input
+            } else if (borrowerType === 'Teacher') {
+                document.getElementById('teacher_radio').checked = true;
+                document.getElementById('other_borrower_type').value = ''; // Clear "Others" input
+            } else {
+                // If it's neither Student nor Teacher, assume it's Others
+                document.getElementById('student_radio').checked = false;
+                document.getElementById('teacher_radio').checked = false;
+                document.getElementById('other_borrower_type').value = borrowerType; // Set "Others" input
+            }
+        });
+    });
+});
+
 
 
 </script>

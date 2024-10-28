@@ -148,7 +148,7 @@ def custom_login_view(request):
         else:
             messages.error(request, 'Invalid username or password')
     
-    return render(request, 'admin-login.html')
+    return render(request, 'admin-login.html', {'is_login_page': True})
 
 
 @login_required 
@@ -745,6 +745,89 @@ def borrow_more_item(request):
     return redirect('admin-borrow-record')
 
 
+@login_required
+def update_borrow_request(request):
+    # Restrict access to faculty users only
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+    
+    if request.method == 'POST':
+        borrow_id = request.POST.get('id')
+        student_id = request.POST.get('student_id')
+        name = request.POST.get('name')
+        course = request.POST.get('course')
+        year = request.POST.get('year')
+        email = request.POST.get('email')
+        phone = request.POST.get('phone')
+        item_id = request.POST.get('itemm')
+        new_quantity = int(request.POST.get('quantityy'))
+        date = request.POST.get('datepicker')
+        purpose = request.POST.get('description')
+
+        # Get borrower_type values
+        borrower_type = request.POST.get('borrower_type')
+        other_borrower_type = request.POST.get('other_borrower_type', '').strip()  # Default to empty string
+
+        # If the "Others" field is filled, use its value
+        if other_borrower_type:
+            borrower_type = other_borrower_type
+
+        try:
+            # Get the BorrowRequest object, ensure it's tied to the logged-in user
+            borrow_request = get_object_or_404(BorrowRequest, id=borrow_id, user=request.user)
+            
+            # Get the content type and ensure the item also belongs to the logged-in user
+            content_type = ContentType.objects.get_for_model(borrow_request.content_object)
+            item = content_type.get_object_for_this_type(id=item_id, user=request.user)
+
+            # Calculate adjusted quantities
+            original_quantity = borrow_request.quantity
+            original_item_quantity = item.quantity
+            borrowed_quantity_change = new_quantity - original_quantity
+            item_quantity_change = original_item_quantity - borrowed_quantity_change
+
+            # Validate quantity change
+            if new_quantity <= 0:
+                messages.error(request, 'Quantity must be greater than zero.')
+                return redirect('admin-borrow-record')
+
+            if item_quantity_change < 0:
+                messages.error(request, f'Not enough quantity available for {item.name}.')
+                return redirect('admin-borrow-record')
+
+            # Update BorrowRequest with the new values
+            borrow_request.student_id = student_id
+            borrow_request.name = name
+            borrow_request.course = course
+            borrow_request.year = year
+            borrow_request.email = email
+            borrow_request.phone = phone
+            borrow_request.content_object = item
+            borrow_request.quantity = new_quantity
+            borrow_request.date_borrow = date
+            borrow_request.purpose = purpose
+            borrow_request.borrower_type = borrower_type  # Update borrower_type here
+            borrow_request.save()
+
+            # Update the item quantity
+            item.quantity = item_quantity_change
+            item.save()
+
+            # Success message
+            messages.success(request, f'Borrow request for {item.name} has been updated.')
+            return redirect('admin-borrow-record')
+
+        except Exception as e:
+            # Handle any errors and show the error message
+            messages.error(request, f'An error occurred: {str(e)}')
+            return redirect('admin-borrow-record')
+
+    else:
+        # Handle invalid request methods
+        messages.error(request, 'Invalid request method.')
+        return redirect('admin-borrow-record')
+
+
 
 @login_required
 def generate_report(request, student_id):
@@ -753,7 +836,9 @@ def generate_report(request, student_id):
         return HttpResponseForbidden("You do not have permission to access this page.")
     
     # Fetch all BorrowRequests for the specific student ID and order by latest date_borrow
-    borrowers = BorrowRequest.objects.filter(student_id=student_id).order_by('-id')[:5]  # Get the 5 latest records
+    borrowers = BorrowRequest.objects.filter(
+        Q(student_id=student_id) & (Q(user=request.user) | Q(handled_by=request.user))
+    ).order_by('-id')[:5]
     
     # Get the latest borrow record
     latest_borrow = borrowers.first() 

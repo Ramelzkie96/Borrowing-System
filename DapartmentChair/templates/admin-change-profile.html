@@ -123,52 +123,7 @@
       <img class="animation__wobble" src="{% static 'dist/img/pit_logo.png' %}" alt="AdminLTELogo" height="60" width="60">
     </div>
   
-    <!-- Navbar -->
-    <nav class="main-header navbar navbar-expand navbar-dark">
-      <!-- Left navbar links -->
-      <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
-        </li>
-        <li class="nav-item d-none d-sm-inline-block">
-          <a href="{% url 'admin-dashboard' %}" class="nav-link">Home</a>
-        </li>
-      </ul>
-  
-      <!-- Right navbar links -->
-      <ul class="navbar-nav ml-auto">
-        <!-- Navbar Search -->
-        <li class="nav-item">
-          <a class="nav-link" data-widget="navbar-search" href="#" role="button">
-            <i class="fas fa-search"></i>
-          </a>
-          <div class="navbar-search-block">
-            <form class="form-inline">
-              <div class="input-group input-group-sm">
-                <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search">
-                <div class="input-group-append">
-                  <button class="btn btn-navbar" type="submit">
-                    <i class="fas fa-search"></i>
-                  </button>
-                  <button class="btn btn-navbar" type="button" data-widget="navbar-search">
-                    <i class="fas fa-times"></i>
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </li>
-  
-   
-        <li class="nav-item">
-          <a class="nav-link" data-widget="fullscreen" href="#" role="button">
-            <i class="fas fa-expand-arrows-alt"></i>
-          </a>
-        </li>
-      
-      </ul>
-    </nav>
-    <!-- /.navbar -->
+
   
     <!-- Main Sidebar Container -->
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
@@ -336,26 +291,26 @@
           <div class="row">
             <div class="container-fluid">
 
-                <div class="card" style="border-top: 4px solid #593bdb; box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 4px;">
+                <div class="card mt-5" style="border-top: 4px solid #593bdb; box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 4px;">
                     <div class="card-header">
-                        <h4 class="card-title text-white" style="font-size: 30px; font-weight: 800">Change Profile</h4>
+                        <h4 class="card-title" style="font-size: 30px; font-weight: 800">Change Profile</h4>
                     </div>
                     <div class="card-body">
                         <div class="basic-form">
                             <form method="post" enctype="multipart/form-data">
                                 {% csrf_token %}
                                 <div class="form-group row mb-4">
-                                    <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 text-white" style="font-size: 15px">Change Image</label>
+                                    <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3" style="font-size: 15px">Change Image</label>
                                     <div class="col-sm-12 col-md-7">
                                         <!-- Display user's profile picture or default image if none exists -->
                                         <img id="profileImage" src="{% if profile_picture %}{{ profile_picture.url }}{% else %}{{ default_image_url }}{% endif %}" alt="Profile Image" class="img-fluid rounded-circle" style="width: 60px; height: 60px; object-fit: cover; box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;"><br>
-                                        <input type="file" id="fileInput" name="profilePicture" class="mt-3" style="border: 1px solid #bebebe; padding: 0.5rem; border-radius: 0.25rem;">
+                                        <input type="file" id="fileInput" name="profilePicture" class="mt-3"  padding: 0.5rem; border-radius: 0.25rem;">
                                     </div>
                                 </div>
                                 <div class="form-group row mb-4">
-                                    <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 text-white" style="font-size: 15px">Username</label>
+                                    <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3" style="font-size: 15px">Username</label>
                                     <div class="col-sm-12 col-md-7">
-                                        <input type="text" name="username" class="form-control" style="border: 1px solid #bebebe; width: 53%;" value="{{ username }}" required>
+                                        <input type="text" name="username" class="form-control"  value="{{ username }}" required>
                                     </div>
                                 </div>
             
@@ -404,11 +359,9 @@
   
     <!-- Main Footer -->
     <footer class="main-footer">
-      <strong>Copyright &copy; 2014-2021 <a href="https://adminlte.io">AdminLTE.io</a>.</strong>
-      All rights reserved.
-      <div class="float-right d-none d-sm-inline-block">
-        <b>Version</b> 3.1.0
-      </div>
+      <strong>Borrowing System By: </strong>
+      Run Time Terror.
+      
     </footer>
   </div>
 

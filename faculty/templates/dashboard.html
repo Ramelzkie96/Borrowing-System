@@ -185,7 +185,44 @@
             </div>
             <!-- Dynamic messages end -->
 
+<!-- Send Email Notification Modal -->
+<div class="modal fade" id="exampleModalLong" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="border-bottom: 2px solid #593bdb;">
+                <h5 class="modal-title">Send Email Notification</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
+            </div>
+            <form id="emailNotificationForm" method="post" action="{% url 'send_email' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="emailTitle" style="color: #333;">Title</label>
+                        <input type="text" class="form-control" id="emailTitle" name="title" required style="border: 1px solid #474747;">
+                    </div>
+                    <div class="form-group">
+                        <label for="emailAddress" style="color: #333;">Email</label>
+                        <input type="email" class="form-control" id="emailAddress" name="email" required style="border: 1px solid #474747;">
+                    </div>
+                    <div class="form-group">
+                        <label for="emailMessage" style="color: #333;">Message</label>
+                        <textarea class="form-control" id="emailMessage" name="message" rows="4" required style="border: 1px solid #474747;"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <!-- Close and Submit Buttons -->
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Send Email</button>
 
+                    <!-- Loader (hidden by default) -->
+                    <div id="loader" style="display:none; margin-left: 10px;">
+                        <div class="loader"></div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
             
 
@@ -262,7 +299,7 @@
                     <div class="col-lg-12">
                         <div class="card" style="border-top: 3px solid #6b51df;">
                             <div class="card-header">
-                                <h4 class="card-title">Borrowers</h4>
+                                <h4 class="card-title">All Borrowers</h4>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
@@ -305,6 +342,10 @@
                                                             data-purpose="{{ request.purpose }}"
                                                             data-status="{{ request.status }}">
                                                             <i class="fas fa-eye"></i>
+                                                        </button>
+
+                                                        <button type="button" class="btn btn-secondary send-email-btn" data-toggle="modal" data-target="#exampleModalLong" data-email="{{ request.email }}">
+                                                            <i class="fa-regular fa-envelope"></i>
                                                         </button>
                                                     </td>
                                                 </tr>
@@ -441,6 +482,21 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
+
+//send email notification
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click event listener to the send email buttons
+    document.querySelectorAll('.send-email-btn').forEach(function(button) {
+        button.addEventListener('click', function() {
+            // Get the email from the data attribute
+            const email = this.getAttribute('data-email');
+            
+            // Set the email in the modal
+            document.getElementById('emailAddress').value = email;
+        });
+    });
+
+});
 
 
     //toaster message

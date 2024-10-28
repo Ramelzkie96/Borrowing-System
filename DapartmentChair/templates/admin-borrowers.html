@@ -154,52 +154,7 @@
       <img class="animation__wobble" src="{% static 'dist/img/pit_logo.png' %}" alt="AdminLTELogo" height="60" width="60">
     </div>
   
-    <!-- Navbar -->
-    <nav class="main-header navbar navbar-expand navbar-dark">
-      <!-- Left navbar links -->
-      <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
-        </li>
-        <li class="nav-item d-none d-sm-inline-block">
-          <a href="{% url 'admin-dashboard' %}" class="nav-link">Home</a>
-        </li>
-      </ul>
-  
-      <!-- Right navbar links -->
-      <ul class="navbar-nav ml-auto">
-        <!-- Navbar Search -->
-        <li class="nav-item">
-          <a class="nav-link" data-widget="navbar-search" href="#" role="button">
-            <i class="fas fa-search"></i>
-          </a>
-          <div class="navbar-search-block">
-            <form class="form-inline">
-              <div class="input-group input-group-sm">
-                <input class="form-control form-control-navbar" type="search" placeholder="Search" aria-label="Search">
-                <div class="input-group-append">
-                  <button class="btn btn-navbar" type="submit">
-                    <i class="fas fa-search"></i>
-                  </button>
-                  <button class="btn btn-navbar" type="button" data-widget="navbar-search">
-                    <i class="fas fa-times"></i>
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-        </li>
-  
-   
-        <li class="nav-item">
-          <a class="nav-link" data-widget="fullscreen" href="#" role="button">
-            <i class="fas fa-expand-arrows-alt"></i>
-          </a>
-        </li>
-      
-      </ul>
-    </nav>
-    <!-- /.navbar -->
+
   
     <!-- Main Sidebar Container -->
     <aside class="main-sidebar sidebar-dark-primary elevation-4">
@@ -369,7 +324,7 @@
 
                 <div class="card mt-3" style="border-top: 4px solid #593bdb; box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 4px;">
                     <div class="card-header">
-                        <h4 class="card-title text-white" style="font-size: 30px; font-weight: 700;">Add New Borrower</h4>
+                        <h4 class="card-title" style="font-size: 30px; font-weight: 700;">Add New Borrower</h4>
                     </div>
                     <div class="card-body">
                         <div class="basic-form">
@@ -377,35 +332,35 @@
                                 {% csrf_token %}
                                 <div class="form-row">
                                     <div class="form-group col-md-6">
-                                        <label class="text-white">Student ID</label>
+                                        <label>Student ID</label>
                                         {{ form.student_id }}
                                     </div>
                                     <div class="form-group col-md-6">
-                                        <label class="text-white">Name</label>
+                                        <label>Name</label>
                                         {{ form.name }}
                                     </div>
                                     <div class="form-group col-md-6">
-                                        <label class="text-white">Course</label>
+                                        <label>Course</label>
                                         {{ form.course }}
                                     </div>
                                     <div class="form-group col-md-6">
-                                        <label class="text-white">Year</label>
+                                        <label>Year</label>
                                         {{ form.year }}
                                     </div>
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group col-md-6">
-                                        <label class="text-white">Email</label>
+                                        <label>Email</label>
                                         {{ form.email }}
                                     </div>
                     
                                     <div class="form-group col-md-3">
-                                        <label class="text-white">Phone</label>
+                                        <label>Phone</label>
                                         {{ form.phone }}
                                     </div>
                     
                                     <div class="form-group col-md-3">
-                                        <label class="text-white">Date Borrow</label>
+                                        <label>Date Borrow</label>
                                         <div class="input-group">
                                             {{ form.date_borrow }}
                                             <div class="input-group-append">
@@ -421,19 +376,19 @@
                                 </div>
                                 <div class="form-row">
                                     <div class="form-group col-md-2">
-                                        <label class="text-white">
+                                        <label>
                                             <input type="radio" name="borrower_type" value="Student" id="student_radio" style="width: 20px; height: 20px;">&nbsp;
                                             Student
                                         </label>
                                     </div>
                                     <div class="form-group col-md-2">
-                                        <label class="text-white">
+                                        <label>
                                             <input type="radio" name="borrower_type" value="Teacher" id="teacher_radio" style="width: 20px; height: 20px;">&nbsp;
                                             Teacher
                                         </label>
                                     </div>
                                     <div class="form-group col-md-2">
-                                        <label class="text-white">
+                                        <label>
                                             Others:
                                             <input type="text" name="other_borrower_type" id="other_borrower_type" style="width: 130px; height: 20px; border-top: 1px solid white; border-right: 1px solid white; border-left: 1px solid white;">&nbsp;
                                         </label>
@@ -453,14 +408,14 @@
                                                 </div>
                                                 {{ form.item }}
                                                 <div class="mt-4">
-                                                    <label class="text-white">Quantity</label>
+                                                    <label>Quantity</label>
                                                     {{ form.quantity }}
                                                 </div>
                                             </div>
                                       
                                     </div>
                                     <div class="form-group col-md-6">
-                                        <label class="text-white">Purpose for borrow</label>
+                                        <label>Purpose for borrow</label>
                                         {{ form.purpose }}
                                     </div>
                                 </div>
@@ -504,13 +459,13 @@
     <!-- /.control-sidebar -->
   
     <!-- Main Footer -->
-    <footer class="main-footer">
+    <!-- <footer class="main-footer">
       <strong>Copyright &copy; 2014-2021 <a href="https://adminlte.io">AdminLTE.io</a>.</strong>
       All rights reserved.
       <div class="float-right d-none d-sm-inline-block">
         <b>Version</b> 3.1.0
       </div>
-    </footer>
+    </footer> -->
   </div>
 
 
