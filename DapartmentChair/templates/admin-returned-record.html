@@ -343,68 +343,53 @@ $(document).ready(function() {
         <div class="container-fluid">
 
 
-             <!-- Modal for Viewing Item -->
-             <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header" style="border-bottom: 2px solid #593bdb;">
-                            <h5 class="modal-title" id="exampleModalCenterTitle" style="font-size: 25px; font-weight: 700;">View Item</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="form-group row mb-1">
-                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px;">Student ID:</label>
-                                <p id="modal-student-id" class=" mt-1" style="font-size: 15px;"></p>
-                            </div>
-                            <div class="form-group row mb-1">
-                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px;">Name:</label>
-                                <p id="modal-name" class=" mt-1" style="font-size: 15px;"></p>
-                            </div>
-                            <div class="form-group row mb-0">
-                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px;">Course:</label>
-                                <p id="modal-course" class=" mt-1" style="font-size: 15px;"></p>
-                            </div>
-                            <div class="form-group row mb-0">
-                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px;">Year:</label>
-                                <p id="modal-year" class=" mt-1" style="font-size: 15px;"></p>
-                            </div>
-                            <div class="form-group row mb-0">
-                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px;">Email:</label>
-                                <p id="modal-email" class=" mt-1" style="font-size: 15px;"></p>
-                            </div>
-                            <div class="form-group row mb-0">
-                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px;">Phone:</label>
-                                <p id="modal-phone" class=" mt-1" style="font-size: 15px;"></p>
-                            </div>
-                            <div class="form-group row mb-0">
-                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px;">Item:</label>
-                                <p id="modal-item" class=" mt-1" style="font-size: 15px;"></p>
-                            </div>
-                            <div class="form-group row mb-0">
-                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px;">Quantity:</label>
-                                <p id="modal-quantity" class=" mt-1" style="font-size: 15px;"></p>
-                            </div>
-                            <div class="form-group row mb-0">
-                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px;">Date Borrow:</label>
-                                <p id="modal-date-borrow" class=" mt-1" style="font-size: 15px;"></p>
-                            </div>
-                            <div class="form-group row mb-0">
-                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px;">Purpose:</label>
-                                <p id="modal-purpose" class=" mt-1" style="font-size: 15px;"></p>
-                            </div>
-                            <div class="form-group row mb-0">
-                                <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px;">Status:</label>
-                                <p id="modal-status" class=" mt-1" style="font-size: 15px;"></p>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        </div>
+                    <!-- Modal for Viewing Item -->
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 800px;">
+        <div class="modal-content">
+            <div class="modal-header" style="border-bottom: 2px solid #593bdb;">
+                <h5 class="modal-title" id="exampleModalCenterTitle" style="font-size: 25px; font-weight: 700;">Borrower Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-1">
+                    <div class="col-4">
+                        <label class="font-weight-bold" style="font-size: 15px;">Student ID:</label>
+                        <p id="modal-student-id" style="font-size: 15px;"></p>
+                    </div>
+                    <div class="col-4">
+                        <label class="font-weight-bold" style="font-size: 15px;">Name:</label>
+                        <p id="modal-name" style="font-size: 15px;"></p>
+                    </div>
+                    <div class="col-4">
+                        <label class="font-weight-bold" style="font-size: 15px;">Date Borrow:</label>
+                        <p id="modal-date-borrow" style="font-size: 15px;"></p>
                     </div>
                 </div>
+
+                <div class="row mb-1">
+                    <div class="col-4">
+                        <p style="font-size: 15px; font-weight: 800;">Items:</p>
+                    </div>
+                    <div class="col-4">
+                        <p style="font-size: 15px; font-weight: 800;">Date Return:</p>
+                    </div>
+
+                  
+                   
+                </div>
+
+                <div id="borrow-items-list">
+                    <!-- Dynamic borrow item list will be injected here -->
+                </div>
             </div>
+
+         
+        </div>
+    </div>
+</div>
 
    
 
@@ -507,11 +492,11 @@ $(document).ready(function() {
                                         <th scope="col">Name</th>
                                         <th scope="col">Course</th>
                                         <th scope="col">Year</th>
-                                        <th scope="col">Item</th>
-                                        <th scope="col">Quantity</th>
+                                        <th scope="col">Phone</th>
+                                        <th scope="col">Date Borrow</th>
                                         <th scope="col">Time Span</th>
                                         <th scope="col">Status</th>
-                                        <th scope="col">Borrower Report</th>
+                                        <!-- <th scope="col">Borrower Report</th> -->
                                         <th scope="col" style="width: 80px;">Action</th>
                                     </tr>
                                 </thead>
@@ -523,8 +508,8 @@ $(document).ready(function() {
                                                 <td>{{ request.name }}</td>
                                                 <td>{{ request.course }}</td>
                                                 <td>{{ request.year }}</td>
-                                                <td>{{ request.content_object.name }}</td>
-                                                <td>{{ request.quantity }}</td>
+                                                <td>{{ request.phone }}</td>
+                                                <td>{{ request.date_borrow }}</td>
                                                 <td>{{ request.time_ago }}</td>
                                                 <td style="display: none;">{{ request.date_return }}</td>
                                                 <td>
@@ -536,25 +521,15 @@ $(document).ready(function() {
                                                         <div class="badge badge-danger">{{ request.status }}</div>
                                                     {% endif %}
                                                 </td>
-                                                <td class="text-center">
-                                                    <a class="btn btn-primary text-white" href="{% url 'borrower-report' request.student_id %}">
-                                                        <i class="fa-solid fa-file-pdf"></i>
-                                                    </a>
-                                                </td>
+                                              
                                                 <td style="text-align: center; vertical-align: middle;">
                                                     {% if request.status == "Returned" %}
                                                         <button type="button" class="btn btn-secondary view-item-btn" data-toggle="modal" data-target="#exampleModalCenter"
                                                             data-student-id="{{ request.student_id }}"
                                                             data-name="{{ request.name }}"
-                                                            data-course="{{ request.course }}"
                                                             data-year="{{ request.year }}"
-                                                            data-email="{{ request.email }}"
-                                                            data-phone="{{ request.phone }}"
-                                                            data-item="{{ request.content_object.name }}"
-                                                            data-quantity="{{ request.quantity }}"
-                                                            data-date="{{ request.date_return }}"
-                                                            data-purpose="{{ request.purpose }}"
-                                                            data-status="{{ request.status }}">
+                                                            data-date="{{ request.date_borrow }}">
+                                                            
                                                             <i class="fas fa-eye"></i>
                                                         </button>
                                                     {% elif request.status == "Returned/Defect Item" %}
@@ -875,37 +850,7 @@ function removeNoRecordRow() {
 
 
 // viewing modal
-document.addEventListener('DOMContentLoaded', function () {
-    const viewItemButtons = document.querySelectorAll('.view-item-btn');
-  
-    viewItemButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            const studentId = button.getAttribute('data-student-id');
-            const name = button.getAttribute('data-name');
-            const course = button.getAttribute('data-course');
-            const year = button.getAttribute('data-year');
-            const email = button.getAttribute('data-email');
-            const phone = button.getAttribute('data-phone');
-            const item = button.getAttribute('data-item');
-            const quantity = button.getAttribute('data-quantity');
-            const date = button.getAttribute('data-date');
-            const purpose = button.getAttribute('data-purpose');
-            const status = button.getAttribute('data-status');
-  
-            document.getElementById('modal-student-id').innerText = studentId;
-            document.getElementById('modal-name').innerText = name;
-            document.getElementById('modal-course').innerText = course;
-            document.getElementById('modal-year').innerText = year;
-            document.getElementById('modal-email').innerText = email;
-            document.getElementById('modal-phone').innerText = phone;
-            document.getElementById('modal-item').innerText = item;
-            document.getElementById('modal-quantity').innerText = quantity;
-            document.getElementById('modal-date-borrow').innerText = date;
-            document.getElementById('modal-purpose').innerText = purpose;
-            document.getElementById('modal-status').innerText = status;
-        });
-    });
-  });
+
   
   
   
@@ -1057,6 +1002,191 @@ document.getElementById('returnItemForm').addEventListener('submit', function(ev
     })
     .catch(error => {
         console.error('Error:', error);
+    });
+});
+
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    const viewItemButtons = document.querySelectorAll('.view-item-btn');
+
+    viewItemButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const studentId = button.getAttribute('data-student-id');
+            const name = button.getAttribute('data-name');
+            const date = button.getAttribute('data-date');
+
+            // Set modal information
+            document.getElementById('modal-student-id').innerText = studentId;
+            document.getElementById('modal-name').innerText = name;
+            document.getElementById('modal-date-borrow').innerText = date;
+
+            fetch(`/fetch-borrow-items?student_id=${studentId}&date_borrow=${date}`)
+                .then(response => response.json())
+                .then(borrowItems => {
+                    const borrowItemsList = document.getElementById('borrow-items-list');
+                    borrowItemsList.innerHTML = '';
+
+                    borrowItems.forEach((borrowItem, index) => {
+                        const itemNumber = index + 1;
+                        const listItem = document.createElement('div');
+                        listItem.classList.add('row', 'mb-1');
+                    
+                        const itemNameId = `item-name-${index}`;
+                        const quantityId = `quantity-${index}`;
+                        const checkboxId = `checkbox-${index}`;
+                        const dateInputId = `dateReturn-${index}`;
+                        const dateReturnDisplayId = `dateReturnDisplay-${index}`;
+                    
+                        // Convert the date string from 'YYYY-MM-DD' to 'D MMMM, YYYY'
+                        const formattedDate = formatDate(borrowItem.return_date);
+                    
+                        listItem.innerHTML = `
+                            <div class="col-4">
+                                <label id="${itemNameId}" style="font-size: 15px;">${itemNumber}. ${borrowItem.item}</label>
+                                <p id="${quantityId}" style="font-size: 15px;">Quantity: ${borrowItem.quantity}</p>
+                            </div>
+                            <div class="col-4 mt-2">
+                                <input type="date" name="date_return" id="${dateInputId}" class="form-control datepicker-default cal" 
+                                    style="border: 1px solid #474747; display: none;"> <!-- Hide the input -->
+                                <p id="${dateReturnDisplayId}" style="font-size: 15px;" class="mt-2">${formattedDate}</p> <!-- Display the formatted date_return -->
+                            </div>
+                            <div class="col-4 text-right" style="display: none;">
+                                <input type="checkbox" id="${checkboxId}" class="form-check-input" style="transform: scale(1.8); position: relative; left: -210px; top: 20px;"
+                                    data-item-id="${borrowItem.id}">
+                            </div>
+                        `;
+
+                        borrowItemsList.appendChild(listItem);
+
+                                                    /**
+                        * Function to format date from 'YYYY-MM-DD' to 'D MMMM, YYYY'
+                        * @param {string} dateString - The date string in 'YYYY-MM-DD' format
+                        * @returns {string} - Formatted date string in 'D MMMM, YYYY'
+                        */
+                        function formatDate(dateString) {
+                            if (!dateString) return 'N/A'; // Handle empty or null date cases
+
+                            const date = new Date(dateString);
+                            
+                            // Extract day, month, and year
+                            const day = date.getUTCDate();
+                            const year = date.getUTCFullYear();
+                            const month = date.toLocaleString('default', { month: 'long' });
+
+                            // Return formatted date
+                            return `${day} ${month}, ${year}`;
+                        }
+
+
+
+                        // Retrieve stored date and checkbox state from localStorage
+                        const storedDate = localStorage.getItem(`${studentId}-${date}-${index}-date`);
+                        const storedCheckedState = localStorage.getItem(`${studentId}-${date}-${index}`);
+
+                        const dateInput = document.getElementById(dateInputId);
+                        if (storedDate) {
+                            dateInput.value = storedDate;
+                        }
+
+                        if (storedCheckedState === 'true') {
+                            const checkbox = document.getElementById(checkboxId);
+                            checkbox.checked = true;
+                            dateInput.disabled = true;
+                            document.getElementById(itemNameId).classList.add('checked');
+                            document.getElementById(quantityId).classList.add('checked');
+                        }
+
+                        // Checkbox change event listener
+                        const checkbox = document.getElementById(checkboxId);
+                        checkbox.addEventListener('change', function () {
+                            const itemNameLabel = document.getElementById(itemNameId);
+                            const quantityLabel = document.getElementById(quantityId);
+
+                            if (checkbox.checked) {
+                                itemNameLabel.classList.add('checked');
+                                quantityLabel.classList.add('checked');
+                                dateInput.disabled = true;
+                                localStorage.setItem(`${studentId}-${date}-${index}`, 'true');
+                            } else {
+                                itemNameLabel.classList.remove('checked');
+                                quantityLabel.classList.remove('checked');
+                                dateInput.disabled = false;
+                                localStorage.setItem(`${studentId}-${date}-${index}`, 'false');
+                            }
+
+                            checkAllCheckboxes(borrowItems.length);
+                        });
+
+                        // Save the date in localStorage on change
+                        dateInput.addEventListener('change', function () {
+                            localStorage.setItem(`${studentId}-${date}-${index}-date`, dateInput.value);
+                        });
+                    });
+
+                    checkAllCheckboxes(borrowItems.length);
+                })
+                .catch(error => console.error('Error fetching borrow items:', error));
+        });
+    });
+
+    function checkAllCheckboxes(itemCount) {
+        const checkboxes = document.querySelectorAll('#borrow-items-list input[type="checkbox"]');
+        const saveButton = document.querySelector('.save-btn');
+        const allChecked = [...checkboxes].every(checkbox => checkbox.checked);
+
+        if (allChecked) {
+            saveButton.classList.remove('disabled', 'not-allowed');
+            saveButton.disabled = false;
+        } else {
+            saveButton.classList.add('disabled', 'not-allowed');
+            saveButton.disabled = true;
+        }
+    }
+
+    document.querySelector('.save-btn').addEventListener('click', function () {
+        const checkboxes = document.querySelectorAll('#borrow-items-list input[type="checkbox"]:checked');
+        const itemsData = [];
+
+        checkboxes.forEach((checkbox) => {
+            const itemId = checkbox.getAttribute('data-item-id'); // Correct attribute name
+            console.log(itemId);
+            if (itemId !== undefined && itemId !== null) {
+                const returnDate = document.querySelector(`#${checkbox.id.replace('checkbox-', 'dateReturn-')}`).value;
+                const quantityReturned = document.querySelector(`#${checkbox.id.replace('checkbox-', 'quantity-')}`).innerText.split(': ')[1];
+
+                itemsData.push({
+                    id: itemId,
+                    return_date: returnDate,
+                    quantity: quantityReturned
+                });
+            } else {
+                console.error('Item ID is undefined for checkbox:', checkbox);
+            }
+        });
+
+        console.log('Items Data:', itemsData);
+
+        fetch('/save-returned-items/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({ items: itemsData })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Refresh the page to show success message
+                location.reload();  // Reload the current page to display messages added by Django
+            } else {
+                // Display an error message only if the response is not successful
+                alert('There was an error returning items.');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+        
     });
 });
 

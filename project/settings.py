@@ -93,7 +93,7 @@ WSGI_APPLICATION = 'project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'borsystem',
+        'NAME': 'abcitemtt',
         'USER': 'root',
         'PASSWORD': 'Password0012',
         'PORT': 3306,

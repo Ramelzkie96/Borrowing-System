@@ -59,6 +59,7 @@ class BorrowRequest(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     borrower_type = models.CharField(max_length=100, null=True)
     handled_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='handled_requests', on_delete=models.CASCADE, null=True, blank=True)
+    upload_image = models.ImageField(upload_to='borrow_upload/', null=True, blank=True)
     
     # New field to store the timestamp
     created_at = models.DateTimeField(auto_now_add=True)
@@ -83,7 +84,12 @@ class BorrowRequest(models.Model):
         else:
             return f"{int(diff.total_seconds() // 31536000)} years ago"
 
-    
+
+class BorrowRequestItem(models.Model):
+    borrow_request = models.ForeignKey(BorrowRequest, related_name='items', on_delete=models.CASCADE)
+    item = models.ForeignKey(facultyItem, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()  # Quantity of this specific item
+ 
 
 
 class EmailNotification(models.Model):

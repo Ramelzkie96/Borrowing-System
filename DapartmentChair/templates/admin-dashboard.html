@@ -87,6 +87,20 @@
   background-color: #e0e0e0;            /* Set a light background for today */
   color: #000;                          /* Black text color for today */
 }
+.checked {
+    text-decoration: line-through; /* Strikethrough effect */
+    color: gray; /* Optional: Change text color for better visibility */
+}
+
+.not-allowed {
+  cursor: not-allowed !important; /* Ensures the not-allowed cursor is applied */
+}
+
+/* Add styles for the disabled state of the button */
+.save-btn.disabled {
+  opacity: 0.5; /* Makes it look disabled */
+  pointer-events: none; /* Prevents clicks */
+}
 </style>
 
 {% endblock %}
@@ -395,68 +409,55 @@
             <div class="container-fluid">
 
 
-            <!-- Modal for Viewing Item -->
-            <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-              <div class="modal-dialog modal-dialog-centered" role="document">
-                  <div class="modal-content">
-                      <div class="modal-header" style="border-bottom: 2px solid #593bdb;">
-                          <h5 class="modal-title" id="exampleModalCenterTitle" style="font-size: 25px; font-weight: 700;">View Item</h5>
-                          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                              <span aria-hidden="true">&times;</span>
-                          </button>
-                      </div>
-                      <div class="modal-body">
-                          <div class="form-group row mb-1">
-                              <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; ">Student ID:</label>
-                              <p id="modal-student-id" class=" mt-1" style="font-size: 15px;"></p>
+                         <!-- Modal for Viewing Item -->
+                          <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 800px;">
+                                <div class="modal-content">
+                                    <div class="modal-header" style="border-bottom: 2px solid #593bdb;">
+                                        <h5 class="modal-title" id="exampleModalCenterTitle" style="font-size: 25px; font-weight: 700;">Borrower Details</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="row mb-1">
+                                            <div class="col-4">
+                                                <label class="font-weight-bold" style="font-size: 15px;">Student ID:</label>
+                                                <p id="modal-student-id" style="font-size: 15px;"></p>
+                                            </div>
+                                            <div class="col-4">
+                                                <label class="font-weight-bold" style="font-size: 15px;">Name:</label>
+                                                <p id="modal-name" style="font-size: 15px;"></p>
+                                            </div>
+                                            <div class="col-4">
+                                                <label class="font-weight-bold" style="font-size: 15px;">Date Borrow:</label>
+                                                <p id="modal-date-borrow" style="font-size: 15px;"></p>
+                                            </div>
+                                        </div>
+
+                                        <div class="row mb-1">
+                                            <div class="col-4">
+                                                <p style="font-size: 15px; font-weight: 800;">Items:</p>
+                                            </div>
+                                            <div class="col-4">
+                                                <p style="font-size: 15px; font-weight: 800;">Date Return:</p>
+                                            </div>
+                                            <div class="col-4">
+                                                <p style="font-size: 15px; font-weight: 800;">Return:</p>
+                                            </div>
+                                        </div>
+
+                                        <div id="borrow-items-list">
+                                            <!-- Dynamic borrow item list will be injected here -->
+                                        </div>
+                                    </div>
+
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary save-btn disabled not-allowed" disabled>Save</button>
+                                    </div>
+                                </div>
+                            </div>
                           </div>
-                          <div class="form-group row mb-1">
-                              <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; ">Name:</label>
-                              <p id="modal-name" class=" mt-1" style="font-size: 15px;"></p>
-                          </div>
-                          <div class="form-group row mb-0">
-                              <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; ">Course:</label>
-                              <p id="modal-course" class=" mt-1" style="font-size: 15px;"></p>
-                          </div>
-                          <div class="form-group row mb-0">
-                              <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; ">Year:</label>
-                              <p id="modal-year" class=" mt-1" style="font-size: 15px;"></p>
-                          </div>
-                          <div class="form-group row mb-0">
-                              <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; ">Email:</label>
-                              <p id="modal-email" class=" mt-1" style="font-size: 15px;"></p>
-                          </div>
-                          <div class="form-group row mb-0">
-                              <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; ">Phone:</label>
-                              <p id="modal-phone" class=" mt-1" style="font-size: 15px;"></p>
-                          </div>
-                          <div class="form-group row mb-0">
-                              <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; ">Item:</label>
-                              <p id="modal-item" class=" mt-1" style="font-size: 15px;"></p>
-                          </div>
-                          <div class="form-group row mb-0">
-                              <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; ">Quantity:</label>
-                              <p id="modal-quantity" class=" mt-1" style="font-size: 15px;"></p>
-                          </div>
-                          <div class="form-group row mb-0">
-                              <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; ">Date Borrow:</label>
-                              <p id="modal-date-borrow" class=" mt-1" style="font-size: 15px;"></p>
-                          </div>
-                          <div class="form-group row mb-0">
-                              <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; ">Purpose:</label>
-                              <p id="modal-purpose" class=" mt-1" style="font-size: 15px;"></p>
-                          </div>
-                          <div class="form-group row mb-0">
-                              <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 " style="font-size: 15px; ">Status:</label>
-                              <p id="modal-status" class=" mt-1" style="font-size: 15px;"></p>
-                          </div>
-                      </div>
-                      <div class="modal-footer">
-                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                      </div>
-                  </div>
-              </div>
-          </div>
 
 
       
@@ -600,8 +601,7 @@
                                               <th scope="col">Name</th>
                                               <th scope="col">Course</th>
                                               <th scope="col">Year</th>
-                                              <th scope="col">Item</th>
-                                              <th scope="col">Quantity</th>
+                                              <th scope="col">Date Borrow</th>
                                               <th scope="col">Time Span</th>
                                               <th scope="col">Status</th>
                                               <th scope="col" style="width: 80px;">Action</th>
@@ -615,8 +615,7 @@
                                                       <td>{{ request.name }}</td>
                                                       <td>{{ request.course }}</td>
                                                       <td>{{ request.year }}</td>
-                                                      <td>{{ request.content_object.name }}</td>
-                                                      <td>{{ request.quantity }}</td>
+                                                      <td>{{ request.date_borrow }}</td>
                                                       <td>{{ request.time_ago }}</td>
                                                       <td style="display: none;">{{ request.date_borrow }}</td>
                                                       <td>
@@ -636,28 +635,15 @@
                                                                   <img src="{% static 'images/mores.png' %}" alt="" width="30" height="30">
                                                               </a>
                                                               <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
-                                                                  <button type="button" class="dropdown-item view-item-btn" data-toggle="modal" data-target="#exampleModalCenter"
-                                                                      data-student-id="{{ request.student_id }}"
-                                                                      data-name="{{ request.name }}"
-                                                                      data-course="{{ request.course }}"
-                                                                      data-year="{{ request.year }}"
-                                                                      data-email="{{ request.email }}"
-                                                                      data-phone="{{ request.phone }}"
-                                                                      data-item="{{ request.content_object.name }}"
-                                                                      data-quantity="{{ request.quantity }}"
-                                                                      data-date="{{ request.date_borrow }}"
-                                                                      data-purpose="{{ request.purpose }}"
-                                                                      data-status="{{ request.status }}">
-                                                                      <i class="fas fa-eye"></i>&nbsp; View
-                                                                  </button>
+                                                                <button type="button" class="dropdown-item view-item-btn" data-toggle="modal" data-target="#exampleModalCenter"
+                                                                  data-student-id="{{ request.student_id }}"
+                                                                  data-name="{{ request.name }}"
+                                                                  data-date="{{ request.date_borrow }}">
+                                                                  <i class="fas fa-eye"></i>&nbsp; Borrower Details
+                                                                </button>
                                       
                                                                   
-                                                                  <button type="button" class="dropdown-item return-item-btn" data-toggle="modal" data-target="#modalGrid"
-                                                                      data-request-id="{{ request.id }}"
-                                                                      data-status="{{ request.status }}"
-                                                                      data-note="{{ request.note }}">
-                                                                      <i class="fa-solid fa-rotate-left"></i>&nbsp; Return Item
-                                                                  </button>
+                                                            
                                                                   <button type="button" class="dropdown-item send-email-btn" data-toggle="modal" data-target="#exampleModalLong" data-email="{{ request.email }}">
                                                                       <i class="fa-regular fa-envelope"></i>&nbsp; Send Notification
                                                                   </button>
@@ -854,99 +840,99 @@ function searchTable() {
   filter = input.value.toUpperCase();
   regex = new RegExp(`(${filter})`, 'gi');
   table = document.getElementById("itemTable");
-  tbody = table.getElementsByTagName("tbody")[0];  // Work only with tbody
-  tr = tbody.getElementsByTagName("tr");  // Get rows only from tbody
+  tbody = table.getElementsByTagName("tbody")[0]; // Work only with tbody
+  tr = tbody.getElementsByTagName("tr"); // Get rows only from tbody
   var noMatch = true;
 
   // If the input is empty, reset table to show all rows and keep the badge and action button intact
   if (!filter) {
-      for (i = 0; i < tr.length; i++) {
-          if (tr[i].classList.contains("no-record-row")) continue; // Skip the "No record found" row
-          tr[i].style.display = ""; // Show all rows
-          td = tr[i].getElementsByTagName("td");
-          for (j = 0; j < td.length; j++) {
-              // Ensure buttons, dropdowns, badges, and action columns are not affected
-              if (j === 7 || j === 8 || j === 9 || td[j].querySelector('.dropdownnn') || td[j].querySelector('.badge') || td[j].querySelector('.action-buttons')) {
-                  continue; // Skip "Status", "Action", and dropdowns, badges
-              }
-              td[j].innerHTML = td[j].textContent || td[j].innerText; // Reset text content
-          }
+    for (i = 0; i < tr.length; i++) {
+      if (tr[i].classList.contains("no-record-row")) continue; // Skip the "No record found" row
+      tr[i].style.display = ""; // Show all rows
+      td = tr[i].getElementsByTagName("td");
+      for (j = 0; j < td.length; j++) {
+        // Ensure buttons, dropdowns, badges, and action columns are not affected
+        if (j === 6 || j === 7 || j === 8) {
+          continue; // Skip "Status" and "Action"
+        }
+        td[j].innerHTML = td[j].textContent || td[j].innerText; // Reset text content
       }
-      removeNoRecordRow();  // Remove "No record found" if it exists
-      return; // Exit function if input is empty
+    }
+    removeNoRecordRow(); // Remove "No record found" if it exists
+    return; // Exit function if input is empty
   }
 
   // If there's input, filter the table rows
-  noMatch = true;  // Reset noMatch for the filtering
+  noMatch = true; // Reset noMatch for the filtering
   for (i = 0; i < tr.length; i++) {
-      if (tr[i].classList.contains("no-record-row")) continue; // Skip "No record found" row
+    if (tr[i].classList.contains("no-record-row")) continue; // Skip "No record found" row
 
-      tr[i].style.display = "none"; // Hide all rows initially
-      td = tr[i].getElementsByTagName("td");
-      let rowContainsFilter = false;
+    tr[i].style.display = "none"; // Hide all rows initially
+    td = tr[i].getElementsByTagName("td");
+    let rowContainsFilter = false;
 
-      // Iterate through each cell in the row
-      for (j = 0; j < td.length; j++) {
-          if (j === 8 || j === 9 || j == 10) continue; // Skip "Status" and "Action" columns
-          if (td[j]) {
-              txtValue = td[j].textContent || td[j].innerText;
-              if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                  rowContainsFilter = true;
-                  // Highlight matched text only in non-dropdown cells
-                  if (!td[j].querySelector('.dropdown')) {
-                      td[j].innerHTML = txtValue.replace(regex, "<span style='background-color: #3f6791; color: white;'>$1</span>");
-                  }
-              } else {
-                  // Remove highlights if no match
-                  if (!td[j].querySelector('.dropdown')) {
-                      td[j].innerHTML = txtValue.replace(/<span style='background-color: rgb\(0, 255, 13\);'>(.*?)<\/span>/g, "$1");
-                  }
-              }
+    // Iterate through each cell in the row
+    for (j = 0; j < td.length; j++) {
+      if (j === 6 || j === 7 || j === 8) continue; // Skip "Status" and "Action" columns
+      if (td[j]) {
+        txtValue = td[j].textContent || td[j].innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+          rowContainsFilter = true;
+          // Highlight matched text only in non-dropdown cells
+          if (!td[j].querySelector('.dropdownnn')) {
+            td[j].innerHTML = txtValue.replace(regex, "<span style='background-color: #3f6791; color: white;'>$1</span>");
           }
+        } else {
+          // Remove highlights if no match
+          if (!td[j].querySelector('.dropdownnn')) {
+            td[j].innerHTML = txtValue.replace(/<span style='background-color: #3f6791; color: white;'>(.*?)<\/span>/g, "$1");
+          }
+        }
       }
+    }
 
-      // If the row contains the filter, show it
-      if (rowContainsFilter) {
-          tr[i].style.display = "";
-          noMatch = false;
-      }
+    // If the row contains the filter, show it
+    if (rowContainsFilter) {
+      tr[i].style.display = "";
+      noMatch = false;
+    }
   }
 
   // Show or hide "No record found" message based on matches
   if (noMatch) {
-      showNoRecordRow();
+    showNoRecordRow();
   } else {
-      removeNoRecordRow(); // Remove the "No record found" row if there are matches
+    removeNoRecordRow(); // Remove the "No record found" row if there are matches
   }
 
   // Remove existing "no record found" row if present
   var noRecordRow = document.getElementById("noRecordRow");
   if (noRecordRow) {
-      noRecordRow.remove();
+    noRecordRow.remove();
   }
 
   // If no matches found, add a "no record found" row
   if (noMatch) {
-      var newRow = tbody.insertRow();
-      newRow.setAttribute("id", "noRecordRow");
-      var cell = newRow.insertCell(0);
-      cell.colSpan = table.getElementsByTagName("th").length;
-      cell.style.textAlign = "center";
-      cell.textContent = "No borrow requests found.";
+    var newRow = tbody.insertRow();
+    newRow.setAttribute("id", "noRecordRow");
+    var cell = newRow.insertCell(0);
+    cell.colSpan = table.getElementsByTagName("th").length;
+    cell.style.textAlign = "center";
+    cell.textContent = "No borrow requests found.";
   }
 }
 
 function showNoRecordRow() {
   var noRecordRow = document.querySelector(".no-record-row");
   if (noRecordRow) {
-      noRecordRow.style.display = "";
+    noRecordRow.style.display = "";
   }
 }
 
 function removeNoRecordRow() {
   var noRecordRow = document.querySelector(".no-record-row");
   if (noRecordRow) {
-      noRecordRow.style.display = "none";
+    noRecordRow.style.display = "none";
   }
 }
 
@@ -956,60 +942,10 @@ function removeNoRecordRow() {
 
 
 
-// viewing modal
-document.addEventListener('DOMContentLoaded', function () {
-  const viewItemButtons = document.querySelectorAll('.view-item-btn');
-
-  viewItemButtons.forEach(button => {
-      button.addEventListener('click', function () {
-          const studentId = button.getAttribute('data-student-id');
-          const name = button.getAttribute('data-name');
-          const course = button.getAttribute('data-course');
-          const year = button.getAttribute('data-year');
-          const email = button.getAttribute('data-email');
-          const phone = button.getAttribute('data-phone');
-          const item = button.getAttribute('data-item');
-          const quantity = button.getAttribute('data-quantity');
-          const date = button.getAttribute('data-date');
-          const purpose = button.getAttribute('data-purpose');
-          const status = button.getAttribute('data-status');
-
-          document.getElementById('modal-student-id').innerText = studentId;
-          document.getElementById('modal-name').innerText = name;
-          document.getElementById('modal-course').innerText = course;
-          document.getElementById('modal-year').innerText = year;
-          document.getElementById('modal-email').innerText = email;
-          document.getElementById('modal-phone').innerText = phone;
-          document.getElementById('modal-item').innerText = item;
-          document.getElementById('modal-quantity').innerText = quantity;
-          document.getElementById('modal-date-borrow').innerText = date;
-          document.getElementById('modal-purpose').innerText = purpose;
-          document.getElementById('modal-status').innerText = status;
-      });
-  });
-});
 
 
 
-// date return
-document.addEventListener('DOMContentLoaded', function() {
-  // Set up the event listener for the "Return Item" buttons
-  document.querySelectorAll('.return-item-btn').forEach(button => {
-      button.addEventListener('click', function() {
-          const requestId = this.getAttribute('data-request-id');
-          const status = this.getAttribute('data-status');
-          const note = this.getAttribute('data-note');
 
-          // Populate modal fields
-          document.getElementById('modalRequestId').value = requestId;
-          document.getElementById('status').value = status;
-          document.getElementById('note').value = note;
-
-          // Remove error-border class if previously added
-          document.getElementById('dateReturn').classList.remove('error-border');
-      });
-  });
-});
 
 
 
@@ -1032,78 +968,188 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-document.getElementById('returnItemForm').addEventListener('submit', function(event) {
-  event.preventDefault(); // Prevent the default form submission
+document.addEventListener('DOMContentLoaded', function () {
+  const viewItemButtons = document.querySelectorAll('.view-item-btn');
 
-  // Clear previous error messages and is-invalid classes
-  const errorMessages = document.querySelectorAll('.invalid-feedback');
-  errorMessages.forEach(msg => msg.remove());
-  const invalidFields = document.querySelectorAll('.is-invalid');
-  invalidFields.forEach(field => field.classList.remove('is-invalid'));
+  viewItemButtons.forEach(button => {
+      button.addEventListener('click', function () {
+          const studentId = button.getAttribute('data-student-id');
+          const name = button.getAttribute('data-name');
+          const date = button.getAttribute('data-date');
 
-  const form = event.target;
-  const formData = new FormData(form);
-  const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+          // Set modal information
+          document.getElementById('modal-student-id').innerText = studentId;
+          document.getElementById('modal-name').innerText = name;
+          document.getElementById('modal-date-borrow').innerText = date;
 
-  fetch(form.action, {
-      method: 'POST',
-      headers: {
-          'X-CSRFToken': csrfToken,
-          'X-Requested-With': 'XMLHttpRequest'
-      },
-      body: formData
-  })
-  .then(response => response.json())
-  .then(data => {
-      if (data.field_errors) {
-          // Loop through each field error and display the message below the respective input field
-          for (const [fieldName, errorMessage] of Object.entries(data.field_errors)) {
-              // Ensure we handle underscores to match the form field names correctly
-              const correctedFieldName = fieldName.replace(/([A-Z])/g, '_$1').toLowerCase();
-              const field = form.querySelector(`[name=${correctedFieldName}]`);
+          fetch(`/fetch-borrow-items?student_id=${studentId}&date_borrow=${date}`)
+              .then(response => response.json())
+              .then(borrowItems => {
+                  const borrowItemsList = document.getElementById('borrow-items-list');
+                  borrowItemsList.innerHTML = '';
 
-              if (field) {
-                  field.classList.add('is-invalid');
-                  const errorDiv = document.createElement('div');
-                  errorDiv.className = 'invalid-feedback';
-                  errorDiv.style.display = 'block'; // Ensure the error message is visible
-                  errorDiv.textContent = errorMessage;
-                  field.parentNode.appendChild(errorDiv);
-              }
-          }
-      } else if (data.success) {
-          // Close the modal
-          $('#modalGrid').modal('hide');
+                  borrowItems.forEach((borrowItem, index) => {
+                      const itemNumber = index + 1;
+                      const listItem = document.createElement('div');
+                      listItem.classList.add('row', 'mb-1');
 
-          // Use Django's messages.success to show the success message and then reload the page
-          setTimeout(function() {
-              location.reload(); // Reload the page only if the operation was successful
-          }, 1000); // Adjust the delay as needed
-      }
-  })
-  .catch(error => {
-      console.error('Error:', error);
-  });
-});
+                      const itemNameId = `item-name-${index}`;
+                      const quantityId = `quantity-${index}`;
+                      const checkboxId = `checkbox-${index}`;
+                      const dateInputId = `dateReturn-${index}`;
+                      const errorId = `error-${index}`;
 
+                      listItem.innerHTML = `
+                          <div class="col-4">
+                              <label id="${itemNameId}" style="font-size: 15px;">${itemNumber}. ${borrowItem.item}</label>
+                              <p id="${quantityId}" style="font-size: 15px;">Quantity: ${borrowItem.quantity}</p>
+                          </div>
+                          <div class="col-4 mt-2">
+                              <input type="date" name="date_return" id="${dateInputId}" class="form-control datepicker-default cal" style="border: 1px solid #474747;">
+                              <small id="${errorId}" class="text-danger" style="display: none;">Date returned is required</small>
+                          </div>
+                          <div class="col-4 text-right">
+                              <input type="checkbox" id="${checkboxId}" class="form-check-input" style="transform: scale(1.8); position: relative; left: -210px; top: 20px;"
+                                  data-item-id="${borrowItem.id}">
+                          </div>
+                      `;
 
+                      borrowItemsList.appendChild(listItem);
 
+                      const dateInput = document.getElementById(dateInputId);
+                      const checkbox = document.getElementById(checkboxId);
+                      const errorMsg = document.getElementById(errorId);
 
-// borrow more item
-document.addEventListener('DOMContentLoaded', function() {
-  const borrowButtons = document.querySelectorAll('.borrow-item-btn');
-  
-  borrowButtons.forEach(button => {
-      button.addEventListener('click', function() {
-          const dateBorrow = this.getAttribute('data-borrow');
-          const requestId = this.getAttribute('data-request-id');  // corrected 'data-request-id'
+                      // Retrieve stored date and checkbox state from localStorage
+                      const storedDate = localStorage.getItem(`${studentId}-${date}-${index}-date`);
+                      const storedCheckedState = localStorage.getItem(`${studentId}-${date}-${index}`);
 
-          // Populate modal fields
-          document.querySelector('#modalGrid1 #borrowerMore').value = dateBorrow;
-          document.querySelector('#modalGrid1 #modalRequestIdd').value = requestId;  // corrected to 'modalRequestIdd'
+                      if (storedDate) {
+                          dateInput.value = storedDate;
+                      }
+
+                      if (storedCheckedState === 'true') {
+                          checkbox.checked = true;
+                          dateInput.disabled = true;
+                          document.getElementById(itemNameId).classList.add('checked');
+                          document.getElementById(quantityId).classList.add('checked');
+                      }
+
+                      // Checkbox change event listener
+                      checkbox.addEventListener('change', function () {
+                          if (checkbox.checked) {
+                              if (dateInput.value === '') {
+                                  checkbox.checked = false;
+                                  errorMsg.style.display = 'block';
+                              } else {
+                                  document.getElementById(itemNameId).classList.add('checked');
+                                  document.getElementById(quantityId).classList.add('checked');
+                                  dateInput.disabled = true;
+                                  localStorage.setItem(`${studentId}-${date}-${index}`, 'true');
+                              }
+                          } else {
+                              errorMsg.style.display = 'none';
+                              document.getElementById(itemNameId).classList.remove('checked');
+                              document.getElementById(quantityId).classList.remove('checked');
+                              dateInput.disabled = false;
+                              localStorage.setItem(`${studentId}-${date}-${index}`, 'false');
+                          }
+                          checkAllCheckboxes(borrowItems.length);
+                      });
+
+                      // Save the date in localStorage on change
+                      dateInput.addEventListener('change', function () {
+                          localStorage.setItem(`${studentId}-${date}-${index}-date`, dateInput.value);
+                          if (dateInput.value !== '') {
+                              errorMsg.style.display = 'none';
+                          }
+                      });
+                  });
+
+                  checkAllCheckboxes(borrowItems.length);
+              })
+              .catch(error => console.error('Error fetching borrow items:', error));
       });
   });
+
+  function clearLocalStorageEntries(studentId, date) {
+      // Clear all entries related to the current student and date
+      for (let index = 0; index < localStorage.length; index++) {
+          const key = localStorage.key(index);
+          if (key.startsWith(`${studentId}-${date}`)) {
+              localStorage.removeItem(key);
+          }
+      }
+  }
+
+  function checkAllCheckboxes(itemCount) {
+      const checkboxes = document.querySelectorAll('#borrow-items-list input[type="checkbox"]');
+      const saveButton = document.querySelector('.save-btn');
+      const allChecked = [...checkboxes].every(checkbox => checkbox.checked);
+
+      if (allChecked) {
+          saveButton.classList.remove('disabled', 'not-allowed');
+          saveButton.disabled = false;
+      } else {
+          saveButton.classList.add('disabled', 'not-allowed');
+          saveButton.disabled = true;
+      }
+  }
+
+  document.querySelector('.save-btn').addEventListener('click', function () {
+      const checkboxes = document.querySelectorAll('#borrow-items-list input[type="checkbox"]:checked');
+      const itemsData = [];
+
+      checkboxes.forEach((checkbox) => {
+          const itemId = checkbox.getAttribute('data-item-id');
+          const returnDate = document.querySelector(`#${checkbox.id.replace('checkbox-', 'dateReturn-')}`).value;
+          const quantityReturned = document.querySelector(`#${checkbox.id.replace('checkbox-', 'quantity-')}`).innerText.split(': ')[1];
+
+          itemsData.push({
+              id: itemId,
+              return_date: returnDate,
+              quantity: quantityReturned
+          });
+      });
+
+      console.log('Items Data:', itemsData);
+
+      fetch('/save-returned-items/', {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              'X-CSRFToken': getCookie('csrftoken')
+          },
+          body: JSON.stringify({ items: itemsData })
+      })
+          .then(response => response.json())
+          .then(data => {
+              if (data.status === 'success') {
+                  location.reload();
+              } else {
+                  alert('There was an error returning items.');
+              }
+          })
+          .catch(error => console.error('Error:', error));
+  });
 });
+
+
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+          }
+      }
+  }
+  return cookieValue;
+}
 
 </script>
 

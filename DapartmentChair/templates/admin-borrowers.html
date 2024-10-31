@@ -89,6 +89,73 @@
   background-color: #e0e0e0;            /* Set a light background for today */
   color: #000;                          /* Black text color for today */
 }
+
+.input-group .form-control {
+  padding-right: 3rem; /* Add padding to prevent overlap with button */
+}
+
+.input-group-append .btn {
+  border-left: none; /* Optional: Remove border between input and button */
+  padding: 0.3rem; /* Adjust padding for the button */
+}
+
+.input-group-append .btn i {
+  font-size: 1rem; /* Adjust icon size if needed */
+}
+
+
+
+
+
+/* Styling for a smaller image preview container */
+.image-preview {
+  width: 180px; /* Smaller width */
+  height: 110px; /* Smaller height */
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  background-color: #f7f7f7;
+}
+
+/* Hidden file input */
+#image-upload {
+  display: none;
+}
+
+/* Style for the label that acts as the button */
+#image-label {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  
+  color: #333; /* Default dark text */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  opacity: 1;
+  transition: opacity 0.3s ease, color 0.3s ease;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* Hover effect: show overlay and change text color to white */
+.image-preview:hover #image-label {
+  opacity: 1;
+  color: #2e7bff;
+}
+
+/* Style for the uploaded image */
+.image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+}
 </style>
 
 {% endblock %}
@@ -97,6 +164,8 @@
 {% block extra_js %}
 <!-- jQuery -->
 <script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
+
+
 <!-- Bootstrap -->
 <script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
 <!-- overlayScrollbars -->
@@ -112,6 +181,7 @@
 <!-- Include Pickadate JS from CDN -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pickadate.js/3.6.2/compressed/picker.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pickadate.js/3.6.2/compressed/picker.date.js"></script>
+
 
 <!-- Initialize Pickadate with Desired Format -->
 <script>
@@ -139,6 +209,7 @@
     }
 });
 </script>
+
 
 
 {% endblock %}
@@ -328,13 +399,20 @@
                     </div>
                     <div class="card-body">
                         <div class="basic-form">
-                            <form method="post">
+                            <form method="post" enctype="multipart/form-data">
                                 {% csrf_token %}
                                 <div class="form-row">
-                                    <div class="form-group col-md-6">
-                                        <label>Student ID</label>
+                                  <div class="form-group col-md-6">
+                                    <label>Student ID</label>
+                                    <div class="input-group">
                                         {{ form.student_id }}
+                                        <!-- Removed the search button -->
                                     </div>
+                                    
+                                </div>
+                                
+                                
+                                
                                     <div class="form-group col-md-6">
                                         <label>Name</label>
                                         {{ form.name }}
@@ -395,30 +473,48 @@
                                     </div>
                                 </div>
                                 
+                                <!-- <div id="image-preview" class="image-preview ml-3 mb-3">
+                                  <label for="image-upload" id="image-label">Upload Image</label>
+                                  <input type="file" name="upload_image" id="image-upload" accept="image/*" multiple onchange="previewImages(event)">
+
+                              </div> -->
                                 
                             
     
                                 <div class="form-row">
-                                    <div class="col-xl-6">
-                                       
-                                            <div class="card-body">
-                                                <div class="mb-2">
-                                                    <h4 class="card-title">Items</h4>
-                                                    <p>Select Item you want to borrow</p>
-                                                </div>
-                                                {{ form.item }}
-                                                <div class="mt-4">
-                                                    <label>Quantity</label>
-                                                    {{ form.quantity }}
-                                                </div>
-                                            </div>
-                                      
-                                    </div>
-                                    <div class="form-group col-md-6">
-                                        <label>Purpose for borrow</label>
-                                        {{ form.purpose }}
-                                    </div>
-                                </div>
+                                  <div class="col-xl-6">
+                                      <div class="card {% if selected_item_has_zero_quantity %}border border-danger{% endif %}" style="position: relative;" id="card-container">
+                                          <i class="fas fa-plus add-card" style="position: absolute; top: 10px; right: 10px; cursor: pointer; color: #007bff;"></i>
+                                          <div class="card-body">
+                                              <div class="mb-2">
+                                                  <h4 class="card-title">Items</h4>
+                                                  <br>
+                                                  <p>Select items you want to borrow</p>
+                                              </div>
+                                              <div id="items-container">
+                                                  <div class="item-entry">
+                                                      {{ form.item.label_tag }}
+                                                      {{ form.item }} <!-- Dropdown for selecting items -->
+                                                      <div class="mt-4">
+                                                          <label>Quantity</label>
+                                                          {{ form.quantity }}
+                                                      </div>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </div>
+                                  <div class="form-group col-md-6">
+                                      <label class="text-dark">Purpose for borrow</label>
+                                      {{ form.purpose }}
+                                  </div>
+                              </div>
+                              
+
+                      
+
+                              
+                              
                                 <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Save</button>
                             </form>
                         </div>
@@ -469,6 +565,74 @@
   </div>
 
 
+  
+  <script>
+    $(document).ready(function() {
+      $('input[name="student_id"]').on('keyup', function() {
+          const studentId = $(this).val(); // Get the student ID from the input field
+          
+          // Clear previous error messages
+          $('#error-message').remove();
+  
+          // Clear fields if the input is empty
+          if (studentId === "") {
+              clearFields(); // Function to clear all fields
+              return; // Exit the function early
+          }
+  
+          if (studentId) { // Only perform the AJAX request if there is input
+              $.ajax({
+                  url: "{% url 'search_borrow_request' %}", // URL of the search view
+                  data: {
+                      'student_id': studentId
+                  },
+                  success: function(data) {
+                      if (data.success) {
+                          // Populate the fields with the retrieved data
+                          $('input[name="name"]').val(data.name);
+                          $('input[name="course"]').val(data.course);
+                          $('select[name="year"]').val(data.year);
+                          $('input[name="email"]').val(data.email);
+                          $('input[name="phone"]').val(data.phone);
+                          $('input[name="borrower_type"][value="' + data.borrower_type + '"]').prop('checked', true);
+                          
+                          // Remove error message if found
+                          $('#error-message').remove();
+                      } else {
+                          // Clear fields if no record found
+                          clearFields();
+                          // Append error message directly below the input field
+                          $('#student_id').after('<span class="text-danger" id="error-message">' + data.error + '</span>');
+                      }
+                  },
+                  error: function(xhr) {
+                      // Clear fields on error
+                      clearFields();
+                      // Append error message directly below the input field
+                      $('#student_id').after('<span class="text-danger" id="error-message">' + xhr.responseJSON.error + '</span>');
+                  }
+              });
+          }
+      });
+  
+      function clearFields() {
+          $('input[name="name"]').val('');
+          $('input[name="course"]').val('');
+          $('select[name="year"]').val('');
+          $('input[name="email"]').val('');
+          $('input[name="phone"]').val('');
+          $('input[name="borrower_type"]').prop('checked', false);
+          $('input[name="other_borrower_type"]').val('');
+      }
+  });
+  
+
+
+    </script>
+    
+    
+    
+
 
   <script>
        // Get the radio buttons and the "Others" input field
@@ -494,6 +658,153 @@ teacherRadio.addEventListener('change', toggleOtherInput);
 
 // Initialize on page load
 toggleOtherInput();
+
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+  const originalCard = document.querySelector("#card-container");
+
+  function addCard() {
+      const newCard = originalCard.cloneNode(true);
+      
+      // Set up the close icon
+      const closeIcon = document.createElement("i");
+      closeIcon.classList.add("fas", "fa-times", "remove-card");
+      Object.assign(closeIcon.style, {
+          position: "absolute",
+          top: "10px",
+          left: "10px",
+          cursor: "pointer",
+          color: "#dc3545",
+      });
+      newCard.appendChild(closeIcon);
+
+      // Append the cloned card to the container
+      originalCard.parentNode.appendChild(newCard);
+
+      // Event listener to remove the card on close icon click
+      closeIcon.addEventListener("click", function () {
+          newCard.remove();
+      });
+
+      // Re-add the "Add Card" click event for the new card
+      newCard.querySelector(".add-card").addEventListener("click", addCard);
+  }
+
+  document.querySelector(".add-card").addEventListener("click", addCard);
+
+  // Form submission validation
+  const form = document.querySelector("form");
+  form.addEventListener("submit", async function (event) {
+      event.preventDefault(); // Prevent the form from submitting immediately
+      let hasErrors = false; // Reset errors before each validation check
+      const totalRequested = {}; // Track total requested quantities for each item
+
+      // Clear previous validation messages
+      clearValidationErrors();
+
+      // Validate each item entry
+      const itemEntries = document.querySelectorAll(".item-entry");
+
+      // Create promises to check available quantities
+      const validationPromises = Array.from(itemEntries).map(async (itemEntry) => {
+          const itemSelect = itemEntry.querySelector("select[name='item']");
+          const quantityInput = itemEntry.querySelector("input[name='quantity']");
+
+          const selectedItemId = itemSelect.value;
+          const requestedQuantity = parseInt(quantityInput.value, 10);
+
+          // Check if the selected item ID is valid and quantity is positive
+          if (selectedItemId && requestedQuantity > 0) {
+              // Accumulate requested quantities for the same item
+              if (!totalRequested[selectedItemId]) {
+                  totalRequested[selectedItemId] = 0;
+              }
+              totalRequested[selectedItemId] += requestedQuantity;
+
+              // Fetch available quantity for the item
+              const availableQuantity = await getAvailableQuantity(selectedItemId);
+
+              // Check if requested quantity exceeds available quantity
+              if (totalRequested[selectedItemId] > availableQuantity) {
+                  hasErrors = true; // Set the error flag
+                  displayValidationError(itemEntry, `Not enough item available. Available: ${availableQuantity}`);
+              } else {
+                  removeValidationError(itemEntry); // Remove previous error if any
+              }
+          } else {
+              hasErrors = true; // Set the error flag for invalid inputs
+              displayValidationError(itemEntry, 'Please select an item and enter a valid quantity.');
+          }
+      });
+
+      // Wait for all validation checks to complete
+      await Promise.all(validationPromises);
+
+      // Only submit the form if there are no errors
+      if (!hasErrors) {
+          form.submit();
+      }
+  });
+
+  // Helper function to clear previous validation messages
+  function clearValidationErrors() {
+      document.querySelectorAll(".text-danger").forEach(errorMsg => errorMsg.remove());
+      document.querySelectorAll('.card.border-danger').forEach(card => card.classList.remove('border-danger'));
+  }
+
+  // Helper function to display validation error on an item entry
+  function displayValidationError(itemEntry, message) {
+      itemEntry.closest('.card').classList.add('border-danger');
+      const errorMsg = document.createElement('div');
+      errorMsg.classList.add('text-danger');
+      errorMsg.textContent = message;
+      itemEntry.appendChild(errorMsg);
+  }
+
+  // Helper function to remove validation error from an item entry
+  function removeValidationError(itemEntry) {
+      const existingErrorMsg = itemEntry.querySelector('.text-danger');
+      if (existingErrorMsg) existingErrorMsg.remove();
+      itemEntry.closest('.card').classList.remove('border-danger');
+  }
+
+  // Function to retrieve the available quantity of an item
+  async function getAvailableQuantity(itemId) {
+      // Replace with actual AJAX call or logic to get the current available quantities
+      return 10; // Example value; replace this with your actual logic
+  }
+});
+
+
+
+
+
+
+
+function previewImages(event) {
+  const previewContainer = document.getElementById('image-preview');
+  previewContainer.innerHTML = ''; // Clear previous previews
+  const files = event.target.files;
+
+  Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.classList.add('preview-image');
+          img.style.width = '100px'; // Adjust the size as needed
+          img.style.marginRight = '10px'; // Spacing between images
+          previewContainer.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+  });
+}
+
+
+
+
 
         
   </script>
