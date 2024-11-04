@@ -979,7 +979,7 @@ $(document).ready(function () {
             if (result.isConfirmed) {
                 // Proceed to update the user status via AJAX
                 $.ajax({
-                    url: '{% url "update-user-status" %}',  // Use the Django `url` template tag to ensure the correct URL
+                    url: '{% url "admin-update-user-status" %}',  // Use the Django `url` template tag to ensure the correct URL
                     type: 'POST',
                     data: {
                         'user_id': userId,

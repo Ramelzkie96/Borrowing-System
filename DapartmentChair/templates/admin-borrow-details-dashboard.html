@@ -1,0 +1,482 @@
+{% extends "admin-base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+<!-- Include Pickadate CSS from CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pickadate.js/3.6.2/compressed/themes/default.css">
+<link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/pickadate.js/3.6.2/compressed/themes/default.date.css">
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/css/tempusdominus-bootstrap-4.min.css">
+{% endblock %}
+
+
+{% block extra_js %}
+<!-- jQuery -->
+<script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
+
+
+<!-- Bootstrap -->
+<script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<!-- overlayScrollbars -->
+<script src="{% static 'plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js' %}"></script>
+<!-- AdminLTE App -->
+<script src="{% static 'dist/js/adminlte.js' %}"></script>
+<!-- PAGE PLUGINS -->
+<!-- jQuery Mapael -->
+<script src="{% static 'plugins/jquery-mousewheel/jquery.mousewheel.js' %}"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<!-- Include Pickadate JS from CDN -->
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment/min/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/js/tempusdominus-bootstrap-4.min.js"></script>
+<!-- date picker -->
+<script>
+  $(function () {
+    $('#reservationdate').datetimepicker({
+        format: 'D MMMM, YYYY' // Custom format: 1 November, 2024
+    });
+
+    // Optional: Open the date picker when the input is focused
+    $('.datetimepicker-input').on('focus', function() {
+        $(this).siblings('.input-group-append').click();
+    });
+});
+
+
+</script>
+
+
+
+{% endblock %}
+
+
+
+{% block content %}
+
+<div class="wrapper">
+
+    <!-- Preloader -->
+    <div class="preloader flex-column justify-content-center align-items-center">
+        <img class="animation__wobble" src="{% static 'dist/img/pit_logo.png' %}" alt="AdminLTELogo" height="60"
+            width="60">
+    </div>
+
+
+
+    <!-- Main Sidebar Container -->
+    <aside class="main-sidebar sidebar-dark-primary elevation-4">
+        <!-- Brand Logo -->
+        <a href="index3.html" class="brand-link">
+            <img src="{% static 'dist/img/pit_logo.png' %}" alt="AdminLTE Logo"
+                class="brand-image img-circle elevation-3" style="opacity: .8">
+            <span class="brand-text font-weight-light">IT CHAIRMAN</span>
+        </a>
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Sidebar user panel (optional) -->
+            <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+                <div class="image">
+                    {% if request.user.profile_picture %}
+                    <img src="{{ request.user.profile_picture.url }}" class="img-circle elevation-2"
+                        alt="{{ request.user.username }}'s profile picture">
+                    {% else %}
+                    <img src="{% static 'images/users.jpg' %}" class="img-circle elevation-2"
+                        alt="Default profile picture">
+                    {% endif %}
+                </div>
+                <div class="info">
+                    <a href="{% url 'admin-dashboard' %}" class="d-block">{{ request.user.username }}</a>
+                </div>
+            </div>
+
+
+
+
+
+
+
+            <!-- Sidebar Menu -->
+            <nav class="mt-2">
+                <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu"
+                    data-accordion="false">
+                    <li class="nav-header">Main Menu</li>
+                    <li class="nav-item">
+                        <a href="{% url 'admin-dashboard' %}" class="nav-link active">
+                            <i class="nav-icon fas fa-tachometer-alt"></i>
+                            <p>
+                                Dashboard
+                            </p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'admin-users' %}" class="nav-link">
+                            <i class="nav-icon fas fa-users"></i>
+                            <p>
+                                Users
+                            </p>
+                        </a>
+                    </li>
+                    <li class="nav-header">Items</li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-box"></i>
+                            <p>
+                                Manage Items
+                                <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="{% url 'admin-add-item' %}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Add Item</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{% url 'admin-item-record' %}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Item Records</p>
+                                </a>
+                            </li>
+
+                        </ul>
+                    </li>
+                    <li class="nav-item "> <!--pang hover menu-open-->
+                        <a href="{% url 'admin-borrowers' %}" class="nav-link">
+                            <i class="nav-icon fas fa-plus"></i>
+                            <p>
+                                Add Borrow Item
+                            </p>
+                        </a>
+                    </li>
+                    <li class="nav-item ">
+                        <a href="{% url 'admin-borrow-record' %}" class="nav-link">
+                            <i class="nav-icon fas fa-clipboard"></i>
+                            <p>
+                                Borrowed Records
+                            </p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'admin-returned-record' %}" class="nav-link">
+                            <i class="nav-icon fa-solid fa-arrow-rotate-left"></i>
+                            <p>
+                                Returned Records
+                            </p>
+                        </a>
+                    </li>
+
+                    <li class="nav-header">Borrowers Reservation</li>
+                    <li class="nav-item">
+                        <a href="{% url 'admin-student-reservation' %}" class="nav-link">
+                            <i class="nav-icon fas fa-list"></i>
+                            <p>
+                                Reservation List
+                            </p>
+                        </a>
+                    </li>
+
+
+                    <li class="nav-header">Accounts</li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-users-gear"></i>
+                            <p>
+                                Manage accounts
+                                <i class="right fas fa-angle-left"></i>
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <li class="nav-item">
+                                <a href="{% url 'admin-change-profile' %}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Change Profile</p>
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a href="{% url 'admin-change-password' %}" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Change Password</p>
+                                </a>
+                            </li>
+                        </ul>
+                    <li class="nav-item">
+                        <a href="{% url 'admin-logout' %}" class="nav-link">
+                            <i class="nav-icon fa-solid fa-right-from-bracket"></i>
+                            <p>
+                                Logout
+                            </p>
+                        </a>
+                    </li>
+
+                    </li>
+                </ul>
+            </nav>
+            <!-- /.sidebar-menu -->
+        </div>
+        <!-- /.sidebar -->
+    </aside>
+
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+
+        <!-- /.content-header -->
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="container-fluid">
+
+                <!-- /.row -->
+
+                <div class="row">
+                    <div class="container-fluid">
+
+                        <div class="card mt-5"
+                            style="border-top: 4px solid #593bdb; box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 4px;">
+                            <div class="card-header">
+
+                                <h4 class="card-title" style="font-size: 30px; font-weight: 700;">Borrower Details</h4>
+                            </div>
+                            <div class="card-body">
+                                <form id="editBorrowerForm" method="post" action="{% url 'admin-update_borrower_status_dashboard' %}">
+                                    {% csrf_token %}
+
+                                    <!-- Hidden field to pass borrow_request_id to the view -->
+                                   
+                                    <div class="row mb-1">
+                                        <div class="col-4">
+                                            <label class="font-weight-bold" style="font-size: 15px;">Student ID:</label>
+                                            <p id="modal-student-id" style="font-size: 15px;">{{ student_id }}</p>
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="font-weight-bold" style="font-size: 15px;">Name:</label>
+                                            <p id="modal-name" style="font-size: 15px;">{{ name }}</p>
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="font-weight-bold" style="font-size: 15px;">Date Borrow:</label>
+                                            <p id="modal-date-borrow" style="font-size: 15px;">{{ date_borrow }}</p>
+                                        </div>
+                                    </div>
+                            
+                                    <div class="row mb-1">
+                                        <div class="col-3">
+                                            <p style="font-size: 15px; font-weight: 800;">Items:</p>
+                                        </div>
+                                        <div class="col-3">
+                                            <p style="font-size: 15px; font-weight: 800;">Quantity:</p>
+                                        </div>
+                                        <div class="col-3">
+                                            <p style="font-size: 15px; font-weight: 800;">Date Return:</p>
+                                        </div>
+                                        <div class="col-3">
+                                            <p style="font-size: 15px; font-weight: 800;">Return:</p>
+                                        </div>
+                                    </div>
+                            
+                                    <!-- Items List -->
+<div id="borrow-items-list">
+    {% for borrow_request_with_items in borrow_requests_with_items %}
+        {% for item in borrow_request_with_items.items %}
+        <input type="hidden" name="borrow_request_id" value="{{ borrow_request_with_items.borrow_request.id }}">
+            <div class="row mb-1">
+                <div class="col-3 item-text">
+                    <p {% if item.is_returned %}style="text-decoration: line-through;"{% endif %}>
+                        {% if borrow_request_with_items.borrow_request.status != "Returned" %}{{ forloop.counter }}. {% endif %}{{ item.item.name }}
+                    </p>
+                </div>
+                <div class="col-3 quantity-text">
+                    <p {% if item.is_returned %}style="text-decoration: line-through;"{% endif %}>
+                        {{ item.quantityy }}
+                    </p>
+                </div>
+                
+                <div class="col-3">
+                    {% if item.is_returned %}
+                    <p>{{ item.date_return|date:"F j, Y" }}</p>
+                    {% else %}
+                    <input type="date" class="form-control date-input" style="width: 200px;"
+                           {% if item.is_returned %} disabled {% endif %}
+                           value="{{ item.date_return|default:'' }}">
+                    {% endif %}
+                </div>
+                
+                <div class="col-3">
+                    {% if item.is_returned %}
+                    <button type="button" class="btn btn-success btn-sm" disabled>
+                        Done
+                    </button>
+                    {% else %}
+                    <button type="button" class="btn btn-outline-success check-button btn-sm" 
+                            data-item-id="{{ item.item.id }}" 
+                            data-borrow-request-item-id="{{ item.id }}" 
+                            onclick="handleReturn(this)">
+                        <i class="fas fa-check"></i>
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    {% endfor %}
+</div>
+                                    
+                                    
+                                    
+                                    
+                            
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" onclick="window.history.back();">Back</button>
+                                        <button type="submit" class="btn btn-primary save-btn" id="save-button">Save</button>
+
+
+
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    </div>
+                </div>
+                <!-- /.row -->
+
+
+                <!-- /.row -->
+            </div><!--/. container-fluid -->
+        </section>
+        <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+
+    <!-- Control Sidebar -->
+    <aside class="control-sidebar control-sidebar-dark">
+        <!-- Control sidebar content goes here -->
+    </aside>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check all items' return status and restore save button state on page load
+        checkAllReturned();
+        restoreSaveButtonState();
+    });
+    
+    function handleReturn(button) {
+        const itemId = button.getAttribute("data-item-id");
+        const borrowRequestItemId = button.getAttribute("data-borrow-request-item-id");
+        const row = button.closest('.row');
+        const dateInput = row.querySelector('.date-input');
+    
+        if (!dateInput.value) {
+            showError(dateInput, "Please select a return date before marking as returned.");
+            return;
+        }
+    
+        fetch(`/admin-return-item/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": "{{ csrf_token }}"
+            },
+            body: JSON.stringify({
+                item_id: itemId,
+                borrow_request_item_id: borrowRequestItemId,
+                date_return: dateInput.value
+            })
+        }).then(response => response.json())
+          .then(data => {
+              if (data.success) {
+                  // Disable the button and input to mark as returned
+                  button.disabled = true;
+                  dateInput.disabled = true;
+    
+                  // Change button style and text
+                  button.classList.remove('btn-outline-success');
+                  button.classList.add('btn-success');
+                  button.textContent = 'Done';
+    
+                  // Add strikethrough to indicate return
+                  row.querySelector('.item-text p').style.textDecoration = "line-through";
+                  row.querySelector('.quantity-text p').style.textDecoration = "line-through";
+    
+                  // Format the date
+                  const date = new Date(dateInput.value);
+                  const options = { day: 'numeric', month: 'long', year: 'numeric' };
+                  const formattedDate = date.toLocaleDateString('en-US', options); // e.g., "26 February, 2025"
+    
+                  // Create a new paragraph element to show the return date
+                  const returnDateParagraph = document.createElement("p");
+                  returnDateParagraph.textContent = formattedDate; // Use the formatted return date
+    
+                  // Insert the new return date paragraph into the correct column
+                  const dateColumn = row.querySelector('.col-3:nth-child(3)');
+                  dateColumn.innerHTML = ""; // Clear the previous input
+                  dateColumn.appendChild(returnDateParagraph); // Add the formatted return date paragraph
+    
+                  // Check if all items are returned
+                  checkAllReturned();
+              } else {
+                  showError(dateInput, "Error processing return. Please try again.");
+              }
+          });
+    }
+    
+    function showError(dateInput, message) {
+        const errorSpan = document.createElement("span");
+        errorSpan.className = "error-message";
+        errorSpan.style.color = "red";
+        errorSpan.style.fontSize = "small";
+        errorSpan.textContent = message;
+    
+        // Insert the error message right below the date input
+        dateInput.insertAdjacentElement("afterend", errorSpan);
+    }
+    
+    function checkAllReturned() {
+        const allCheckButtons = document.querySelectorAll('.check-button');
+        const saveButton = document.querySelector('.save-btn');
+    
+        // Check if all check buttons are disabled
+        const allReturned = Array.from(allCheckButtons).every(button => button.disabled);
+    
+        // Enable the save button if all items are returned
+        if (allReturned) {
+            saveButton.disabled = false;
+            localStorage.setItem('saveButtonEnabled', 'true'); // Store state in local storage
+        } else {
+            saveButton.disabled = true;
+            localStorage.setItem('saveButtonEnabled', 'false'); // Store state in local storage
+        }
+    }
+    
+    function restoreSaveButtonState() {
+        const saveButton = document.querySelector('.save-btn');
+        const isEnabled = localStorage.getItem('saveButtonEnabled') === 'true';
+        saveButton.disabled = !isEnabled; // Set the button state based on local storage
+    }
+    
+    
+    
+    </script>
+
+
+{% endblock content %}

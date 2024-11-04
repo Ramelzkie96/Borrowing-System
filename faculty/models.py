@@ -52,16 +52,14 @@ class BorrowRequest(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
-    quantity = models.PositiveIntegerField()
     purpose = models.TextField(null=True, blank=True)
     status = models.CharField(max_length=20, null=True, blank=True)
     note = models.CharField(max_length=200, null=True, blank=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     borrower_type = models.CharField(max_length=100, null=True)
-    handled_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='handled_requests', on_delete=models.CASCADE, null=True, blank=True)
     upload_image = models.ImageField(upload_to='borrow_upload/', null=True, blank=True)
     
-    # New field to store the timestamp
+    # New field to store the timestamp 
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -88,7 +86,14 @@ class BorrowRequest(models.Model):
 class BorrowRequestItem(models.Model):
     borrow_request = models.ForeignKey(BorrowRequest, related_name='items', on_delete=models.CASCADE)
     item = models.ForeignKey(facultyItem, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField()  # Quantity of this specific item
+    quantityy = models.PositiveIntegerField()
+    date_return = models.DateField(null=True, blank=True)
+    is_returned = models.BooleanField(default=False)  # New field to track return status
+    handled_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='handled_items', on_delete=models.CASCADE, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.item.name} ({self.quantityy})"
+
  
 
 

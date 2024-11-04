@@ -231,115 +231,61 @@
             <!-- Dynamic messages end -->
 
 
-            <!-- Modal for Viewing Item -->
-<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header" style="border-bottom: 2px solid #593bdb;">
-                <h5 class="modal-title" id="exampleModalCenterTitle" style="font-size: 25px;">View Item</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group row" style="margin-top: 1px;">
-                    <label class="col-form-label text-md-left font-weight-bold col-12 col-md-4 col-lg-4 text-dark" style="font-size: 15px;">Student ID:</label>
-                    <p id="modal-student-id" class="text-dark mt-1" style="font-size: 15px; margin-left: 20px;"></p>
-                </div>
-                <div class="form-group row" style="margin-top: -20px;">
-                    <label class="col-form-label text-md-left font-weight-bold col-12 col-md-4 col-lg-4 text-dark" style="font-size: 15px;">Name:</label>
-                    <p id="modal-name" class="text-dark mt-1" style="font-size: 15px; margin-left: 20px;"></p>
-                </div>
-                <div class="form-group row" style="margin-top: -20px;">
-                    <label class="col-form-label text-md-left font-weight-bold col-12 col-md-4 col-lg-4 text-dark" style="font-size: 15px;">Course:</label>
-                    <p id="modal-course" class="text-dark mt-1" style="font-size: 15px; margin-left: 20px;"></p>
-                </div>
-                <div class="form-group row" style="margin-top: -20px;">
-                    <label class="col-form-label text-md-left font-weight-bold col-12 col-md-4 col-lg-4 text-dark" style="font-size: 15px;">Year:</label>
-                    <p id="modal-year" class="text-dark mt-1" style="font-size: 15px; margin-left: 20px;"></p>
-                </div>
-                <div class="form-group row" style="margin-top: -20px;">
-                    <label class="col-form-label text-md-left font-weight-bold col-12 col-md-4 col-lg-4 text-dark" style="font-size: 15px;">Email:</label>
-                    <p id="modal-email" class="text-dark mt-1" style="font-size: 15px; margin-left: 20px;"></p>
-                </div>
-                <div class="form-group row" style="margin-top: -20px;">
-                    <label class="col-form-label text-md-left font-weight-bold col-12 col-md-4 col-lg-4 text-dark" style="font-size: 15px;">Item:</label>
-                    <p id="modal-item" class="text-dark mt-1" style="font-size: 15px; margin-left: 20px;"></p>
-                </div>
-                <div class="form-group row" style="margin-top: -20px;">
-                    <label class="col-form-label text-md-left font-weight-bold col-12 col-md-4 col-lg-4 text-dark" style="font-size: 15px;">Quantity:</label>
-                    <p id="modal-quantity" class="text-dark mt-1" style="font-size: 15px; margin-left: 20px;"></p>
-                </div>
-                <div class="form-group row" style="margin-top: -20px;">
-                    <label class="col-form-label text-md-left font-weight-bold col-12 col-md-4 col-lg-4 text-dark" style="font-size: 15px;">Date Returned:</label>
-                    <p id="modal-date-borrow" class="text-dark mt-1" style="font-size: 15px; margin-left: 20px;"></p>
-                </div>
-                <div class="form-group row" style="margin-top: -20px;">
-                    <label class="col-form-label text-md-left font-weight-bold col-12 col-md-4 col-lg-4 text-dark" style="font-size: 15px;">Status:</label>
-                    <p id="modal-status" class="text-dark mt-1" style="font-size: 15px; margin-left: 20px;"></p>
-                </div>
-                <div class="form-group row" style="margin-top: -20px;">
-                    <label class="col-form-label text-md-left font-weight-bold col-12 col-md-4 col-lg-4 text-dark" style="font-size: 15px;">Purpose:</label>
-                    <p id="modal-purpose" class="text-dark mt-1" style="font-size: 15px; margin-left: 20px;"></p>
-                </div>
-            </div>
-            <div class="modal-footer" style="margin-top: -20px;">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-
-            <!-- return modal -->
-            <div class="modal fade custom-modal" id="modalGrid">
-                <div class="modal-dialog modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                        <form id="returnItemForm" method="POST" action="{% url 'return-item' %}">
-                            {% csrf_token %}
-                            <input type="hidden" name="request_id" id="modalRequestId">
-                            <div class="modal-header">
-                                <h5 class="modal-title">For Defect Item</h5>
-                                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="container-fluid">
-                                    <div class="row mb-3">
-                                        <label class="col-sm-4 col-form-label text-dark">Date Returned</label>
-                                        <div class="col-sm-8">
-                                            <div class="input-group">
-                                                <input name="date_return" id="dateReturn" class="form-control datepicker-default cal" style="border: 1px solid #474747;">
-                                                <i class="fas fa-calendar-alt" style="position: absolute; right: 10px; top: 10px; color: #333;"></i>
+                            <!-- Modal for Viewing Item -->
+                            <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 800px;">
+                                    <div class="modal-content">
+                                        <div class="modal-header" style="border-bottom: 2px solid #593bdb;">
+                                            <h5 class="modal-title" id="exampleModalCenterTitle" style="font-size: 25px; font-weight: 700;">Borrower Details</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                            </button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="row mb-1">
+                                                <div class="col-3">
+                                                    <label class="font-weight-bold text-dark" style="font-size: 15px;">Student ID:</label>
+                                                    <p id="modal-student-id" style="font-size: 15px; color: #474747;"></p>
+                                                </div>
+                                                <div class="col-3">
+                                                    <label class="font-weight-bold text-dark" style="font-size: 15px;">Name:</label>
+                                                    <p id="modal-name" style="font-size: 15px; color: #474747;"></p>
+                                                </div>
+                                                <div class="col-3">
+                                                    <label class="font-weight-bold text-dark" style="font-size: 15px;">Course:</label>
+                                                    <p id="modal-course" style="font-size: 15px; color: #474747;"></p>
+                                                </div>
+                                                <div class="col-3">
+                                                    <label class="font-weight-bold text-dark" style="font-size: 15px;">Date Borrow:</label>
+                                                    <p id="modal-date-borrow" style="font-size: 15px; color: #474747;"></p>
+                                                </div>
+                                            </div>
+                            
+                                            <div class="row">
+                                                <div class="col-4">
+                                                    <p style="font-size: 15px; font-weight: 800;" class="text-dark font-weight-bold">Items:</p>
+                                                </div>
+                                                <div class="col-4">
+                                                    <p style="font-size: 15px; font-weight: 800;" class="text-dark font-weight-bold">Quantity:</p>
+                                                </div>
+                                                <div class="col-4">
+                                                    <p style="font-size: 15px; font-weight: 800;" class="text-dark font-weight-bold">Date Return:</p>
+                                                </div>
+                                             
+                            
+                                              
+                                               
+                                            </div>
+                            
+                                            <div id="borrow-items-list">
+                                                <!-- Dynamic borrow item list will be injected here -->
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="row mb-3">
-                                        <label class="col-sm-4 col-form-label text-dark">Status</label>
-                                        <div class="col-sm-8">
-                                            <select class="form-select form-control" name="status" id="status" style="border: 1px solid #474747;">
-                                                <option selected disabled>----</option>
-                                                <option value="Returned">Returned</option>
-                                                <option value="Returned/Defect Item">Returned/Defect Item</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="row">
-                                        <label class="col-sm-4 col-form-label text-dark">Note</label>
-                                        <div class="col-sm-8">
-                                            <textarea name="note" id="note" class="form-control" style="border: 1px solid #474747;"></textarea>
-                                        </div>
+                            
+                                     
                                     </div>
                                 </div>
                             </div>
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Save changes</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
 
 
             
@@ -394,11 +340,10 @@
                                                 <th scope="col">Name</th>
                                                 <th scope="col">Course</th>
                                                 <th scope="col">Year</th>
-                                                <th scope="col">Item</th>
-                                                <th scope="col">Quantity</th>
+                                                <th scope="col">Phone</th>
+                                                <th scope="col">Date Borrow</th>
                                                 <th scope="col">Time Span</th>
                                                 <th scope="col">Status</th>
-                                                <th scope="col">Borrowers Report</th>
                                                 <th scope="col" style="width: 80px;">Action</th>
                                             </tr>
                                         </thead>
@@ -410,8 +355,8 @@
                                                         <td>{{ request.name }}</td>
                                                         <td>{{ request.course }}</td>
                                                         <td>{{ request.year }}</td>
-                                                        <td>{{ request.content_object.name }}</td>
-                                                        <td>{{ request.quantity }}</td>
+                                                        <td>{{ request.phone }}</td>
+                                                        <td>{{ request.date_borrow }}</td>
                                                         <td>{{ request.time_ago }}</td>
                                                         <td style="display: none;">{{ request.date_return }}</td>
                                                         <td>
@@ -423,55 +368,18 @@
                                                                 <div class="badge badge-danger">{{ request.status }}</div>
                                                             {% endif %}
                                                         </td>
-                                                        <td class="text-center">
-                                                            <a class="btn btn-secondary text-white" href="{% url 'borrower-report' request.student_id %}">
-                                                                <i class="fa-solid fa-file-pdf"></i>
-                                                            </a>
-                                                        </td>
                                                         <td style="text-align: center; vertical-align: middle;">
-                                                            {% if request.status == "Returned" %}
-                                                                <button type="button" class="btn btn-secondary view-item-btn" data-toggle="modal" data-target="#exampleModalCenter"
-                                                                    data-student-id="{{ request.student_id }}"
-                                                                    data-name="{{ request.name }}"
-                                                                    data-course="{{ request.course }}"
-                                                                    data-year="{{ request.year }}"
-                                                                    data-email="{{ request.email }}"
-                                                                    data-item="{{ request.content_object.name }}"
-                                                                    data-quantity="{{ request.quantity }}"
-                                                                    data-date="{{ request.date_return }}"
-                                                                    data-purpose="{{ request.purpose }}"
-                                                                    data-status="{{ request.status }}">
-                                                                    <i class="fas fa-eye"></i>
-                                                                </button>
-                                                            {% elif request.status == "Returned/Defect Item" %}
-                                                                <div class="dropdown">
-                                                                    <a class="btn btn-link font-24 p-0 line-height-1 no-arrow dropd" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
-                                                                        <img src="{% static 'images/mores.png' %}" alt="" width="30" height="30">
-                                                                    </a>
-                                                                    <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
-                                                                        <button type="button" class="dropdown-item view-item-btn" data-toggle="modal" data-target="#exampleModalCenter"
-                                                                            data-student-id="{{ request.student_id }}"
-                                                                            data-name="{{ request.name }}"
-                                                                            data-course="{{ request.course }}"
-                                                                            data-year="{{ request.year }}"
-                                                                            data-email="{{ request.email }}"
-                                                                            data-item="{{ request.content_object.name }}"
-                                                                            data-quantity="{{ request.quantity }}"
-                                                                            data-date="{{ request.date_return }}"
-                                                                            data-purpose="{{ request.purpose }}"
-                                                                            data-status="{{ request.status }}">
-                                                                            <i class="fas fa-eye"></i>&nbsp; View
-                                                                        </button>
-                                                                        <button type="button" class="dropdown-item return-item-btn" data-toggle="modal" data-target="#modalGrid"
-                                                                            data-request-id="{{ request.id }}"
-                                                                            data-date="{{ request.date_return }}"
-                                                                            data-status="{{ request.status }}"
-                                                                            data-note="{{ request.note }}">
-                                                                            <i class="fa-solid fa-rotate-left"></i>&nbsp; For Defect Item
-                                                                        </button>
-                                                                    </div>
-                                                                </div>
-                                                            {% endif %}
+                                                        
+                                                            <button type="button" class="btn btn-secondary view-item-btn" data-toggle="modal" data-target="#exampleModalCenter"
+                                                            data-request-id="{{ request.id }}"
+                                                            data-student-id="{{ request.student_id }}"
+                                                            data-name="{{ request.name }}"
+                                                            data-course="{{ request.course }}"
+                                                            data-date="{{ request.date_borrow }}">
+                                                            
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                          
                                                         </td>
                                                     </tr>
                                                 {% endfor %}
@@ -558,22 +466,7 @@
 
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            var editButtons = document.querySelectorAll('.edit-item-btn');
-            
-            editButtons.forEach(function(button) {
-                button.addEventListener('click', function() {
-                    var itemId = this.getAttribute('data-id');
-                    var itemName = this.getAttribute('data-name');
-                    var itemQuantity = this.getAttribute('data-quantity');
-    
-                    // Set the modal input values
-                    document.querySelector('#exampleModalCenter input[name="item_id"]').value = itemId;
-                    document.querySelector('#exampleModalCenter input[name="name"]').value = itemName;
-                    document.querySelector('#exampleModalCenter input[name="quantity"]').value = itemQuantity;
-                });
-            });
-        });
+ 
 
         function updateShowEntries(value) {
     const urlParams = new URLSearchParams(window.location.search);
@@ -690,59 +583,10 @@ function removeNoRecordRow() {
 }
 
 
-// viewing modal
-document.addEventListener('DOMContentLoaded', function () {
-    const viewItemButtons = document.querySelectorAll('.view-item-btn');
-
-    viewItemButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            const studentId = button.getAttribute('data-student-id');
-            const name = button.getAttribute('data-name');
-            const course = button.getAttribute('data-course');
-            const year = button.getAttribute('data-year');
-            const email = button.getAttribute('data-email');
-            const item = button.getAttribute('data-item');
-            const quantity = button.getAttribute('data-quantity');
-            const date = button.getAttribute('data-date');
-            const purpose = button.getAttribute('data-purpose');
-            const status = button.getAttribute('data-status');
-
-            document.getElementById('modal-student-id').innerText = studentId;
-            document.getElementById('modal-name').innerText = name;
-            document.getElementById('modal-course').innerText = course;
-            document.getElementById('modal-year').innerText = year;
-            document.getElementById('modal-email').innerText = email;
-            document.getElementById('modal-item').innerText = item;
-            document.getElementById('modal-quantity').innerText = quantity;
-            document.getElementById('modal-date-borrow').innerText = date;
-            document.getElementById('modal-purpose').innerText = purpose;
-            document.getElementById('modal-status').innerText = status;
-        });
-    });
-});
 
 
 
-// date return
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.return-item-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const requestId = this.getAttribute('data-request-id');
-            const date = this.getAttribute('data-date');
-            const status = this.getAttribute('data-status');
-            const note = this.getAttribute('data-note');
 
-            // Populate modal fields
-            document.getElementById('modalRequestId').value = requestId;
-            document.getElementById('dateReturn').value = date;
-            document.getElementById('status').value = status;
-            document.getElementById('note').value = note;
-
-            // Remove error-border class if previously added
-            document.getElementById('dateReturn').classList.remove('error-border');
-        });
-    });
-});
 
 
 
@@ -849,6 +693,65 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
+
+
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Select all buttons with the 'view-item-btn' class
+        const viewButtons = document.querySelectorAll('.view-item-btn');
+
+        viewButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const requestId = button.getAttribute('data-request-id');
+                const studentId = button.getAttribute('data-student-id');
+                const name = button.getAttribute('data-name');
+                const course = button.getAttribute('data-course');
+                const dateBorrow = button.getAttribute('data-date');
+
+                // Populate modal fields
+                document.getElementById('modal-student-id').textContent = studentId;
+                document.getElementById('modal-name').textContent = name;
+                document.getElementById('modal-course').textContent = course;
+                document.getElementById('modal-date-borrow').textContent = dateBorrow;
+
+                // Clear previous items
+                const borrowItemsList = document.getElementById('borrow-items-list');
+                borrowItemsList.innerHTML = '';
+
+                // Fetch items related to this borrow request using Fetch API
+                fetch(`/fetch_borrow_request_items/?request_id=${requestId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.items && data.items.length > 0) {
+                            data.items.forEach((item, index) => {
+                                const itemRow = document.createElement('div');
+                                itemRow.classList.add('row', 'mb-1');
+
+                                itemRow.innerHTML = `
+                                    <div class="col-4" style="color: #474747;">${index + 1}. ${item.item_name}</div>
+                                    <div class="col-4" style="color: #474747;">${item.quantity}</div>
+                                    <div class="col-4" style="color: #474747;">${item.date_return}</div>
+                                `;
+                                borrowItemsList.appendChild(itemRow);
+                            });
+                        } else {
+                            borrowItemsList.innerHTML = '<div class="row mb-1"><div class="col-12">No items found.</div></div>';
+                        }
+                    })
+                    .catch(() => {
+                        borrowItemsList.innerHTML = '<div class="row mb-1"><div class="col-12">Error loading items.</div></div>';
+                    });
+            });
+        });
+    });
+
 
 
 

@@ -258,20 +258,20 @@
                             <div class="form-row">
                                 <div class="form-group col-md-2">
                                     <label class="text-dark">
-                                        <input type="radio" name="borrower_type" value="Student" id="student_radio" style="width: 20px; height: 20px;">&nbsp;
+                                        <input type="radio" name="borrower_type" value="Student" id="student_radio" style="width: 20px; height: 20px;" onclick="clearOtherBorrowerType()">&nbsp;
                                         Student
                                     </label>
                                 </div>
                                 <div class="form-group col-md-2">
                                     <label class="text-dark">
-                                        <input type="radio" name="borrower_type" value="Teacher" id="teacher_radio" style="width: 20px; height: 20px;">&nbsp;
+                                        <input type="radio" name="borrower_type" value="Teacher" id="teacher_radio" style="width: 20px; height: 20px;" onclick="clearOtherBorrowerType()">&nbsp;
                                         Teacher
                                     </label>
                                 </div>
                                 <div class="form-group col-md-2">
                                     <label class="text-dark">
                                         Others:
-                                        <input type="text" name="other_borrower_type" id="other_borrower_type" style="width: 130px; height: 20px; border-top: 1px solid white; border-right: 1px solid white; border-left: 1px solid white;">&nbsp;
+                                        <input type="text" class="text-dark" name="other_borrower_type" id="other_borrower_type" style="width: 130px; height: 20px; border-top: 1px solid white; border-right: 1px solid white; border-left: 1px solid white;" oninput="checkOtherBorrowerType()">&nbsp;
                                     </label>
                                 </div>
                             </div>
@@ -281,16 +281,23 @@
 
                             <div class="form-row">
                                 <div class="col-xl-6">
-                                    <div class="card {% if selected_item_has_zero_quantity %}border border-danger{% endif %}" style="box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;">
+                                    <div class="card {% if selected_item_has_zero_quantity %}border border-danger{% endif %}"  id="card-container" style="box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px; position: relative;">
+                                        <i class="fas fa-plus add-card" style="position: absolute; top: 10px; right: 10px; cursor: pointer; color: #007bff;"></i>
                                         <div class="card-body">
                                             <div class="mb-2">
-                                                <h4 class="card-title">Items</h4>
-                                                <p>Select Item you want to borrow</p>
+                                                <h4 class="card-title text-dark">Items</h4>
+                                                <br>
+                                                <p class="text-dark">Select items you want to borrow</p>
                                             </div>
-                                            {{ form.item }}
-                                            <div class="mt-4">
-                                                <label class="text-dark">Quantity</label>
-                                                {{ form.quantity }}
+                                            <div id="items-container">
+                                                <div class="item-entry">
+                                                    <label class="text-dark">Item:</label>
+                                                    {{ form.item }} <!-- Dropdown for selecting items -->
+                                                    <div class="mt-4">
+                                                      <label class="text-dark">Quantity</label>
+                                                      <input type="number" class="form-control col-md-3"  name="quantities[]" min="1" value="1" required>
+                                                  </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -326,6 +333,240 @@
         </div>
     </div>
 
+
+
+<!-- automatic fill if student id exist -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const studentIdInput = document.querySelector('input[name="student_id"]');
+        const errorMessageId = 'error-message';
+    
+        studentIdInput.addEventListener('keyup', function() {
+            let studentId = studentIdInput.value.replace(/-/g, ''); // Remove dashes from the input
+    
+            // Clear previous error messages
+            const existingError = document.getElementById(errorMessageId);
+            if (existingError) {
+                existingError.remove();
+            }
+    
+            // Clear fields if the input is empty
+            if (studentId === "") {
+                clearFields();
+                return;
+            }
+    
+            if (studentId) { // Only perform the fetch request if there is input
+                fetch("{% url 'search_borrow_request' %}?student_id=" + encodeURIComponent(studentId))
+                    .then(response => {
+                        if (!response.ok) {
+                            throw response;
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            // Populate the fields with the retrieved data
+                            document.querySelector('input[name="name"]').value = data.name;
+                            document.querySelector('input[name="course"]').value = data.course;
+                            document.querySelector('select[name="year"]').value = data.year;
+                            document.querySelector('input[name="email"]').value = data.email;
+                            document.querySelector('input[name="phone"]').value = data.phone;
+                            document.querySelector('input[name="date_borrow"]').value = data.date_borrow; // Fill in the date_borrow input
+    
+                            // Check borrower_type and set the appropriate radio or text input
+                            if (data.borrower_type === "Student") {
+                                document.getElementById('student_radio').checked = true;
+                                document.querySelector('input[name="other_borrower_type"]').value = ''; // Clear other input if any
+                            } else if (data.borrower_type === "Teacher") {
+                                document.getElementById('teacher_radio').checked = true;
+                                document.querySelector('input[name="other_borrower_type"]').value = ''; // Clear other input if any
+                            } else {
+                                document.querySelectorAll('input[name="borrower_type"]').forEach(radio => radio.checked = false); // Uncheck radio buttons
+                                document.querySelector('input[name="other_borrower_type"]').value = data.borrower_type; // Set other type
+                            }
+                        } else {
+                            // Clear fields if no record found
+                            clearFields();
+                            // Append error message directly below the input field
+                            const errorSpan = document.createElement('span');
+                            errorSpan.classList.add('text-danger');
+                            errorSpan.id = errorMessageId;
+                            errorSpan.textContent = data.error;
+                            studentIdInput.insertAdjacentElement('afterend', errorSpan);
+                        }
+                    })
+                    .catch(xhr => {
+                        // Clear fields on error
+                        clearFields();
+                        xhr.json().then(err => {
+                            // Append error message directly below the input field
+                            const errorSpan = document.createElement('span');
+                            errorSpan.classList.add('text-danger');
+                            errorSpan.id = errorMessageId;
+                            errorSpan.textContent = err.error;
+                            studentIdInput.insertAdjacentElement('afterend', errorSpan);
+                        });
+                    });
+            }
+        });
+    
+        function clearFields() {
+            document.querySelector('input[name="name"]').value = '';
+            document.querySelector('input[name="course"]').value = '';
+            document.querySelector('select[name="year"]').value = '';
+            document.querySelector('input[name="email"]').value = '';
+            document.querySelector('input[name="phone"]').value = '';
+            document.querySelectorAll('input[name="borrower_type"]').forEach(radio => radio.checked = false); // Clear radio buttons
+            document.querySelector('input[name="other_borrower_type"]').value = ''; // Clear other type
+            document.querySelector('input[name="date_borrow"]').value = ''; // Clear date_borrow input
+        }
+    });
+
+
+
+
+
+
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const originalCard = document.querySelector("#card-container");
+      
+        function addCard() {
+            const newCard = originalCard.cloneNode(true);
+      
+            // Reset quantity input in the cloned card
+            const quantityInput = newCard.querySelector("input[name='quantities[]']");
+            if (quantityInput) {
+                quantityInput.value = 1;  // Reset to default value of 1
+            }
+      
+            // Clear previous validation messages for the new card
+            clearValidationErrors(newCard);
+      
+            // Set up the close icon
+            const closeIcon = document.createElement("i");
+            closeIcon.classList.add("fas", "fa-times", "remove-card");
+            Object.assign(closeIcon.style, {
+                position: "absolute",
+                top: "10px",
+                left: "10px",
+                cursor: "pointer",
+                color: "#dc3545",
+            });
+            newCard.appendChild(closeIcon);
+      
+            // Append the cloned card to the container
+            originalCard.parentNode.appendChild(newCard);
+      
+            // Event listener to remove the card on close icon click
+            closeIcon.addEventListener("click", function () {
+                newCard.remove();
+            });
+      
+            // Re-add the "Add Card" click event for the new card
+            newCard.querySelector(".add-card").addEventListener("click", addCard);
+        }
+      
+        document.querySelector(".add-card").addEventListener("click", addCard);
+      
+        // Form submission validation
+        const form = document.querySelector("form");
+        form.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            let hasErrors = false;
+            const totalRequested = {};
+            const selectedItems = new Set();
+      
+            // Clear previous validation messages
+            clearValidationErrors();
+      
+            // Validate each item entry
+            const itemEntries = document.querySelectorAll(".item-entry");
+            const validationPromises = Array.from(itemEntries).map(async (itemEntry) => {
+                const itemSelect = itemEntry.querySelector("select[name='item']");
+                const quantityInput = itemEntry.querySelector("input[name='quantities[]']");  // Adjusted to match the input name
+      
+                const selectedItemId = itemSelect.value;
+                const requestedQuantity = parseInt(quantityInput.value, 10);
+      
+                // Check for duplicate item selection
+                if (selectedItems.has(selectedItemId)) {
+                    hasErrors = true;
+                    displayValidationError(itemEntry, 'Item already chosen in another card.');
+                    return;
+                } else {
+                    selectedItems.add(selectedItemId);
+                }
+      
+                if (selectedItemId && requestedQuantity > 0) {
+                    if (!totalRequested[selectedItemId]) {
+                        totalRequested[selectedItemId] = 0;
+                    }
+                    totalRequested[selectedItemId] += requestedQuantity;
+      
+                    // Fetch available quantity for the item from server
+                    const availableQuantity = await getAvailableQuantity(selectedItemId);
+      
+                    if (totalRequested[selectedItemId] > availableQuantity) {
+                        hasErrors = true;
+                        displayValidationError(itemEntry, `Not enough item available. Available: ${availableQuantity}`);
+                    } else {
+                        removeValidationError(itemEntry);
+                    }
+                } else {
+                    hasErrors = true;
+                    displayValidationError(itemEntry, 'Please select an item and enter a valid quantity.');
+                }
+            });
+      
+            await Promise.all(validationPromises);
+      
+            if (!hasErrors) {
+                console.log("Submitting form with the following quantities:", totalRequested);
+                form.submit();
+            }
+        });
+      
+        function clearValidationErrors(card) {
+            if (card) {
+                card.querySelectorAll(".text-danger").forEach(errorMsg => errorMsg.remove());
+                card.classList.remove('border-danger');
+            } else {
+                document.querySelectorAll(".text-danger").forEach(errorMsg => errorMsg.remove());
+                document.querySelectorAll('.card.border-danger').forEach(card => card.classList.remove('border-danger'));
+            }
+        }
+      
+        function displayValidationError(itemEntry, message) {
+            itemEntry.closest('.card').classList.add('border-danger');
+            const errorMsg = document.createElement('div');
+            errorMsg.classList.add('text-danger');
+            errorMsg.textContent = message;
+            itemEntry.appendChild(errorMsg);
+        }
+      
+        function removeValidationError(itemEntry) {
+            const existingErrorMsg = itemEntry.querySelector('.text-danger');
+            if (existingErrorMsg) existingErrorMsg.remove();
+            itemEntry.closest('.card').classList.remove('border-danger');
+        }
+      
+        async function getAvailableQuantity(itemId) {
+            try {
+                const response = await fetch(`/get-available-quantity/${itemId}/`);
+                const data = await response.json();
+                return data.available_quantity;
+            } catch (error) {
+                console.error('Error fetching available quantity:', error);
+                return 0;
+            }
+        }
+      });
+</script>
+
+
     <script>
                 //toaster message
                 document.addEventListener("DOMContentLoaded", function() {
@@ -356,33 +597,6 @@
                         }
                     });
                 });
-
-
-
-
-   // Get the radio buttons and the "Others" input field
-const studentRadio = document.getElementById('student_radio');
-const teacherRadio = document.getElementById('teacher_radio');
-const otherInput = document.getElementById('other_borrower_type');
-
-// Function to enable or disable and clear the "Others" input field
-function toggleOtherInput() {
-    if (studentRadio.checked || teacherRadio.checked) {
-        otherInput.value = '';  // Clear the input field
-        otherInput.disabled = true;
-        otherInput.style.cursor = 'not-allowed';  // Show disabled cursor
-    } else {
-        otherInput.disabled = false;
-        otherInput.style.cursor = 'text';  // Show normal text cursor when enabled
-    }
-}
-
-// Add event listeners for the radio buttons
-studentRadio.addEventListener('change', toggleOtherInput);
-teacherRadio.addEventListener('change', toggleOtherInput);
-
-// Initialize on page load
-toggleOtherInput();
 
         
     </script>

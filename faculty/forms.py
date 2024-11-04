@@ -21,7 +21,10 @@ class BorrowRequestMultimediaForm(forms.ModelForm):
 
     class Meta:
         model = BorrowRequest
-        fields = ['student_id', 'name', 'course', 'year', 'email', 'phone', 'date_borrow', 'date_return', 'item', 'quantity', 'purpose', 'status', 'note']
+        fields = [
+            'student_id', 'name', 'course', 'year', 'email', 'phone', 
+            'date_borrow', 'date_return', 'item', 'purpose', 'status', 'note'
+        ]
         widgets = {
             'student_id': forms.TextInput(attrs={'class': 'form-control', 'style': 'border: 1px solid #bebebe;', 'placeholder': 'Enter Student ID'}),
             'name': forms.TextInput(attrs={'class': 'form-control', 'style': 'border: 1px solid #bebebe;', 'placeholder': 'Enter Full Name'}),
@@ -29,9 +32,14 @@ class BorrowRequestMultimediaForm(forms.ModelForm):
             'year': forms.Select(attrs={'class': 'form-control', 'style': 'border: 1px solid #bebebe;'}),
             'email': forms.EmailInput(attrs={'class': 'form-control', 'style': 'border: 1px solid #bebebe;', 'placeholder': 'Enter your Email'}),
             'phone': forms.TextInput(attrs={'class': 'form-control', 'style': 'border: 1px solid #bebebe;', 'placeholder': 'Phone Number'}),
-            'date_borrow': forms.DateInput(attrs={'class': 'datepicker-default form-control', 'id': 'datepicker', 'style': 'border: 1px solid #bebebe;', 'required': 'required'}),
+            'date_borrow' : forms.DateInput(attrs={
+            'class': 'form-control datetimepicker-input datepicker-default', 'id': 'date_borrow datepicker',
+            'data-target': '#reservationdate',
+            'style': 'border: 1px solid #bebebe;',
+            'required': 'required',
+            'placeholder': 'Select date'  # Optional: add a placeholder for better UX
+        }),
             'date_return': forms.DateInput(attrs={'class': 'datepicker-default form-control', 'id': 'datepicker-return', 'style': 'border: 1px solid #bebebe;'}),
-            'quantity': forms.NumberInput(attrs={'class': 'form-control col-md-3', 'style': 'border: 1px solid #bebebe;', 'value': 1}),
             'purpose': forms.Textarea(attrs={'class': 'summernote form-control', 'style': 'border: 1px solid #bebebe;', 'placeholder': 'Type here...'}),
             'status': forms.TextInput(attrs={'class': 'form-control', 'style': 'border: 1px solid #bebebe;', 'readonly': 'readonly'}),
             'note': forms.Textarea(attrs={'class': 'form-control', 'style': 'border: 1px solid #bebebe;'}),

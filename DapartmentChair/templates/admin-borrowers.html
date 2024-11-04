@@ -7,6 +7,7 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pickadate.js/3.6.2/compressed/themes/default.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pickadate.js/3.6.2/compressed/themes/default.date.css">
 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/css/tempusdominus-bootstrap-4.min.css">
 
 <style>
   .pagination-container {
@@ -53,42 +54,7 @@
   border-color: red !important;
   border-width: 1px !important; /* Adjust as needed */
 }
-.picker__holder {
-  overflow-y: hidden !important; /* Hide vertical scrollbar */
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
-}
 
-.picker__frame {
-  overflow: hidden !important; /* Remove scrollbars inside the frame */
-  width: 100% !important;      /* Ensure full width without triggering overflow */
-}
-
-.picker__header select {
-  background-color: #ffffff !important; /* Set background color to white */
-  border: none !important;              /* Remove the border */
-  color: #000000 !important;            /* Set the text color to black for contrast */
-  padding: 5px;                         /* Add some padding for spacing */
-  border-radius: 4px;                   /* Slight rounding of corners for a modern look */
-}
-
-/* Style adjustments for the picker container */
-.picker__holder {
-  display: block !important;  /* Ensure the picker is properly displayed */
-  visibility: visible !important;
-}
-
-/* Customize navigation buttons (arrows) */
-.picker__nav--prev,
-.picker__nav--next {
-  background-color: transparent;        /* Remove any background color */
-  color: #000000 !important;            /* Set the arrow color to black */
-}
-
-/* Additional style for a clean look */
-.picker__day--today {
-  background-color: #e0e0e0;            /* Set a light background for today */
-  color: #000;                          /* Black text color for today */
-}
 
 .input-group .form-control {
   padding-right: 3rem; /* Add padding to prevent overlap with button */
@@ -178,37 +144,33 @@
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 <script src="dist/js/pages/dashboard2.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-<!-- Include Pickadate JS from CDN -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pickadate.js/3.6.2/compressed/picker.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pickadate.js/3.6.2/compressed/picker.date.js"></script>
 
 
-<!-- Initialize Pickadate with Desired Format -->
+
+<script src="https://cdn.jsdelivr.net/npm/moment/min/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/js/tempusdominus-bootstrap-4.min.js"></script>
+<!-- date picker -->
 <script>
-  $(document).ready(function() {
-    // Initialize Pickadate on the input field
-    var $datePicker = $('#datepicker').pickadate({
-        format: 'd mmmm, yyyy',  // Format as "20 September, 2024"
-        selectMonths: true,      // Enable dropdown to select month
-        selectYears: 10,         // Enable dropdown for selecting year
-        today: 'Today',
-        clear: 'Clear',
-        close: 'Close',
-        closeOnSelect: true,     // Close picker on date selection
-        onSet: function(context) {
-            // Ensure the input is blurred to prevent duplicate appearances
-            if (context.select) {
-                this.$node.blur(); // Unfocus the input to avoid re-triggering the picker
-            }
-        }
+  $(function () {
+    $('#reservationdate').datetimepicker({
+        format: 'D MMMM, YYYY' // Custom format: 1 November, 2024
     });
-    
-    // Optional: Ensure no duplicate initialization
-    if ($datePicker.data('pickadate')) {
-        return; // Prevent duplicate initialization
-    }
+
+    // Optional: Open the date picker when the input is focused
+    $('.datetimepicker-input').on('focus', function() {
+        $(this).siblings('.input-group-append').click();
+    });
+
+    // Set today's date when the calendar icon is clicked
+    $('#set-today').on('click', function() {
+        const today = moment().format('D MMMM, YYYY'); // Use moment.js for the custom format
+        $('#date_borrow').val(today);
+    });
 });
+
+
 </script>
+
 
 
 
@@ -406,13 +368,9 @@
                                     <label>Student ID</label>
                                     <div class="input-group">
                                         {{ form.student_id }}
-                                        <!-- Removed the search button -->
                                     </div>
                                     
                                 </div>
-                                
-                                
-                                
                                     <div class="form-group col-md-6">
                                         <label>Name</label>
                                         {{ form.name }}
@@ -440,10 +398,12 @@
                                     <div class="form-group col-md-3">
                                         <label>Date Borrow</label>
                                         <div class="input-group">
-                                            {{ form.date_borrow }}
-                                            <div class="input-group-append">
-                                                <i class="fas fa-calendar-alt" style="position: absolute; right: 14px; top: 8px; font-size: 18px;"></i>
+                                          <div class="input-group date" id="reservationdate" data-target-input="nearest">
+                                            <input type="text" class="form-control datetimepicker-input" id="date_borrow" placeholder="Select Date" name="date_borrow" data-target="#reservationdate"/>
+                                            <div class="input-group-append" data-target="#reservationdate" data-toggle="datetimepicker">
+                                                <div class="input-group-text" id="set-today"><i class="fa fa-calendar"></i></div>
                                             </div>
+                                        </div>
                                         </div>
                                         {% if form.date_borrow.errors %}
                                             <script>
@@ -453,34 +413,29 @@
                                     </div>
                                 </div>
                                 <div class="form-row">
-                                    <div class="form-group col-md-2">
-                                        <label>
-                                            <input type="radio" name="borrower_type" value="Student" id="student_radio" style="width: 20px; height: 20px;">&nbsp;
-                                            Student
-                                        </label>
-                                    </div>
-                                    <div class="form-group col-md-2">
-                                        <label>
-                                            <input type="radio" name="borrower_type" value="Teacher" id="teacher_radio" style="width: 20px; height: 20px;">&nbsp;
-                                            Teacher
-                                        </label>
-                                    </div>
-                                    <div class="form-group col-md-2">
-                                        <label>
-                                            Others:
-                                            <input type="text" name="other_borrower_type" id="other_borrower_type" style="width: 130px; height: 20px; border-top: 1px solid white; border-right: 1px solid white; border-left: 1px solid white;">&nbsp;
-                                        </label>
-                                    </div>
-                                </div>
+                                  <div class="form-group col-md-2">
+                                      <label>
+                                          <input type="radio" name="borrower_type" value="Student" id="student_radio" style="width: 20px; height: 20px;" onclick="clearOtherBorrowerType()">&nbsp;
+                                          Student
+                                      </label>
+                                  </div>
+                                  <div class="form-group col-md-2">
+                                      <label>
+                                          <input type="radio" name="borrower_type" value="Teacher" id="teacher_radio" style="width: 20px; height: 20px;" onclick="clearOtherBorrowerType()">&nbsp;
+                                          Teacher
+                                      </label>
+                                  </div>
+                                  <div class="form-group col-md-2">
+                                      <label>
+                                          Others:
+                                          <input type="text" name="other_borrower_type" id="other_borrower_type" style="width: 130px; height: 20px; border-top: 1px solid white; border-right: 1px solid white; border-left: 1px solid white;" oninput="checkOtherBorrowerType()">&nbsp;
+                                      </label>
+                                  </div>
+                              </div>
+                              
+                             
+                              
                                 
-                                <!-- <div id="image-preview" class="image-preview ml-3 mb-3">
-                                  <label for="image-upload" id="image-label">Upload Image</label>
-                                  <input type="file" name="upload_image" id="image-upload" accept="image/*" multiple onchange="previewImages(event)">
-
-                              </div> -->
-                                
-                            
-    
                                 <div class="form-row">
                                   <div class="col-xl-6">
                                       <div class="card {% if selected_item_has_zero_quantity %}border border-danger{% endif %}" style="position: relative;" id="card-container">
@@ -496,9 +451,9 @@
                                                       {{ form.item.label_tag }}
                                                       {{ form.item }} <!-- Dropdown for selecting items -->
                                                       <div class="mt-4">
-                                                          <label>Quantity</label>
-                                                          {{ form.quantity }}
-                                                      </div>
+                                                        <label>Quantity</label>
+                                                        <input type="number" class="form-control col-md-3"  name="quantities[]" min="1" value="1" required>
+                                                    </div>
                                                   </div>
                                               </div>
                                           </div>
@@ -509,12 +464,6 @@
                                       {{ form.purpose }}
                                   </div>
                               </div>
-                              
-
-                      
-
-                              
-                              
                                 <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Save</button>
                             </form>
                         </div>
@@ -569,213 +518,245 @@
   <script>
     $(document).ready(function() {
       $('input[name="student_id"]').on('keyup', function() {
-          const studentId = $(this).val(); // Get the student ID from the input field
-          
-          // Clear previous error messages
-          $('#error-message').remove();
+        // Get the student ID from the input field and remove hyphens
+        let studentId = $(this).val().replace(/-/g, ''); // Remove all hyphens
   
-          // Clear fields if the input is empty
-          if (studentId === "") {
-              clearFields(); // Function to clear all fields
-              return; // Exit the function early
-          }
+        // Clear previous error messages
+        $('#error-message').remove();
   
-          if (studentId) { // Only perform the AJAX request if there is input
-              $.ajax({
-                  url: "{% url 'search_borrow_request' %}", // URL of the search view
-                  data: {
-                      'student_id': studentId
-                  },
-                  success: function(data) {
-                      if (data.success) {
-                          // Populate the fields with the retrieved data
-                          $('input[name="name"]').val(data.name);
-                          $('input[name="course"]').val(data.course);
-                          $('select[name="year"]').val(data.year);
-                          $('input[name="email"]').val(data.email);
-                          $('input[name="phone"]').val(data.phone);
-                          $('input[name="borrower_type"][value="' + data.borrower_type + '"]').prop('checked', true);
-                          
-                          // Remove error message if found
-                          $('#error-message').remove();
-                      } else {
-                          // Clear fields if no record found
-                          clearFields();
-                          // Append error message directly below the input field
-                          $('#student_id').after('<span class="text-danger" id="error-message">' + data.error + '</span>');
-                      }
-                  },
-                  error: function(xhr) {
-                      // Clear fields on error
-                      clearFields();
-                      // Append error message directly below the input field
-                      $('#student_id').after('<span class="text-danger" id="error-message">' + xhr.responseJSON.error + '</span>');
-                  }
-              });
-          }
+        // Clear fields if the input is empty
+        if (studentId === "") {
+          clearFields();
+          return;
+        }
+  
+        if (studentId) { // Only perform the AJAX request if there is input
+          $.ajax({
+            url: "{% url 'search_borrow_request' %}", // URL of the search view
+            data: {
+              'student_id': studentId
+            },
+            success: function(data) {
+              if (data.success) {
+                // Populate the fields with the retrieved data
+                $('input[name="name"]').val(data.name);
+                $('input[name="course"]').val(data.course);
+                $('select[name="year"]').val(data.year);
+                $('input[name="email"]').val(data.email);
+                $('input[name="phone"]').val(data.phone);
+  
+                // Set the date_borrow input
+                $('input[name="date_borrow"]').val(data.date_borrow); // Fill in the date_borrow input
+  
+                // Check borrower_type and set the appropriate radio or text input
+                if (data.borrower_type === "Student") {
+                  $('#student_radio').prop('checked', true);
+                  $('#other_borrower_type').val(''); // Clear other input if any
+                } else if (data.borrower_type === "Teacher") {
+                  $('#teacher_radio').prop('checked', true);
+                  $('#other_borrower_type').val(''); // Clear other input if any
+                } else {
+                  $('input[name="borrower_type"]').prop('checked', false); // Uncheck radio buttons
+                  $('#other_borrower_type').val(data.borrower_type); // Set other type
+                }
+  
+                // Remove error message if found
+                $('#error-message').remove();
+              } else {
+                // Clear fields if no record found
+                clearFields();
+                // Append error message directly below the input field
+                $('#student_id').after('<span class="text-danger" id="error-message">' + data.error + '</span>');
+              }
+            },
+            error: function(xhr) {
+              // Clear fields on error
+              clearFields();
+              // Append error message directly below the input field
+              $('#student_id').after('<span class="text-danger" id="error-message">' + xhr.responseJSON.error + '</span>');
+            }
+          });
+        }
       });
   
       function clearFields() {
-          $('input[name="name"]').val('');
-          $('input[name="course"]').val('');
-          $('select[name="year"]').val('');
-          $('input[name="email"]').val('');
-          $('input[name="phone"]').val('');
-          $('input[name="borrower_type"]').prop('checked', false);
-          $('input[name="other_borrower_type"]').val('');
+        $('input[name="name"]').val('');
+        $('input[name="course"]').val('');
+        $('select[name="year"]').val('');
+        $('input[name="email"]').val('');
+        $('input[name="phone"]').val('');
+        $('input[name="borrower_type"]').prop('checked', false); // Clear radio buttons
+        $('input[name="other_borrower_type"]').val(''); // Clear other type
+        $('input[name="date_borrow"]').val(''); // Clear date_borrow input
       }
-  });
+    });
+  </script>
   
-
-
-    </script>
     
     
     
 
 
   <script>
-       // Get the radio buttons and the "Others" input field
-const studentRadio = document.getElementById('student_radio');
-const teacherRadio = document.getElementById('teacher_radio');
-const otherInput = document.getElementById('other_borrower_type');
-
-// Function to enable or disable and clear the "Others" input field
-function toggleOtherInput() {
-    if (studentRadio.checked || teacherRadio.checked) {
-        otherInput.value = '';  // Clear the input field
-        otherInput.disabled = true;
-        otherInput.style.cursor = 'not-allowed';  // Show disabled cursor
-    } else {
-        otherInput.disabled = false;
-        otherInput.style.cursor = 'text';  // Show normal text cursor when enabled
-    }
-}
-
-// Add event listeners for the radio buttons
-studentRadio.addEventListener('change', toggleOtherInput);
-teacherRadio.addEventListener('change', toggleOtherInput);
-
-// Initialize on page load
-toggleOtherInput();
-
-
-
-
-document.addEventListener("DOMContentLoaded", function () {
-  const originalCard = document.querySelector("#card-container");
-
-  function addCard() {
-      const newCard = originalCard.cloneNode(true);
+    
+      function checkOtherBorrowerType() {
+          const otherInput = document.getElementById('other_borrower_type').value;
       
-      // Set up the close icon
-      const closeIcon = document.createElement("i");
-      closeIcon.classList.add("fas", "fa-times", "remove-card");
-      Object.assign(closeIcon.style, {
-          position: "absolute",
-          top: "10px",
-          left: "10px",
-          cursor: "pointer",
-          color: "#dc3545",
-      });
-      newCard.appendChild(closeIcon);
-
-      // Append the cloned card to the container
-      originalCard.parentNode.appendChild(newCard);
-
-      // Event listener to remove the card on close icon click
-      closeIcon.addEventListener("click", function () {
-          newCard.remove();
-      });
-
-      // Re-add the "Add Card" click event for the new card
-      newCard.querySelector(".add-card").addEventListener("click", addCard);
-  }
-
-  document.querySelector(".add-card").addEventListener("click", addCard);
-
-  // Form submission validation
-  const form = document.querySelector("form");
-  form.addEventListener("submit", async function (event) {
-      event.preventDefault(); // Prevent the form from submitting immediately
-      let hasErrors = false; // Reset errors before each validation check
-      const totalRequested = {}; // Track total requested quantities for each item
-
-      // Clear previous validation messages
-      clearValidationErrors();
-
-      // Validate each item entry
-      const itemEntries = document.querySelectorAll(".item-entry");
-
-      // Create promises to check available quantities
-      const validationPromises = Array.from(itemEntries).map(async (itemEntry) => {
-          const itemSelect = itemEntry.querySelector("select[name='item']");
-          const quantityInput = itemEntry.querySelector("input[name='quantity']");
-
-          const selectedItemId = itemSelect.value;
-          const requestedQuantity = parseInt(quantityInput.value, 10);
-
-          // Check if the selected item ID is valid and quantity is positive
-          if (selectedItemId && requestedQuantity > 0) {
-              // Accumulate requested quantities for the same item
-              if (!totalRequested[selectedItemId]) {
-                  totalRequested[selectedItemId] = 0;
-              }
-              totalRequested[selectedItemId] += requestedQuantity;
-
-              // Fetch available quantity for the item
-              const availableQuantity = await getAvailableQuantity(selectedItemId);
-
-              // Check if requested quantity exceeds available quantity
-              if (totalRequested[selectedItemId] > availableQuantity) {
-                  hasErrors = true; // Set the error flag
-                  displayValidationError(itemEntry, `Not enough item available. Available: ${availableQuantity}`);
-              } else {
-                  removeValidationError(itemEntry); // Remove previous error if any
-              }
-          } else {
-              hasErrors = true; // Set the error flag for invalid inputs
-              displayValidationError(itemEntry, 'Please select an item and enter a valid quantity.');
+          if (otherInput) {
+              // If there's input in the "Others" field, uncheck both radio buttons
+              document.getElementById('student_radio').checked = false;
+              document.getElementById('teacher_radio').checked = false;
           }
-      });
-
-      // Wait for all validation checks to complete
-      await Promise.all(validationPromises);
-
-      // Only submit the form if there are no errors
-      if (!hasErrors) {
-          form.submit();
       }
-  });
+      
+      function clearOtherBorrowerType() {
+          // Clear the "Others" input when either radio button is selected
+          document.getElementById('other_borrower_type').value = '';
+      }
+  
 
-  // Helper function to clear previous validation messages
-  function clearValidationErrors() {
-      document.querySelectorAll(".text-danger").forEach(errorMsg => errorMsg.remove());
-      document.querySelectorAll('.card.border-danger').forEach(card => card.classList.remove('border-danger'));
-  }
 
-  // Helper function to display validation error on an item entry
-  function displayValidationError(itemEntry, message) {
-      itemEntry.closest('.card').classList.add('border-danger');
-      const errorMsg = document.createElement('div');
-      errorMsg.classList.add('text-danger');
-      errorMsg.textContent = message;
-      itemEntry.appendChild(errorMsg);
-  }
 
-  // Helper function to remove validation error from an item entry
-  function removeValidationError(itemEntry) {
-      const existingErrorMsg = itemEntry.querySelector('.text-danger');
-      if (existingErrorMsg) existingErrorMsg.remove();
-      itemEntry.closest('.card').classList.remove('border-danger');
-  }
 
-  // Function to retrieve the available quantity of an item
-  async function getAvailableQuantity(itemId) {
-      // Replace with actual AJAX call or logic to get the current available quantities
-      return 10; // Example value; replace this with your actual logic
-  }
-});
+      document.addEventListener("DOMContentLoaded", function () {
+        const originalCard = document.querySelector("#card-container");
+      
+        function addCard() {
+            const newCard = originalCard.cloneNode(true);
+      
+            // Reset quantity input in the cloned card
+            const quantityInput = newCard.querySelector("input[name='quantities[]']");
+            if (quantityInput) {
+                quantityInput.value = 1;  // Reset to default value of 1
+            }
+      
+            // Clear previous validation messages for the new card
+            clearValidationErrors(newCard);
+      
+            // Set up the close icon
+            const closeIcon = document.createElement("i");
+            closeIcon.classList.add("fas", "fa-times", "remove-card");
+            Object.assign(closeIcon.style, {
+                position: "absolute",
+                top: "10px",
+                left: "10px",
+                cursor: "pointer",
+                color: "#dc3545",
+            });
+            newCard.appendChild(closeIcon);
+      
+            // Append the cloned card to the container
+            originalCard.parentNode.appendChild(newCard);
+      
+            // Event listener to remove the card on close icon click
+            closeIcon.addEventListener("click", function () {
+                newCard.remove();
+            });
+      
+            // Re-add the "Add Card" click event for the new card
+            newCard.querySelector(".add-card").addEventListener("click", addCard);
+        }
+      
+        document.querySelector(".add-card").addEventListener("click", addCard);
+      
+        // Form submission validation
+        const form = document.querySelector("form");
+        form.addEventListener("submit", async function (event) {
+            event.preventDefault();
+            let hasErrors = false;
+            const totalRequested = {};
+            const selectedItems = new Set();
+      
+            // Clear previous validation messages
+            clearValidationErrors();
+      
+            // Validate each item entry
+            const itemEntries = document.querySelectorAll(".item-entry");
+            const validationPromises = Array.from(itemEntries).map(async (itemEntry) => {
+                const itemSelect = itemEntry.querySelector("select[name='item']");
+                const quantityInput = itemEntry.querySelector("input[name='quantities[]']");  // Adjusted to match the input name
+      
+                const selectedItemId = itemSelect.value;
+                const requestedQuantity = parseInt(quantityInput.value, 10);
+      
+                // Check for duplicate item selection
+                if (selectedItems.has(selectedItemId)) {
+                    hasErrors = true;
+                    displayValidationError(itemEntry, 'Item already chosen in another card.');
+                    return;
+                } else {
+                    selectedItems.add(selectedItemId);
+                }
+      
+                if (selectedItemId && requestedQuantity > 0) {
+                    if (!totalRequested[selectedItemId]) {
+                        totalRequested[selectedItemId] = 0;
+                    }
+                    totalRequested[selectedItemId] += requestedQuantity;
+      
+                    // Fetch available quantity for the item from server
+                    const availableQuantity = await getAvailableQuantity(selectedItemId);
+      
+                    if (totalRequested[selectedItemId] > availableQuantity) {
+                        hasErrors = true;
+                        displayValidationError(itemEntry, `Not enough item available. Available: ${availableQuantity}`);
+                    } else {
+                        removeValidationError(itemEntry);
+                    }
+                } else {
+                    hasErrors = true;
+                    displayValidationError(itemEntry, 'Please select an item and enter a valid quantity.');
+                }
+            });
+      
+            await Promise.all(validationPromises);
+      
+            if (!hasErrors) {
+                console.log("Submitting form with the following quantities:", totalRequested);
+                form.submit();
+            }
+        });
+      
+        function clearValidationErrors(card) {
+            if (card) {
+                card.querySelectorAll(".text-danger").forEach(errorMsg => errorMsg.remove());
+                card.classList.remove('border-danger');
+            } else {
+                document.querySelectorAll(".text-danger").forEach(errorMsg => errorMsg.remove());
+                document.querySelectorAll('.card.border-danger').forEach(card => card.classList.remove('border-danger'));
+            }
+        }
+      
+        function displayValidationError(itemEntry, message) {
+            itemEntry.closest('.card').classList.add('border-danger');
+            const errorMsg = document.createElement('div');
+            errorMsg.classList.add('text-danger');
+            errorMsg.textContent = message;
+            itemEntry.appendChild(errorMsg);
+        }
+      
+        function removeValidationError(itemEntry) {
+            const existingErrorMsg = itemEntry.querySelector('.text-danger');
+            if (existingErrorMsg) existingErrorMsg.remove();
+            itemEntry.closest('.card').classList.remove('border-danger');
+        }
+      
+        async function getAvailableQuantity(itemId) {
+            try {
+                const response = await fetch(`/admin-get-available-quantity/${itemId}/`);
+                const data = await response.json();
+                return data.available_quantity;
+            } catch (error) {
+                console.error('Error fetching available quantity:', error);
+                return 0;
+            }
+        }
+      });
+      
+
+
+
+
 
 
 
