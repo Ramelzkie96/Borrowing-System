@@ -52,12 +52,8 @@ class StudentReservation(models.Model):
     year_level = models.CharField(max_length=50)
     email = models.EmailField()
     phone_number = models.CharField(max_length=15)
-    reserve_date = models.DateField()  # Changed to DateField for better date handling
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
-    quantity = models.PositiveIntegerField()
-    purpose = models.TextField()
+    reserve_date = models.CharField(max_length=50)  # Changed to DateField for better date handling
+    purpose = models.TextField(null=True)
     status = models.CharField(max_length=20, default='Pending')
     user = models.ForeignKey('ReservationUser', on_delete=models.CASCADE)
     notification = models.CharField(max_length=500, null=True)
@@ -69,3 +65,16 @@ class StudentReservation(models.Model):
 
     def __str__(self):
         return f"Reservation by {self.name} for {self.content_object.name}"
+    
+    
+class ReservationItem(models.Model):
+    reservation = models.ForeignKey(StudentReservation, on_delete=models.CASCADE, related_name='items')
+    item_name = models.CharField(max_length=100)
+    description = models.TextField()
+    quantity = models.PositiveIntegerField()
+
+    def __str__(self):
+        return f"{self.item_name} (Qty: {self.quantity}) for {self.reservation.name}"
+
+    
+    

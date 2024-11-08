@@ -216,14 +216,6 @@
                 </p>
               </a>
             </li>
-            <li class="nav-item">
-              <a href="{% url 'admin-returned-record' %}" class="nav-link">
-                <i class="nav-icon fa-solid fa-arrow-rotate-left"></i>
-                <p>
-                  Returned Records
-                </p>
-              </a>
-            </li>
   
             <li class="nav-header">Borrowers Reservation</li>
             <li class="nav-item">
@@ -297,38 +289,41 @@
                     </div>
                     <div class="card-body">
                         <div class="basic-form">
-                            <form method="post">
-                                {% csrf_token %}
-                    
-                                <div class="form-group row mb-4">
-                                    <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 " style="font-size: 15px">Name</label>
-                                    <div class="col-sm-12 col-md-7">
-                                        <input type="text" name="name" class="form-control" value="{{ name }}" required>
-                                    </div>
+                          <form method="post" id="item-form">
+                            {% csrf_token %}
+                            <div class="form-group row mb-4">
+                                <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3" style="font-size: 15px">Property ID (OPTIONAL)</label>
+                                <div class="col-sm-12 col-md-4">
+                                    <input type="text" name="property_id" class="form-control" value="{{ property_id }}">
                                 </div>
-    
-                                <div class="form-group row mb-4">
-                                    <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 " style="font-size: 15px">Description</label>
-                                    <div class="col-sm-12 col-md-7">
-                                        <textarea name="description" class="form-control" required>{{ description }}</textarea>
-                                    </div>
+                            </div>
+                            
+                            <div class="form-group row mb-4">
+                                <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3" style="font-size: 15px">Name</label>
+                                <div class="col-sm-12 col-md-4">
+                                    <input type="text" name="name" id="item-name" class="form-control" value="{{ name }}" required>
+                                    <div id="name-error" class="text-danger" style="display:none;">Item name already exists.</div>
                                 </div>
-                               
-                    
-                                <div class="form-group row mb-4">
-                                    <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 " style="font-size: 15px">Quantity</label>
-                                    <div class="col-sm-12 col-md-7">
-                                        <input type="number" id="quantity" style="width: 100px;" class="form-control" name="quantity" value="{{ quantity|default:1 }}" min="1" max="100" required>
-                                    </div>
+                            </div>
+                        
+                            <div class="form-group row mb-4">
+                                <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3" style="font-size: 15px">Quantity</label>
+                                <div class="col-sm-12 col-md-7">
+                                    <input type="number" id="quantity" style="width: 100px;" class="form-control" name="quantity" value="{{ quantity|default:1 }}" min="1" max="100" required>
                                 </div>
-                    
-                                <div class="form-group row mb-4">
-                                    <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3"></label>
-                                    <div class="col-sm-12 col-md-7">
-                                        <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Add Item</button>
-                                    </div>
+                            </div>
+                            
+                            <div class="form-group row mb-4">
+                                <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3"></label>
+                                <div class="col-sm-12 col-md-7">
+                                  <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Add Item</button>
+
                                 </div>
-                            </form>
+                            </div>
+                        </form>
+                        
+                        
+                        
                         </div>
                     </div>
                     
@@ -375,6 +370,34 @@
   </div>
 
 
+  <script>
+    document.getElementById('item-name').addEventListener('input', function() {
+      const name = this.value;
+      const errorDiv = document.getElementById('name-error');
+      const submitButton = document.getElementById('toastr-success-bottom-left');
+  
+      if (name) {
+          fetch(`/admin-validate-item-name/?name=${encodeURIComponent(name)}`)
+              .then(response => response.json())
+              .then(data => {
+                  if (data.exists) {
+                      errorDiv.style.display = 'block';
+                      submitButton.disabled = true; // Disable the button if the item name exists
+                  } else {
+                      errorDiv.style.display = 'none';
+                      submitButton.disabled = false; // Enable the button if the item name does not exist
+                  }
+              })
+              .catch(error => {
+                  console.error('Error:', error);
+                  submitButton.disabled = false; // Enable the button if there's an error in the request
+              });
+      } else {
+          errorDiv.style.display = 'none';
+          submitButton.disabled = false; // Enable the button if the input is cleared
+      }
+  });
+    </script>
 
 {% endblock content %}
   

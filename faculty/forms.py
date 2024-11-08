@@ -7,7 +7,6 @@ class BorrowRequestMultimediaForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
-        content_type = kwargs.pop('content_type', None)
         super().__init__(*args, **kwargs)
 
         if user:
@@ -18,6 +17,9 @@ class BorrowRequestMultimediaForm(forms.ModelForm):
 
         # Add class form-control to item field
         self.fields['item'].widget.attrs.update({'class': 'form-control'})
+
+        # Customize the display of the dropdown items
+        self.fields['item'].label_from_instance = lambda obj: f"{obj.name} (Available stock: {obj.quantity})"
 
     class Meta:
         model = BorrowRequest
@@ -32,13 +34,14 @@ class BorrowRequestMultimediaForm(forms.ModelForm):
             'year': forms.Select(attrs={'class': 'form-control', 'style': 'border: 1px solid #bebebe;'}),
             'email': forms.EmailInput(attrs={'class': 'form-control', 'style': 'border: 1px solid #bebebe;', 'placeholder': 'Enter your Email'}),
             'phone': forms.TextInput(attrs={'class': 'form-control', 'style': 'border: 1px solid #bebebe;', 'placeholder': 'Phone Number'}),
-            'date_borrow' : forms.DateInput(attrs={
-            'class': 'form-control datetimepicker-input datepicker-default', 'id': 'date_borrow datepicker',
-            'data-target': '#reservationdate',
-            'style': 'border: 1px solid #bebebe;',
-            'required': 'required',
-            'placeholder': 'Select date'  # Optional: add a placeholder for better UX
-        }),
+            'date_borrow': forms.DateInput(attrs={
+                'class': 'form-control datetimepicker-input datepicker-default', 
+                'id': 'datepicker',
+                'data-target': '#reservationdate',
+                'style': 'border: 1px solid #bebebe;',
+                'required': 'required',
+                'placeholder': 'Select date'
+            }),
             'date_return': forms.DateInput(attrs={'class': 'datepicker-default form-control', 'id': 'datepicker-return', 'style': 'border: 1px solid #bebebe;'}),
             'purpose': forms.Textarea(attrs={'class': 'summernote form-control', 'style': 'border: 1px solid #bebebe;', 'placeholder': 'Type here...'}),
             'status': forms.TextInput(attrs={'class': 'form-control', 'style': 'border: 1px solid #bebebe;', 'readonly': 'readonly'}),

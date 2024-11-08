@@ -61,14 +61,7 @@
         /* Adjust font size for better readability */
     }
 
-    .card-box .btn {
-        width: 180px;
-        /* Increase button width */
-        height: 40px;
-        /* Increase button height */
-        font-size: 14px;
-        /* Increase button font size */
-    }
+
 
     input[type="radio"] {
         appearance: none;
@@ -441,8 +434,7 @@
                         <th scope="col">NAME</th>
                         <th scope="col">COURSE</th>
                         <th scope="col">YEAR</th>
-                        <th scope="col">ITEM</th>
-                        <th scope="col">QUANTITY</th>
+                        <th scope="col">PHONE</th>
                         <th scope="col">DATE RESERVE</th>
                         <th scope="col">STATUS</th>
                         <th scope="col">ACTION</th>
@@ -456,34 +448,51 @@
                                 <td>{{ reservation.name }}</td>
                                 <td>{{ reservation.course }}</td>
                                 <td>{{ reservation.year_level }}</td>
-                                <td>{{ reservation.content_object.name }}</td> <!-- Assuming content_object refers to the item -->
-                                <td>{{ reservation.quantity }}</td>
+                                <td>{{ reservation.phone_number }}</td> <!-- Assuming content_object refers to the item -->
                                 <td>{{ reservation.reserve_date }}</td>
                                 <td>
                                     {% if reservation.status == "Approved" %}
                                         <div class="badge badge-success">{{ reservation.status }}</div>
                                     {% elif reservation.status == "Pending" %}
-                                        <div class="badge badge-secondary">{{ reservation.status }}</div>
+                                        <div class="badge badge-info">{{ reservation.status }}</div>
                                     {% else %}
                                         <div class="badge badge-danger">{{ reservation.status }}</div>
                                     {% endif %}
                                 </td>
-                                <td>
-                                    <button class="dropdown-item view-item-btn" data-toggle="modal" data-target="#exampleModalCenter"
-                                    data-student-id="{{ reservation.student_id }}"
-                                    data-name="{{ reservation.name }}"
-                                    data-course="{{ reservation.course }}"
-                                    data-year="{{ reservation.year_level }}"
-                                    data-email="{{ reservation.email }}"
-                                    data-phone="{{ reservation.phone_number }}"
-                                    data-item="{{ reservation.content_object.name }}"
-                                    data-quantity="{{ reservation.quantity }}"
-                                    data-date="{{ reservation.reserve_date }}"
-                                    data-purpose="{{ reservation.purpose }}"
-                                    data-status="{{ reservation.status }}">
-                                        <img src="{% static 'images/eye-btn.png' %}" alt="" width="35" height="35">
-                                    </button>
+                                <td style="text-align: center; vertical-align: middle; display: flex; justify-content: center;">
+                                    {% if reservation.status == "Approved" or reservation.status == "Denied" %}
+                                        <!-- If Approved or Denied, show the View button outside the dropdown -->
+                                        <button class="btn btn-secondary btn-sm view-item-btn" data-toggle="modal" data-target="#exampleModalCenter"
+                                            data-student-id="{{ reservation.student_id }}"
+                                            data-name="{{ reservation.name }}"
+                                            data-date="{{ reservation.reserve_date }}">
+                                            <i class="fas fa-eye" style="font-size: 15px;"></i>
+                                        </button>
+                                    {% else %}
+                                        <!-- If Pending, show both View and Edit buttons inside the dropdown -->
+                                        <div class="dropdownnn">
+                                            <a class="btn btn-link font-24 p-0 line-height-1 no-arrow -toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
+                                                <img src="{% static 'images/mores.png' %}" alt="" width="30" height="30">
+                                            </a>
+                                            <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
+                                                <button class="dropdown-item btn-secondary btn-sm view-item-btn" data-toggle="modal" data-target="#exampleModalCenter"
+                                                    data-student-id="{{ reservation.student_id }}"
+                                                    data-name="{{ reservation.name }}"
+                                                    data-date="{{ reservation.reserve_date }}">
+                                                    <i class="fas fa-eye" style="font-size: 15px;"></i>&nbsp;View Reservation
+                                                </button>
+                                                <button class="dropdown-item btn-primary btn-sm" onclick="redirectToEditForm('{{ reservation.id }}', '{{ reservation.student_id }}', '{{ reservation.name }}', '{{ reservation.year_level }}', '{{ reservation.email }}', '{{ reservation.phone_number }}', '{{ reservation.reserve_date }}', '{{ reservation.purpose }}')" class="dropdown-item edit-item-btn">
+                                                    <i class="fas fa-edit"></i>&nbsp; Edit Reservation
+                                                </button>
+                                            </div>
+                                        </div>
+                                    {% endif %}
                                 </td>
+                                
+                                
+                                
+                                
+                                
                             </tr>
                         {% endfor %}
                     {% else %}
@@ -503,63 +512,161 @@
 
         <!-- Modal for Viewing Item -->
         <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 800px;">
                 <div class="modal-content">
                     <div class="modal-header" style="border-bottom: 2px solid #593bdb;">
-                        <h5 class="modal-title" id="exampleModalCenterTitle" style="font-size: 25px;">View Student Details</h5>
+                        <h5 class="modal-title" id="exampleModalCenterTitle" style="font-size: 25px; font-weight: 700;">View Reservation Details</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
                     <div class="modal-body">
-                        <div class="form-group row mb-1">
-                            <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Student ID:</label>
-                            <p id="modal-student-id" class="text-dark mt-1" style="font-size: 15px; position:relative; left: 50px; top: 5px;"></p>
+                        <div class="row mb-1">
+                            <div class="col-4">
+                                <label class="font-weight-bold text-dark" style="font-size: 15px;">Student ID:</label>
+                                <p id="modal-student-id" style="font-size: 15px; color: #474747;"></p>
+                            </div>
+                            <div class="col-4">
+                                <label class="font-weight-bold text-dark" style="font-size: 15px;">Name:</label>
+                                <p id="modal-name" style="font-size: 15px; color: #474747;"></p>
+                            </div>
+
+                            <div class="col-4">
+                                <label class="font-weight-bold text-dark" style="font-size: 15px;">Date Reserve:</label>
+                                <p id="modal-date-borrow" style="font-size: 15px; color: #474747;"></p>
+                            </div>
                         </div>
-                        <div class="form-group row mb-1">
-                            <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Name:</label>
-                            <p id="modal-name" class="text-dark mt-1" style="font-size: 15px; position:relative; left: 50px; top: 5px;"></p>
+        
+                        <div class="row mb-1">
+                            <div class="col-4">
+                                <p style="font-size: 15px; font-weight: 800;" class="text-dark">Items:</p>
+                            </div>
+
+                            
+                            <div class="col-4">
+                                <p style="font-size: 15px; font-weight: 800;" class="text-dark">Description:</p>
+                            </div>
+
+                            <div class="col-4">
+                                <p style="font-size: 15px; font-weight: 800;" class="text-dark">Quantity:</p>
+                            </div>
+
+        
+                          
+                           
                         </div>
-                        <div class="form-group row mb-0">
-                            <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Course:</label>
-                            <p id="modal-course" class="text-dark mt-1" style="font-size: 15px; position:relative; left: 50px; top: 5px;"></p>
-                        </div>
-                        <div class="form-group row mb-0">
-                            <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Year:</label>
-                            <p id="modal-year" class="text-dark mt-1" style="font-size: 15px; position:relative; left: 50px; top: 5px;"></p>
-                        </div>
-                        <div class="form-group row mb-0">
-                            <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Phone:</label>
-                            <p id="modal-phone" class="text-dark mt-1" style="font-size: 15px; position:relative; left: 50px; top: 5px;"></p>
-                        </div>
-                        <div class="form-group row mb-0">
-                            <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Email:</label>
-                            <p id="modal-email" class="text-dark mt-1" style="font-size: 15px; position:relative; left: 50px; top: 5px;"></p>
-                        </div>
-                        <div class="form-group row mb-0">
-                            <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Item:</label>
-                            <p id="modal-item" class="text-dark mt-1" style="font-size: 15px; position:relative; left: 50px; top: 5px;"></p>
-                        </div>
-                        <div class="form-group row mb-0">
-                            <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Quantity:</label>
-                            <p id="modal-quantity" class="text-dark mt-1" style="font-size: 15px; position:relative; left: 50px; top: 5px;"></p>
-                        </div>
-                        <div class="form-group row mb-0">
-                            <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px; white-space: nowrap;">Date Reserved:</label>
-                            <p id="modal-date-borrow" class="text-dark mt-1" style="font-size: 15px; position:relative; left: 50px; top: 5px;"></p>
-                        </div>
-                        
-                        <div class="form-group row mb-0">
-                            <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Status:</label>
-                            <p id="modal-status" class="text-dark mt-1" style="font-size: 15px; position:relative; left: 50px; top: 5px;"></p>
-                        </div>
-                        <div class="form-group row mb-0">
-                            <label class="col-form-label text-md-left font-weight-bold col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Purpose:</label>
-                            <p id="modal-purpose" class="text-dark mt-1" style="font-size: 15px; position:relative; left: 50px; top: 5px;"></p>
+        
+                        <div id="borrow-items-list">
+                            <!-- Dynamic borrow item list will be injected here -->
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        
+                 
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+
+        <div class="modal fade" id="reservationModal" tabindex="-1" role="dialog" aria-labelledby="reservationModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg" style="overflow: hidden;">
+                <div class="modal-content">
+                    <div class="modal-header" style="border-bottom: 2px solid #593bdb;">
+                        <h2 class="modal-title" style="color: #593bdb;">Edit Reservation Form</h2>
+                        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+                    </div>
+                    <div class="card-body">
+                        <div class="basic-form">
+                            <form id="editBorrowerForm" method="post" action="">
+                                {% csrf_token %}
+                                <input type="hidden" name="id">
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label class="text-dark">Student ID</label>
+                                        <input type="text" name="student_id" class="form-control" style="border: 1px solid #bebebe;">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label class="text-dark">Name</label>
+                                        <input type="text" name="name" class="form-control" style="border: 1px solid #bebebe;">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label class="text-dark">Course</label>
+                                        <input type="text" name="course" class="form-control" value="" style="border: 1px solid #bebebe;">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label class="text-dark">Year</label>
+                                        <select class="form-select form-control" name="year" style="border:1px solid rgba(0, 0, 0, 0.2);" aria-label="Default select example" required>
+                                            <option value="1st Year">1st Year</option>
+                                            <option value="2nd Year">2nd Year</option>
+                                            <option value="3rd Year">3rd Year</option>
+                                            <option value="4th Year">4th Year</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label class="text-dark">Email</label>
+                                        <input type="text" name="email" class="form-control"  style="border: 1px solid #bebebe;">
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label class="text-dark">Phone</label>
+                                        <input type="text" name="phone" class="form-control"  style="border: 1px solid #bebebe;">
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label class="text-dark">Date Reserve</label>
+                                        <div class="input-with-icon">
+                                            <input name="datepicker" id="dateBorrow" class="datepicker-default form-control" style="border: 1px solid #bebebe; background: white; font-size: 14px">
+                                            <i class="fas fa-calendar-alt" style="position: absolute; top: 38px; right: -50px;"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="col-xl-6">
+                                        <div class="cardd mb-5" style="position: relative;">
+                                            <div class="card-bodyd">
+                                                <div class="mt-4">
+                                                    <h4 class="card-title">Items</h4>
+                                                    <p>Select Item you want to borrow</p>
+                                                    <select id="itemSelect" name="itemm" class="form-control">
+                                                        <option value="">Select an item...</option>
+                                                        <!-- Options will be populated here via JavaScript -->
+                                                    </select>
+                                                    <div class="text-danger mt-2"></div>
+                                                </div>
+                                        
+                                                <div class="mt-4">
+                                                    <label class="text-dark">Description</label>
+                                                    <textarea name="description" style="height: 50px; resize: vertical;" class="form-control"></textarea>
+                                                </div>
+                                        
+                                                <div class="mt-4">
+                                                    <label class="text-dark">Quantity</label>
+                                                    <input type="number" name="quantityy" id="quantityy" class="form-control col-md-3" style="border: 1px solid #bebebe;" value="1" min="1" oninput="if(this.value < 1) { this.value = 1; }">
+                                                    <div class="text-danger mt-2"></div> <!-- Error message container -->
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- it should be duplicate here -->
+                                        
+ 
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label class="text-dark">Purpose for borrow</label>
+                                        <textarea name="description" class="form-control" cols="1" rows="1" style="border: 1px solid #bebebe;"></textarea>
+                                    </div>
+                                </div>
+
+                                
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -598,7 +705,15 @@
     }, 5000);
 
 
-    // viewing modal
+
+    function redirectToEditForm(id, studentId, name, yearLevel, email, phone, reserveDate, purpose) {
+        const queryString = `?id=${id}&student_id=${encodeURIComponent(studentId)}&name=${encodeURIComponent(name)}&year_level=${encodeURIComponent(yearLevel)}&email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}&reserve_date=${encodeURIComponent(reserveDate)}&purpose=${encodeURIComponent(purpose)}`;
+        window.location.href = `/reservation-edit/${id}${queryString}`;
+    }
+
+
+
+
     document.addEventListener('DOMContentLoaded', function () {
         const viewItemButtons = document.querySelectorAll('.view-item-btn');
     
@@ -606,30 +721,63 @@
             button.addEventListener('click', function () {
                 const studentId = button.getAttribute('data-student-id');
                 const name = button.getAttribute('data-name');
-                const course = button.getAttribute('data-course');
-                const year = button.getAttribute('data-year');
-                const phone = button.getAttribute('data-phone');
-                const email = button.getAttribute('data-email');
-                const item = button.getAttribute('data-item');
-                const quantity = button.getAttribute('data-quantity');
                 const date = button.getAttribute('data-date');
-                const purpose = button.getAttribute('data-purpose');
-                const status = button.getAttribute('data-status');
     
                 document.getElementById('modal-student-id').innerText = studentId;
                 document.getElementById('modal-name').innerText = name;
-                document.getElementById('modal-course').innerText = course;
-                document.getElementById('modal-year').innerText = year;
-                document.getElementById('modal-phone').innerText = phone;
-                document.getElementById('modal-email').innerText = email;
-                document.getElementById('modal-item').innerText = item;
-                document.getElementById('modal-quantity').innerText = quantity;
                 document.getElementById('modal-date-borrow').innerText = date;
-                document.getElementById('modal-purpose').innerText = purpose;
-                document.getElementById('modal-status').innerText = status;
+    
+                // Fetch borrow items related to this reservation
+                fetchBorrowItems(date);
             });
         });
     });
+    
+    // Function to fetch borrow items
+    function fetchBorrowItems(reserveDate) {
+        fetch(`/api/reservation-items/${reserveDate}/`) // Use reserve_date in the URL
+            .then(response => response.json())
+            .then(data => {
+                const itemsList = document.getElementById('borrow-items-list');
+                itemsList.innerHTML = ''; // Clear existing items
+    
+                // Loop through the items and add numbering
+                data.forEach((item, index) => {
+                    const itemRow = document.createElement('div');
+                    itemRow.classList.add('row', 'mb-1');
+    
+                    itemRow.innerHTML = `
+                        <div class="col-4">
+                            <p style="font-size: 15px; color: #474747;">${index + 1}. ${item.item_name}</p>
+                        </div>
+                        <div class="col-4">
+                            <p style="font-size: 15px; color: #474747;">${item.description}</p>
+                        </div>
+                        <div class="col-4">
+                            <p style="font-size: 15px; color: #474747;">${item.quantity}</p>
+                        </div>
+                    `;
+    
+                    itemsList.appendChild(itemRow);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching reservation items:', error);
+            });
+    }
+    
+
+
+
+
+    
+    
+    
+
+    
+    
+    
+    
 
 
     document.addEventListener('DOMContentLoaded', function() {

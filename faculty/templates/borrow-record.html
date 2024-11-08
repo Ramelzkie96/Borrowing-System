@@ -196,10 +196,7 @@
                         <img src="{% static 'images/search.png'%}" width="30" height="30" alt="">
                         <span class="nav-text">Borrow Record</span></a>
                     </li>
-                    <li><a href="{% url 'returned-record'%}" aria-expanded="false">
-                        <img src="{% static 'images/return.png'%}" width="30" height="30" alt="">
-                        <span class="nav-text">Return Record</span></a>
-                    </li>
+                 
                     <li class="nav-label">Borrower's Reservation</li>
                     <li><a  href="{% url 'student-reservation' %}" aria-expanded="false">
                         <img src="{% static 'images/reservation.png'%}" width="30" height="30" alt="">
@@ -246,40 +243,101 @@
 
 
             <!-- Send Email Notification Modal -->
-            <div class="modal fade" id="exampleModalLong" aria-hidden="true" style="display: none;">
-                <div class="modal-dialog">
+            <!-- Updated Send Email Notification Modal -->
+<div class="modal fade" id="exampleModalLong" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="border-bottom: 2px solid #593bdb;">
+                <h5 class="modal-title">Send Email Notification</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
+            </div>
+            <form id="emailNotificationForm" method="post" action="{% url 'send_email' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="emailTitle" style="color: #333;">Title</label>
+                        <input type="text" class="form-control" id="emailTitle" name="title" required style="border: 1px solid #474747;">
+                    </div>
+                    <div class="form-group">
+                        <label for="emailAddress" style="color: #333;">Email</label>
+                        <input type="email" class="form-control" id="emailAddress" name="email" required style="border: 1px solid #474747;">
+                    </div>
+                    <!-- New paragraph to display the message -->
+                    <p id="emailMessageDisplay" style="margin-top: 10px; color: #333;"></p>
+                    <div class="form-group">
+                        <label for="emailMessage" style="color: #333;">Message</label>
+                        <textarea class="form-control" id="emailMessage" name="message" rows="4" required style="border: 1px solid #474747;"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Send Email</button>
+                    <div id="loader" style="display:none; margin-left: 10px;">
+                        <div class="loader"></div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+            <!-- Modal for Viewing Item -->
+            <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 800px;">
                     <div class="modal-content">
                         <div class="modal-header" style="border-bottom: 2px solid #593bdb;">
-                            <h5 class="modal-title">Send Email Notification</h5>
-                            <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
+                            <h5 class="modal-title" id="exampleModalCenterTitle" style="font-size: 25px; font-weight: 700;">Borrower Details</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
                         </div>
-                        <form id="emailNotificationForm" method="post" action="{% url 'send_email' %}">
-                            {% csrf_token %}
-                            <div class="modal-body">
-                                <div class="form-group">
-                                    <label for="emailTitle" style="color: #333;">Title</label>
-                                    <input type="text" class="form-control" id="emailTitle" name="title" required style="border: 1px solid #474747;">
+                        <div class="modal-body">
+                            <div class="row mb-1">
+                                <div class="col-4">
+                                    <label class="font-weight-bold text-dark" style="font-size: 15px;">Student ID:</label>
+                                    <p id="modal-student-id" style="font-size: 15px; color: #474747;"></p>
                                 </div>
-                                <div class="form-group">
-                                    <label for="emailAddress" style="color: #333;">Email</label>
-                                    <input type="email" class="form-control" id="emailAddress" name="email" required style="border: 1px solid #474747;">
+                                <div class="col-4">
+                                    <label class="font-weight-bold text-dark" style="font-size: 15px;">Name:</label>
+                                    <p id="modal-name" style="font-size: 15px; color: #474747;"></p>
                                 </div>
-                                <div class="form-group">
-                                    <label for="emailMessage" style="color: #333;">Message</label>
-                                    <textarea class="form-control" id="emailMessage" name="message" rows="4" required style="border: 1px solid #474747;"></textarea>
+                                <div class="col-4">
+                                    <label class="font-weight-bold text-dark" style="font-size: 15px;">Date Borrow:</label>
+                                    <p id="modal-date-borrow" style="font-size: 15px; color: #474747;"></p>
                                 </div>
                             </div>
-                            <div class="modal-footer">
-                                <!-- Close and Submit Buttons -->
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Send Email</button>
+            
+                            <div class="row mb-1">
+                                <div class="col-3">
+                                    <p style="font-size: 15px; font-weight: 800;" class="text-dark">Items:</p>
+                                </div>
 
-                                <!-- Loader (hidden by default) -->
-                                <div id="loader" style="display:none; margin-left: 10px;">
-                                    <div class="loader"></div>
+                                
+                                <div class="col-3">
+                                    <p style="font-size: 15px; font-weight: 800;" class="text-dark">Description:</p>
                                 </div>
+
+                                <div class="col-3">
+                                    <p style="font-size: 15px; font-weight: 800;" class="text-dark">Quantity:</p>
+                                </div>
+
+                                <div class="col-3">
+                                    <p style="font-size: 15px; font-weight: 800;" class="text-dark">Date Return:</p>
+                                </div>
+            
+                              
+                               
                             </div>
-                        </form>
+            
+                            <div id="borrow-items-list">
+                                <!-- Dynamic borrow item list will be injected here -->
+                            </div>
+                        </div>
+            
+                     
                     </div>
                 </div>
             </div>
@@ -328,6 +386,17 @@
                                         </div>
                                     </div>
 
+                                    <div class="dataTables_length" id="example_length" style="width: 140px;">
+                                        <label class="text-dark">Status Filter 
+                                            <select name="example_length" aria-controls="example" class="form-control" id="statusFilter">
+                                                <option value="all" {% if current_show == 'all' %}selected{% endif %}>All</option>
+                                                <option value="Borrowed" {% if current_show == 'Borrowed' %}selected{% endif %}>Borrowed</option>
+                                                <option value="Returned" {% if current_show == 'Returned' %}selected{% endif %}>Returned</option>
+                                            </select>
+                                        </label>
+                                        
+                                    </div>
+
                             
                 
                                     <table id="itemTable" class="table table-bordered table-striped table-responsive-sm mt-3">
@@ -356,14 +425,13 @@
                                                         <td>{{ request.phone }}</td>
                                                         <td>{{ request.date_borrow }}</td>
                                                         <td>{{ request.time_ago }}</td>
-                                                        <td style="display: none;">{{ request.date_borrow }}</td>
                                                         <td>
-                                                            {% if request.status == "Borrowed" %}
-                                                                <div class="badge badge-success" style="color: white;">{{ request.status }}</div>
-                                                            {% elif request.status == "Returned" %}
-                                                                <div class="badge badge-danger">{{ request.status }}</div>
+                                                            {% if request.status == "Unreturned" %}
+                                                                <div class="badge badge-warning" style="color: white;">{{ request.status }}</div>
+                                                            {% elif request.status == "Fully Returned" %}
+                                                                <div class="badge badge-success text-white">{{ request.status }}</div>
                                                             {% else %}
-                                                                <div class="badge badge-secondary">{{ request.status }}</div>
+                                                                <div class="badge badge-primary">{{ request.status }}</div>
                                                             {% endif %}
                                                         </td>
                                                         <td class="text-center">
@@ -373,37 +441,42 @@
                                                         </td>
                                         
                                                         <td style="text-align: center; vertical-align: middle;">
-                                                            <div class="dropdownnn">
-                                                                <a class="btn btn-link font-24 p-0 line-height-1 no-arrow -toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
-                                                                    <img src="{% static 'images/mores.png' %}" alt="" width="30" height="30">
-                                                                </a>
-                                                                <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
-                                                                    <button onclick="redirectToBorrowerDetails('{{ request.student_id }}', '{{ request.name }}', '{{ request.date_borrow }}', '{{ request.id }}')" class="dropdown-item">
-                                                                        <i class="fas fa-eye"></i>&nbsp; Borrower Details
-                                                                    </button>
-
-                                                                    {% if request.user_id == user.id or request.handled_by_id == user.id %}  <!-- Ensure the request is associated with the current user or handled by the user -->
-                                                            
-                                                            
-                                                                    <button onclick="redirectToUpdateBorrowRequest('{{ request.id }}', '{{ request.student_id }}', '{{ request.name }}', '{{ request.course }}', '{{ request.year }}', '{{ request.email }}', '{{ request.phone }}', '{{ request.content_object.id }}', '{{ request.content_object.name }}', '{{ request.quantity }}', '{{ request.date_borrow }}', '{{ request.purpose }}', '{{ request.borrower_type }}')" class="dropdown-item edit-item-btn">
-                                                                        <i class="fas fa-edit"></i>&nbsp; Edit
-                                                                    </button>
-                                                            
-
-                                                    
-                                                                    {% endif %}
-                                        
-                                                                    
-                                                                    <button type="button" class="dropdown-item send-email-btn" data-target="#exampleModalLong" data-toggle="modal"
-                                                                    data-email="{{ request.email }}"
-                                                                    data-sender-name="{{ user.username }}"
-                                                                    data-borrow-id="{{ request.id }}">
-                                                                        <i class="fa-regular fa-envelope"></i>&nbsp; Send Notification
-                                                                    </button>
-
-
+                                                            {% if request.status == "Unreturned" or request.status == "Partial Item Returned" %}
+                                                                <!-- Show dropdown only if status is "Borrowed" -->
+                                                                <div class="dropdownnn">
+                                                                    <a class="btn btn-link font-24 p-0 line-height-1 no-arrow -toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
+                                                                        <img src="{% static 'images/mores.png' %}" alt="" width="30" height="30">
+                                                                    </a>
+                                                                    <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
+                                                                        <button onclick="redirectToBorrowerDetails('{{ request.student_id }}', '{{ request.name }}', '{{ request.date_borrow }}', '{{ request.id }}')" class="dropdown-item">
+                                                                            <i class="fas fa-eye"></i>&nbsp; Borrower Details
+                                                                        </button>
+                                                        
+                                                                        <button onclick="redirectToUpdateBorrowRequest('{{ request.id }}', '{{ request.student_id }}', '{{ request.name }}', '{{ request.course }}', '{{ request.year }}', '{{ request.email }}', '{{ request.phone }}', '{{ request.content_object.id }}', '{{ request.content_object.name }}', '{{ request.date_borrow }}', '{{ request.purpose }}', '{{ request.borrower_type }}', '{{ request.description }}')" class="dropdown-item edit-item-btn">
+                                                                            <i class="fas fa-edit"></i>&nbsp; Edit
+                                                                        </button>
+                                                                        
+                                                                        
+                                                        
+                                                                        <button type="button" class="dropdown-item send-email-btn" data-toggle="modal" data-target="#exampleModalLong"
+                                                                        data-email="{{ request.email }}"
+                                                                        data-sender-name="{{ user.username }}"
+                                                                        data-borrow-id="{{ request.id }}">
+                                                                            <i class="fa-regular fa-envelope"></i>&nbsp; Send Notification
+                                                                        </button>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
+                                                            {% elif request.status == "Fully Returned" %}
+                                                                <!-- Show view button only if status is "Returned" -->
+                                                                <button type="button" class="btn btn-primary view-item-btn btn-sm" data-toggle="modal" data-target="#exampleModalCenter"
+                                                                        data-request-id="{{ request.id }}"
+                                                                        data-student-id="{{ request.student_id }}"
+                                                                        data-name="{{ request.name }}"
+                                                                        data-year="{{ request.year }}"
+                                                                        data-date="{{ request.date_borrow }}">
+                                                                    <i class="fas fa-eye"></i>
+                                                                </button>
+                                                            {% endif %}
                                                         </td>
                                                     </tr>
                                                 {% endfor %}
@@ -696,54 +769,47 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-
-// Send email notification
+//send email
 document.addEventListener('DOMContentLoaded', function () {
-    // Add click event listener to the send email buttons
     document.querySelectorAll('.send-email-btn').forEach(function (button) {
         button.addEventListener('click', function () {
-            // Get the email, borrow ID, and sender name from the data attributes
             const email = this.getAttribute('data-email');
             const borrowId = this.getAttribute('data-borrow-id');
-            const senderName = this.getAttribute('data-sender-name'); // Get the sender's username
-  
-            // Set the email in the modal
+            
             document.getElementById('emailAddress').value = email;
-  
-            // Set the default title in the modal
             document.getElementById('emailTitle').value = 'Reminder: Outstanding Borrowed Items';
-  
+            
             // Fetch the unreturned items for the given borrow ID
             fetch(`/get-unreturned-items/${borrowId}/`)
                 .then(response => response.json())
                 .then(data => {
-                    const emailMessageTextarea = document.getElementById('emailMessage');
+                    const emailMessageDisplay = document.getElementById('emailMessageDisplay');
                     if (data.success) {
                         const unreturnedItems = data.items;
-                        let messageContent = 'The following items need to be returned:\n\n';
-  
+                        let messageContent = 'The following items need to be returned:<br><br>';
+                        
                         if (unreturnedItems.length > 0) {
                             unreturnedItems.forEach((item, index) => {
-                                messageContent += `${index + 1}. ${item.name} (Quantity: ${item.quantity})\n`;
+                                messageContent += `${index + 1}. ${item.name} (Quantity: ${item.quantity})<br>`;
                             });
-                            // Append the sender's username to the message
-                            messageContent += `\nSent by: ${senderName} (Information Technology Department)`; // Add sender's name below the items
                         } else {
                             messageContent = 'All items have been returned.';
                         }
-  
-                        // Set the message content in the textarea
-                        emailMessageTextarea.value = messageContent;
+                        
+                        // Display the message in the <p> tag
+                        emailMessageDisplay.innerHTML = messageContent;
                     } else {
-                        emailMessageTextarea.value = 'Error fetching items.';
+                        emailMessageDisplay.textContent = 'Error fetching items.';
                     }
                 })
                 .catch(() => {
-                    document.getElementById('emailMessage').value = 'Error fetching items.';
+                    document.getElementById('emailMessageDisplay').textContent = 'Error fetching items.';
                 });
         });
     });
-  });
+});
+
+
 
 
 
@@ -886,9 +952,6 @@ toggleOtherInput();
 
 
 
-
-
-
 function getCookie(name) {
     let cookieValue = null;
     if (document.cookie && document.cookie !== '') {
@@ -904,6 +967,91 @@ function getCookie(name) {
     return cookieValue;
 }
     </script>
+
+
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.view-item-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const studentId = button.getAttribute('data-student-id');
+                    const dateBorrow = button.getAttribute('data-date');
+                    const name = button.getAttribute('data-name');
+            
+                    // Populate modal fields
+                    document.getElementById('modal-student-id').textContent = studentId;
+                    document.getElementById('modal-date-borrow').textContent = dateBorrow;
+                    document.getElementById('modal-name').textContent = name;
+            
+                    // Clear previous items
+                    const borrowItemsList = document.getElementById('borrow-items-list');
+                    borrowItemsList.innerHTML = '';
+            
+                    // Fetch items related to this borrow request
+                    fetch(`/fetch_borrow_request_items/?student_id=${studentId}&date_borrow=${dateBorrow}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            console.log('Items received:', data.items); // Log items received
+                            if (data.items.length === 0) {
+                                borrowItemsList.innerHTML = '<div class="col-12">No items found.</div>';
+                            } else {
+                                data.items.forEach((item, index) => {
+                                    console.log('Rendering item', index + 1); // Log index + 1 for verification
+                                    const row = document.createElement('div');
+                                    row.className = 'row mb-1';
+                                    row.innerHTML = `
+                                        <div class="col-3" style="color: #474747;">${index + 1}. ${item.item_name}</div>
+                                        <div class="col-3" style="color: #474747;">${item.description}</div>
+                                        <div class="col-3" style="color: #474747;">${item.quantity}</div>
+                                        <div class="col-3" style="color: #474747;">${item.date_return ? item.date_return : 'Not Returned'}</div>
+                                    `;
+                                    borrowItemsList.appendChild(row);
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching items:', error); // Log any fetch errors
+                            const errorRow = document.createElement('div');
+                            errorRow.className = 'row mb-1';
+                            errorRow.innerHTML = '<div class="col-12">Error loading items.</div>';
+                            borrowItemsList.appendChild(errorRow);
+                        });
+                });
+            });
+        });
+    </script>
+    
+    
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusFilter = document.getElementById('statusFilter');
+        const tableRows = document.querySelectorAll('#itemTable tbody tr');
+    
+        statusFilter.addEventListener('change', function() {
+            const selectedStatus = this.value.toLowerCase();
+    
+            tableRows.forEach(row => {
+                // Get the text content of the 8th <td> (status column)
+                const statusCell = row.children[7]; // 7 is the index for the 8th <td>
+                if (statusCell) {
+                    const rowStatus = statusCell.textContent.trim().toLowerCase();
+    
+                    // Show the row if it matches the selected status or if "all" is selected
+                    if (selectedStatus === 'all' || rowStatus === selectedStatus) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            });
+        });
+    });
+    
+    
+    
+</script>
     
 
 {% endblock content %}

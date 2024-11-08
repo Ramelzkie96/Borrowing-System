@@ -474,7 +474,7 @@
                 </div>
                 <div class="col-md-8">
                     <h4 class="font-20 weight-500 mb-10 text-capitalize">
-                        Welcome back <div class="weight-600 font-30 text-blue">{{ user.name }}!</div>
+                        Welcome to reservation item, <div class="weight-600 font-30 text-blue">{{ user.name }}!</div>
                     </h4>
                 </div>
             </div>
@@ -549,35 +549,45 @@
                                 </div>
                                 <div class="form-row">
                                     <div class="col-xl-6">
-                                        <div class="cardd">
+                                        <div class="cardd mb-5" style="position: relative;">
+                                            <!-- Plus Icon -->
+                                            <div class="plus-icon" style="position: absolute; bottom: 10px; right: 10px; cursor: pointer;">
+                                                <i class="fa fa-plus text-primary"></i>
+                                            </div>
+                                        
                                             <div class="card-bodyd">
-                                                <div class="mb-2">
+                                                <div class="mt-4">
                                                     <h4 class="card-title">Items</h4>
                                                     <p>Select Item you want to borrow</p>
+                                                    <select id="itemSelect" name="itemm" class="form-control" required>
+                                                        <option value="">Select an item...</option>
+                                                        <!-- Options will be populated here via JavaScript -->
+                                                    </select>
+                                                    <div class="text-danger mt-2"></div>
                                                 </div>
-                                                
-                                                <div class="dropdown-container">
-                                                    <input type="text" id="searchInput" placeholder="Search for an item..." class="form-control" onkeyup="filterFunction()">
-                                                    <div id="dropdownItems" class="dropdown-items">
-                                                        {% for item in items %}
-                                                            <div class="dropdown-item" data-value="{{ item.id }}">{{ item.name }} ({{ item.quantity }}) - {{ item.description }}</div>
-                                                        {% endfor %}
-                                                    </div>
-                                                    <input type="hidden" id="selectedItem" name="itemm" value="">
+                                        
+                                                <div class="mt-4">
+                                                    <label class="text-dark">Description</label>
+                                                    <textarea name="description" style="height: 50px; resize: vertical;" class="form-control" required></textarea>
                                                 </div>
-                                                
+                                        
                                                 <div class="mt-4">
                                                     <label class="text-dark">Quantity</label>
-                                                    <input type="number" name="quantityy" id="quantityy" class="form-control col-md-3" style="border: 1px solid #bebebe;" value="1" min="1" oninput="if(this.value < 1) { this.value = 1; }">
+                                                    <input type="number" name="quantityy" id="quantityy" class="form-control col-md-3" required style="border: 1px solid #bebebe;" value="1" min="1" oninput="if(this.value < 1) { this.value = 1; }">
+                                                    <div class="text-danger mt-2"></div> <!-- Error message container -->
                                                 </div>
                                             </div>
                                         </div>
+                                        
+ 
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label class="text-dark">Purpose for borrow</label>
-                                        <textarea name="description" class="form-control" cols="1" rows="1" style="border: 1px solid #bebebe;"></textarea>
+                                        <textarea name="purpose" class="form-control" cols="1" rows="1" style="border: 1px solid #bebebe;"></textarea>
                                     </div>
                                 </div>
+
+                                
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
                                     <button type="submit" class="btn btn-primary">Submit</button>
@@ -602,6 +612,145 @@
 
 <!-- Add this script to hide the alerts after 5 seconds -->
 <script>
+    let itemQuantities = {}; // Object to store quantities of each item
+
+function populateItems() {
+    fetch('/get-faculty-items/') // Your actual endpoint to fetch items
+        .then(response => response.json())
+        .then(data => {
+            const itemSelects = document.querySelectorAll('select[name="itemm"]');
+            itemSelects.forEach(itemSelect => {
+                // Clear existing options (except the default) only if the select is empty
+                if (itemSelect.options.length === 1) {
+                    data.forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item.id; // Set the item's ID as the value
+                        option.textContent = `${item.name} (${item.quantity})`; // Set the display text
+                        itemSelect.appendChild(option);
+                        // Store the item's quantity for later validation
+                        itemQuantities[item.id] = item.quantity;
+                    });
+                }
+            });
+        })
+        .catch(error => console.error('Error fetching items:', error));
+}
+
+// Validate quantity based on selected item
+function validateQuantity(selectElement, quantityInput) {
+    const selectedItemId = selectElement.value;
+    const availableQuantity = itemQuantities[selectedItemId] || 0; // Get available quantity
+
+    const quantityValue = parseInt(quantityInput.value, 10);
+    const quantityError = quantityInput.nextElementSibling; // Assumes error message is the next sibling
+    const selectError = selectElement.nextElementSibling; // Assumes error message for select field is the next sibling
+
+    // Clear previous error messages
+    quantityError.textContent = '';
+    selectError.textContent = '';
+
+    // Check if quantity exceeds available stock
+    if (quantityValue > availableQuantity) {
+        quantityError.textContent = `You cannot borrow more than ${availableQuantity} of this item.`;
+    }
+
+    // Validate uniqueness of selected item across cards
+    const selectedItemIds = Array.from(document.querySelectorAll('select[name="itemm"]')).map(select => select.value);
+    const duplicateItemId = selectedItemIds.find((id, index) => selectedItemIds.indexOf(id) !== index && id !== ''); // Check for duplicates
+
+    if (duplicateItemId) {
+        selectError.textContent = 'This item has already been selected in another card.';
+    }
+
+    updateSubmitButtonState(); // Check submit button state after validation
+}
+
+// Enable or disable the submit button based on validation
+function updateSubmitButtonState() {
+    const errorMessages = document.querySelectorAll('.text-danger'); // Select all error messages
+    const submitButton = document.querySelector('button[type="submit"]');
+    const hasErrors = Array.from(errorMessages).some(message => message.textContent.trim() !== '');
+    
+    submitButton.disabled = hasErrors; // Disable button if there are any error messages
+}
+
+// Event listener for select change
+document.addEventListener('change', (event) => {
+    if (event.target.matches('select[name="itemm"]')) {
+        const selectElement = event.target;
+        const quantityInput = selectElement.closest('.card-bodyd').querySelector('input[name="quantityy"]');
+        validateQuantity(selectElement, quantityInput); // Validate on select change
+    }
+});
+
+// Event listener for quantity input change
+document.addEventListener('input', (event) => {
+    if (event.target.matches('input[name="quantityy"]')) {
+        const quantityInput = event.target;
+        const selectElement = quantityInput.closest('.card-bodyd').querySelector('select[name="itemm"]');
+        validateQuantity(selectElement, quantityInput); // Validate on quantity input change
+    }
+});
+
+// Function to handle duplicating the card
+function duplicateCard(event) {
+    const originalCard = event.target.closest('.cardd');
+    if (!originalCard) return;
+
+    const newCard = originalCard.cloneNode(true);
+    newCard.removeAttribute('id');
+
+    // Reset quantity input and clear error messages
+    const quantityInput = newCard.querySelector('input[name="quantityy"]');
+    if (quantityInput) {
+        quantityInput.value = 1; // Reset quantity
+        quantityInput.nextElementSibling.textContent = ''; // Clear quantity error message
+    }
+
+    // Clear selected item in the new card and clear errors
+    const selectElement = newCard.querySelector('select[name="itemm"]');
+    if (selectElement) {
+        selectElement.selectedIndex = 0; // Reset to the default option
+        selectElement.nextElementSibling.textContent = ''; // Clear select error message
+    }
+
+    // Clear the description field in the new card
+    const descriptionInput = newCard.querySelector('textarea[name="description"]'); // Adjust if it's not a textarea
+    if (descriptionInput) {
+        descriptionInput.value = ''; // Clear the description field
+    }
+
+    // Add "X" icon for deleting the card
+    const closeIcon = document.createElement('div');
+    closeIcon.innerHTML = '<i class="fa fa-times text-danger" style="cursor: pointer;"></i>';
+    closeIcon.style.position = 'absolute';
+    closeIcon.style.top = '10px';
+    closeIcon.style.right = '10px';
+    newCard.appendChild(closeIcon);
+    closeIcon.addEventListener('click', () => newCard.remove());
+
+    // Append the new card to the container
+    originalCard.parentNode.appendChild(newCard);
+    populateItems(); // Call the function to fetch and populate items
+}
+
+// Call this function when the document is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    populateItems(); // Fetch and populate items on load
+    document.querySelectorAll('.plus-icon').forEach(plusIcon => {
+        plusIcon.addEventListener('click', duplicateCard); // Add event listeners to all current plus icons
+    });
+    updateSubmitButtonState(); // Check the initial state of the submit button
+});
+
+
+    
+
+        
+        
+        
+        
+        
 
 
 
@@ -710,6 +859,11 @@
             });
         });
     });
+
+
+
+
+  
     
 
 
@@ -746,6 +900,9 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
     
+
+
+
     
 </script>
 

@@ -172,10 +172,7 @@ button:disabled {
                         <img src="{% static 'images/search.png'%}" width="30" height="30" alt="">
                         <span class="nav-text text-white">Borrow Record</span></a>
                     </li>
-                    <li><a href="{% url 'returned-record'%}" aria-expanded="false">
-                        <img src="{% static 'images/return.png'%}" width="30" height="30" alt="">
-                        <span class="nav-text">Return Record</span></a>
-                    </li>
+              
                     <li class="nav-label">Borrower's Reservation</li>
                     <li><a  href="{% url 'student-reservation' %}" aria-expanded="false">
                         <img src="{% static 'images/reservation.png'%}" width="30" height="30" alt="">
@@ -224,140 +221,122 @@ button:disabled {
           
           
                             <form id="editBorrowerForm" method="post" action="{% url 'save-borrower-update' %}">
-                              {% csrf_token %}
-                              <input type="hidden" name="id" value="{{ borrow_request_id }}">
-          
-                              <div class="form-row">
-                                <div class="form-group col-md-6">
-                                  <label class="text-dark">Student ID</label>
-                                  <input type="text" name="student_id" class="form-control" value="{{ student_id }}">
-                                </div>
-                                <div class="form-group col-md-6">
-                                  <label class="text-dark">Name</label>
-                                  <input type="text" name="name" class="form-control" value="{{ name }}">
-                                </div>
-                                <div class="form-group col-md-6">
-                                  <label class="text-dark">Course</label>
-                                  <input type="text" name="course" class="form-control" value="{{ course }}">
-                                </div>
-                                <div class="form-group col-md-6">
-                                  <label class="text-dark">Year</label>
-                                  <select class="form-select form-control" name="year" style="border:1px solid rgba(0, 0, 0, 0.2);" aria-label="Default select example">
-                                    <option value="">----</option>
-                                    <option value="1st Year" {% if year == "1st Year" %}selected{% endif %}>1st Year</option>
-                                    <option value="2nd Year" {% if year == "2nd Year" %}selected{% endif %}>2nd Year</option>
-                                    <option value="3rd Year" {% if year == "3rd Year" %}selected{% endif %}>3rd Year</option>
-                                    <option value="4th Year" {% if year == "4th Year" %}selected{% endif %}>4th Year</option>
-                                </select>
+                                {% csrf_token %}
+                                <input type="hidden" name="id" value="{{ borrow_request_id }}">
                                 
-                                
-                                </div>
-                              </div>
-          
-                              <div class="form-row">
+                                <div class="form-row">
+                                 
                                 <div class="form-group col-md-6">
-                                  <label class="text-dark">Email</label>
-                                  <input type="text" name="email" class="form-control" value="{{ email }}">
-                                </div>
-                                <div class="form-group col-md-3">
-                                  <label class="text-dark">Phone</label>
-                                  <input type="text" name="phone" class="form-control" value="{{ phone }}">
-                                </div>
-                                <div class="form-group col-md-3">
-                                  <label class="text-dark">Date Borrow</label>
-                                  <div class="input-with-icon">
-                                    <input name="datepicker" id="dateBorrow" class="datepicker-default form-control"
-                                      value="{{ date_borrow }}" style="border: 1px solid #bebebe; width: 180px;">
-                                    <i class="fas fa-calendar-alt" style="position: absolute; top: 38px; right: -50px;"></i>
-                                  </div>
-                                </div>
-                              </div>
-          
-                              <div class="form-row">
-                                <div class="form-group col-md-2">
-                                  <label class="text-dark">
-                                    <input type="radio" name="borrower_type" value="Student" {% if borrower_type == "Student" %}checked{% endif %} id="student_radio" style="width: 20px; height: 20px;">&nbsp; Student
-                                  </label>
-                                </div>
-                                <div class="form-group col-md-2">
-                                  <label class="text-dark">
-                                    <input type="radio" name="borrower_type" value="Teacher" {% if borrower_type == "Teacher" %}checked{% endif %} id="teacher_radio" style="width: 20px; height: 20px;">&nbsp; Teacher
-                                  </label>
-                                </div>
-                                <div class="form-group col-md-2">
-                                  <label class="text-dark">
-                                    Others:
-                                    {% if borrower_type != "Student" and borrower_type != "Teacher" %}
-                                      <input type="text" class="text-dark" name="other_borrower_type" id="other_borrower_type" value="{{ borrower_type }}" style="width: 100px; height: 20px;">
-                                    {% else %}
-                                      <input type="text" name="other_borrower_type" id="other_borrower_type" style="width: 100px; height: 20px;">
-                                    {% endif %}
-                                  </label>
-                                </div>
-                              </div>
-                              
-                              
-          
-          
-          
-                              <div class="form-row">
-                                <div class="col-xl-6">
-          
-                                  <div class="card">
-                                    <div class="col-xl-6">
-                                        <div class="card-body">
-                                            <div class="mb-3">
-                                                <h4 class="card-title">Item</h4>
+                                  <label style="color: #474747;">Date Borrow</label>
+                                  
+                                            <div class="input-with-icon">
+                                              <input name="datepicker" id="dateBorrow" class="datepicker-default form-control"
+                                                value="{{ date_borrow }}" style="border: 1px solid #bebebe;">
+                                              <i class="fas fa-calendar-alt" style="position: absolute; top: 38px; right: 20px;"></i>
                                             </div>
-                                            {% if items %}
-                                                <select name="itemm" id="itemSelect" class="form-control" aria-hidden="true" style="width: 300px;">
-                                                    
-                                                        {% for borrow_item in items %}
-                                                            <option value="{{ borrow_item.item.id }}" 
-                                                                    data-available-quantity="{{ borrow_item.item.quantity }}" 
-                                                                    data-original-quantity="{{ borrow_item.quantityy }}">
-                                                                {{ borrow_item.item.name }} (Available stock: {{ borrow_item.item.quantity }})
-                                                            </option>
-                                                        {% endfor %}
-                                                </select>
-
-                                                <div class="mt-4">
-                                                    <label class="text-dark">Quantity</label>
-                                                    <input type="number" name="quantityy" id="quantityInput" class="form-control col-md-3" 
-                                                           value="0" style="border: 1px solid #bebebe;">
-                                                    <span id="quantityError" class="text-danger" style="display: none;"></span>
-                                                    <!-- Error message area -->
-                                                </div>
-                                                {% else %}
-                                                    <input type="text" class="form-control" disabled value="mark as returned">
-                                                {% endif %}
-                                            
-                                
-                                            
-                                        </div>
+                                   
+                                        {% if form.date_borrow.errors %}
+                                            <script>
+                                                document.querySelector('#datepicker').classList.add('error-border');
+                                            </script>
+                                        {% endif %} 
+                                </div>
+            
+            
+                                    <div class="form-group col-md-3">
+                                        <label style="color: #474747;">Student ID</label>
+                                        <input type="text" name="student_id" class="form-control" value="{{ student_id }}" style="border: 1px solid #bebebe;">
+                                    </div>
+                                    <div class="form-group col-md-3">
+                                        <label style="color: #474747;">Name</label>
+                                        <input type="text" name="name" class="form-control" value="{{ name }}" style="border: 1px solid #bebebe;">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label style="color: #474747;">Course</label>
+                                        <input type="text" name="course" class="form-control" value="{{ course }}" style="border: 1px solid #bebebe;">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label style="color: #474747;">Year</label>
+                                        <select class="form-select form-control" name="year" style="border:1px solid rgba(0, 0, 0, 0.2);" aria-label="Default select example">
+                                            <option value="">----</option>
+                                            <option value="1st Year" {% if year == "1st Year" %}selected{% endif %}>1st Year</option>
+                                            <option value="2nd Year" {% if year == "2nd Year" %}selected{% endif %}>2nd Year</option>
+                                            <option value="3rd Year" {% if year == "3rd Year" %}selected{% endif %}>3rd Year</option>
+                                            <option value="4th Year" {% if year == "4th Year" %}selected{% endif %}>4th Year</option>
+                                        </select>
                                     </div>
                                 </div>
-                                
-                                
-                                
-                                
-                                
-          
-          
+                            
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label style="color: #474747;">Email</label>
+                                        <input type="text" name="email" class="form-control" value="{{ email }}" style="border: 1px solid #bebebe;">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label style="color: #474747;">Phone</label>
+                                        <input type="text" name="phone" class="form-control" value="{{ phone }}" style="border: 1px solid #bebebe;">
+                                    </div>
+                                    
                                 </div>
-                                <div class="form-group col-md-6">
-                                  <label class="text-dark">Purpose for borrow</label>
-                                  <textarea name="description" class="form-control"
-                                    style="border: 1px solid #bebebe;">{{ purpose }}</textarea>
+                            
+                                <div class="form-row">
+                                    <div class="form-group col-md-2">
+                                        <label style="color: #474747;">
+                                            <input type="radio" name="borrower_type" value="Student" id="student_radio" style="width: 20px; height: 20px;" {% if borrower_type == "Student" %}checked{% endif %}>&nbsp; Student
+                                        </label>
+                                    </div>
+                                    <div class="form-group col-md-2">
+                                        <label style="color: #474747;">
+                                            <input type="radio" name="borrower_type" value="Teacher" id="teacher_radio" style="width: 20px; height: 20px;" {% if borrower_type == "Teacher" %}checked{% endif %}>&nbsp; Faculty/Employee
+                                        </label>
+                                    </div>
                                 </div>
+                            
+                                <div class="form-row">
+                                  <div class="col-xl-6">
+                                      {% for borrow_item in borrow_request_items %}
+                                      <div class="card mb-3">
+                                          <div class="card-body">
+                                              <h4 class="card-title text-dark">Item</h4>
+                                              <br>
+                                              <select name="itemm_{{ forloop.counter }}" id="itemSelect_{{ forloop.counter }}" class="form-control item-select" style="width: 300px; border: 1px solid #bebebe;" data-available-quantity="{{ borrow_item.item.quantity }}">
+                                                  <option value="">Select an item</option>
+                                                  {% for item in items %}
+                                                      <option value="{{ item.id }}" {% if item.id == borrow_item.item.id %}selected{% endif %}>{{ item.name }} ({{ item.quantity }})</option>
+                                                  {% endfor %}
+                                              </select>
+                                              <div class="error-message" id="error-message-{{ forloop.counter }}" style="color: red; display: none;"></div>
+                                              <input type="hidden" name="borrow_item_id_{{ forloop.counter }}" value="{{ borrow_item.id }}">
+                                              <div class="mt-4">
+                                                  <label class="text-dark">Description</label>
+                                                  <textarea name="description_{{ forloop.counter }}" class="form-control" style="border: 1px solid #bebebe;">{{ borrow_item.description }}</textarea>
+                                              </div>
+                              
+                                              <div class="mt-4">
+                                                  <label class="text-dark">Quantity</label>
+                                                  <input type="number" name="quantity_{{ forloop.counter }}" class="form-control quantity-input" data-index="{{ forloop.counter }}" value="{{ borrow_item.quantityy }}" style="width: 200px; border: 1px solid #bebebe;" data-available-quantity="{{ borrow_item.item.quantity }}">
+            
+                                              </div>
+                                              
+                                          </div>
+                                      </div>
+                                      {% endfor %}
+                                  </div>
+                                  <div class="form-group col-md-6">
+                                      <label class="text-dark">Purpose for borrow</label>
+                                      <textarea name="purpose" class="form-control" style="border: 1px solid #bebebe;">{{ purpose }}</textarea>
+                                  </div>
                               </div>
-          
-          
-                              <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" onclick="window.history.back();">Back</button>
-                                <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Update</button>
-                              </div>
+                              
+                                
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" onclick="window.history.back();">Back</button>
+                                    <button id="updateButton" class="btn btn-primary" disabled>Update</button>
+                                </div>
                             </form>
+                          
+                          
+                          
           
           
                           </div>
@@ -386,118 +365,50 @@ button:disabled {
 
 
     <script>
-
-        function checkOtherBorrowerType() {
-          const otherInput = document.getElementById('other_borrower_type').value;
-      
-          if (otherInput) {
-              // If there's input in the "Others" field, uncheck both radio buttons
-              document.getElementById('student_radio').checked = false;
-              document.getElementById('teacher_radio').checked = false;
-          }
-      }
-      
-      function clearOtherBorrowerType() {
-          // Clear the "Others" input when either radio button is selected
-          document.getElementById('other_borrower_type').value = '';
-      }
-      
-      
-      
-      
-      document.addEventListener('DOMContentLoaded', function () {
-        // Function to update quantity input based on the selected item
-        function updateQuantityInput() {
-            const itemSelect = document.getElementById('itemSelect');
-            const selectedOption = itemSelect.options[itemSelect.selectedIndex];
-            const originalQuantity = parseInt(selectedOption.getAttribute('data-original-quantity'));
-    
-            // Set the quantity input to the current quantity of the selected item
-            const quantityInput = document.getElementById('quantityInput');
-            quantityInput.value = originalQuantity;
-    
-            // Hide any previous error message
-            document.getElementById('quantityError').style.display = 'none';
-        }
-    
-        // Call the update function on page load to set initial values
-        updateQuantityInput();
-    
-        // Update quantity when a new item is selected
-        document.getElementById('itemSelect').addEventListener('change', updateQuantityInput);
-    
-        // Real-time validation for quantity input
-        document.getElementById('quantityInput').addEventListener('input', function () {
-            const itemSelect = document.getElementById('itemSelect');
-            const selectedOption = itemSelect.options[itemSelect.selectedIndex];
-            const availableStock = parseInt(selectedOption.getAttribute('data-available-quantity'));
-            const originalQuantity = parseInt(selectedOption.getAttribute('data-original-quantity'));
-            let newQuantity = parseInt(this.value);
-    
-            // Enforce a minimum quantity of 1
-            if (newQuantity < 1) {
-                newQuantity = 1;
-                this.value = newQuantity;
+        document.addEventListener('DOMContentLoaded', function() {
+            const quantityInputs = document.querySelectorAll('.quantity-input');
+            const updateButton = document.getElementById('updateButton');
+        
+            // Function to check all quantity inputs for errors
+            function checkErrors() {
+                let hasError = false;
+        
+                quantityInputs.forEach(input => {
+                    const index = input.getAttribute('data-index');
+                    const availableQuantity = parseInt(input.getAttribute('data-available-quantity'), 10);
+                    const enteredQuantity = parseInt(input.value, 10);
+                    const initialQuantity = parseInt(input.getAttribute('data-initial-quantity'), 10);
+        
+                    const addedQuantity = enteredQuantity - initialQuantity; // Calculate added quantity
+                    const errorMessageDiv = document.querySelector(`#error-message-${index}`);
+        
+                    // Show error message if added quantity exceeds available stock
+                    if (addedQuantity > availableQuantity) {
+                        errorMessageDiv.textContent = `You cannot borrow more than ${availableQuantity} items available.`;
+                        errorMessageDiv.style.display = 'block';  // Show the error message
+                        hasError = true;
+                    } else {
+                        // Clear the error message if added quantity is valid (0 or less than available)
+                        errorMessageDiv.style.display = 'none';
+                    }
+                });
+        
+                // Enable or disable the update button based on error state
+                updateButton.disabled = hasError;
             }
-    
-            const additionalQuantity = newQuantity - originalQuantity;
-            const errorMessage = document.getElementById('quantityError');
-    
-            // Show error message if the additional quantity exceeds available stock
-            if (additionalQuantity > availableStock) {
-                errorMessage.textContent = 'The requested additional quantity exceeds the available stock.';
-                errorMessage.style.display = 'block';
-            } else {
-                errorMessage.style.display = 'none'; // Hide error message if quantity is within limit
-            }
+        
+            quantityInputs.forEach(input => {
+                input.addEventListener('focus', function() {
+                    // Capture the initial quantity value when the input gains focus
+                    input.setAttribute('data-initial-quantity', input.value);
+                });
+        
+                input.addEventListener('input', checkErrors); // Call checkErrors on input change
+            });
+        
+            // Initial check to disable the button if there are errors on page load
+            checkErrors();
         });
-    
-        // Handle form submission
-        document.getElementById('editBorrowerForm').addEventListener('submit', function (e) {
-            const itemSelect = document.getElementById('itemSelect');
-            const selectedOption = itemSelect.options[itemSelect.selectedIndex];
-            const availableStock = parseInt(selectedOption.getAttribute('data-available-quantity'));
-            const originalQuantity = parseInt(selectedOption.getAttribute('data-original-quantity'));
-            const newQuantity = parseInt(document.getElementById('quantityInput').value);
-            const additionalQuantity = newQuantity - originalQuantity;
-    
-            // Prevent form submission if additional quantity exceeds available stock
-            if (additionalQuantity > availableStock) {
-                e.preventDefault(); // Stop form submission
-                document.getElementById('quantityError').textContent = 'Cannot submit: Additional quantity exceeds available stock.';
-                document.getElementById('quantityError').style.display = 'block';
-                return;
-            }
-    
-            // Proceed with form submission if within stock
-            e.preventDefault();
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', this.action, true);
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    
-            xhr.onload = function () {
-                if (xhr.status === 200) {
-                    // Redirect to the borrow record page after success
-                    window.location.href = '/borrow-record';
-                } else {
-                    console.error('Error:', xhr.responseText);
-                }
-            };
-    
-            const formData = new FormData(this);
-            const urlEncodedData = new URLSearchParams(formData).toString();
-            xhr.send(urlEncodedData);
-        });
-    });
-    
-      
-      
-      
-      
-      
-      
-      
-      </script>
-
+        </script>
 
 {% endblock content %}

@@ -31,7 +31,6 @@ urlpatterns = [
     path('admin-edit', views.update_item, name="admin-update_item"),
     path('admin-delete-item/<int:item_id>/', views.delete_item, name='admin-delete_item'),
     path('admin-borrowers', views.borrowers, name='admin-borrowers'),
-    path('admin-get-available-quantity/<int:item_id>/', views.get_available_quantity, name='admin-get_available_quantity'),
     path('admin-search-borrow-request/', views.search_borrow_request, name='admin-search_borrow_request'),
     path('admin-borrow-record', views.borrow_record, name='admin-borrow-record'),
     path('admin-borrower-details/', views.borrower_details, name='admin-borrower-details'),
@@ -39,16 +38,16 @@ urlpatterns = [
     path('admin-update-borrower/', views.fetch_borrow_request, name='admin-update-borrower'),
     path('admin-save-borrower-update/', views.save_borrow_update, name='admin-save-borrower-update'),
     path('admin-get-unreturned-items/<int:borrow_id>/', views.get_unreturned_items, name='admin-get-unreturned-items'),
-    
-    
     path('admin-borrower-report/<str:id>/', views.generate_report, name='admin-borrower-report'),
-
-    path('admin-returned-record/', views.returned_record, name="admin-returned-record"),
     path('admin-fetch_borrow_request_items/', views.fetch_borrow_request_items, name='admin-fetch_borrow_request_items'),
     path('admin-student-reservation/', views.admin_student_reservation, name='admin-student-reservation'),
     path('admin-update-reservation-status/', views.update_reservation_status, name='admin-update_reservation_status'),
     path('admin-change-profile', views.change_profile, name='admin-change-profile'),
     path('admin-change-password', views.change_password, name='admin-change-password'),
+    path('admin-validate-item-name/', views.validate_item_name, name='admin-validate_item_name'),
+    path('admin-get-available-quantity/<int:item_id>/', views.get_available_quantity, name='admin-get_available_quantity'),
+    path('api/admin-reservation-items/<str:reserve_date>/', views.reservation_items, name='admin-reservation-items'),
+    
 ] 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

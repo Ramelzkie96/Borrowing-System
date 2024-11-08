@@ -1,0 +1,753 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- CSS -->
+<link rel="stylesheet" type="text/css" href="{%static 'vendorss/styles/core.css'%}">
+<link rel="stylesheet" type="text/css" href="{%static 'vendorss/styles/icon-font.min.css'%}">
+<link rel="stylesheet" type="text/css" href="{%static 'vendorss/styles/style.css'%}">
+<link rel="stylesheet" href="{% static 'vendor/pickadate/themes/default.css' %}">
+<link rel="stylesheet" href="{% static 'vendor/pickadate/themes/default.date.css' %}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+
+<style>
+    /* Hide the alert after the transition */
+    .hide-alert {
+        opacity: 0;
+        transition: opacity 0.6s ease-out;
+        /* Smooth transition */
+    }
+
+    /* Optional: smooth fade-in for when the alert first appears */
+    .alert-fade {
+        opacity: 1;
+        transition: opacity 0.6s ease-in;
+        /* Smooth transition */
+    }
+
+    /* Adjust the size of the card container */
+    .custom-card {
+        height: 330px !important;
+        /* Increase height */
+        width: 1000px;
+        /* Increase width */
+    }
+
+    /* Optionally adjust the card styling */
+    .card-box {
+        height: 100%;
+        /* Ensure the card-box fills its container */
+        width: 100%;
+        /* Ensure the card-box fills its container */
+        padding: 20px;
+        /* Add padding if needed */
+    }
+
+    /* Style adjustments for elements inside the card */
+    .card-box .reserve-img {
+        width: 60px;
+        /* Increase the icon size */
+    }
+
+    .card-box .h4 {
+        font-size: 36px;
+        /* Adjust font size for better visibility */
+    }
+
+    .card-box .font-14 {
+        font-size: 18px;
+        /* Adjust font size for better readability */
+    }
+
+
+
+    input[type="radio"] {
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        outline: none;
+        background-color: transparent;
+        border: 2px solid #bebebe;
+        border-radius: 50%;
+        width: 20px;
+        height: 20px;
+        position: relative;
+    }
+
+    /* Style the radio button when it is checked */
+    input[type="radio"]:checked::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 12px;
+        height: 12px;
+        background-color: #007bff;
+        /* Color of the checked state */
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    /* Style the label to align with the custom radio button */
+    label {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0;
+        cursor: pointer;
+    }
+
+    /* Optional: Style the label when the radio button is focused */
+    input[type="radio"]:focus+label {
+        outline: 1px solid #007bff;
+        /* Focus outline color */
+    }
+    .notification-close {
+        background: none;
+        border: none;
+        color: #999; /* Adjust color as needed */
+        font-size: 16px; /* Adjust size as needed */
+        cursor: pointer;
+        position: absolute;
+        top: 10px; /* Adjust as needed */
+        right: 10px; /* Adjust as needed */
+    }
+    
+    .notification-close:hover {
+        color: #f00; /* Change color on hover */
+    }
+    
+    .notification-list {
+        position: relative;
+    }
+    
+    .notification-content {
+        padding-right: 30px; /* Space for the close icon */
+    }
+</style>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<script src="{%static 'vendorss/scripts/core.js'%}"></script>
+<script src="{%static 'vendorss/scripts/script.min.js'%}"></script>
+<script src="{%static 'vendorss/scripts/process.js'%}"></script>
+<script src="{%static 'vendorss/scripts/layout-settings.js'%}"></script>
+<script src="{%static 'vendorss/scripts/dashboard.js'%}"></script>
+<!-- pickadate -->
+<script src="{% static 'vendor/pickadate/picker.js' %}"></script>
+<script src="{% static 'vendor/pickadate/picker.time.js' %}"></script>
+<script src="{% static 'vendor/pickadate/picker.date.js' %}"></script>
+<script src="{% static 'js/plugins-init/pickadate-init.js' %}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+{% endblock %}
+
+
+
+{% block content %}
+<div class="header">
+    <div class="header-left">
+        <div class="menu-icon dw dw-menu"></div>
+        <div class="header-search">
+            <form>
+                <div class="form-group mb-0">
+
+                    <div class="dropdown">
+
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <div class="form-group row">
+                                <label class="col-sm-12 col-md-2 col-form-label">From</label>
+                                <div class="col-sm-12 col-md-10">
+                                    <input class="form-control form-control-sm form-control-line" type="text">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-12 col-md-2 col-form-label">To</label>
+                                <div class="col-sm-12 col-md-10">
+                                    <input class="form-control form-control-sm form-control-line" type="text">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-sm-12 col-md-2 col-form-label">Subject</label>
+                                <div class="col-sm-12 col-md-10">
+                                    <input class="form-control form-control-sm form-control-line" type="text">
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <button class="btn btn-primary">Search</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="header-right">
+        <div class="dashboard-setting user-notification">
+            <div class="dropdown">
+                <a class="dropdown-toggle no-arrow" href="javascript:;" data-toggle="right-sidebar">
+                    <i class="dw dw-settings2"></i>
+                </a>
+            </div>
+        </div>
+        <div class="user-notification">
+            <div class="dropdown">
+                <a class="dropdown-toggle no-arrow" href="#" role="button" data-toggle="dropdown" id="notification-icon">
+                    <i class="icon-copy dw dw-notification"></i>
+                    {% if unread_notification > 0 %}
+                        <span class="notification-active text-danger" style="font-size: 15px; font-weight: 800; position: absolute;">
+                            {{ unread_notification }}
+                        </span>
+                    {% endif %}
+                </a>
+                <div class="dropdown-menu dropdown-menu-right">
+                    <div class="notification-list mx-h-350 customscroll">
+                        <ul id="notification-list">
+                            {% if reservations %}
+                                {% for reservation in reservations %}
+                                    <li data-id="{{ reservation.id }}" class="{% if reservation.is_read %} read {% endif %}">
+                                        <a href="#">
+                                            <img src="{{ reservation.handled_by_profile_picture }}" alt="Handled by {{ reservation.handled_by }}">
+                                            <div class="notification-content">
+                                                <h3>{{ reservation.handled_by }}</h3>
+                                                <p>{{ reservation.notification }}</p>
+                                            </div>
+                                            <button class="notification-close" data-id="{{ reservation.id }}">
+                                                <i class="icon-copy dw dw-delete-3"></i>
+                                            </button>
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            {% else %}
+                                <li class="no-notifications text-center">
+                                    <p>No available notifications</p>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="user-info-dropdown">
+            <div class="dropdown">
+                <a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown">
+                    <span class="user-icon" style="display: inline-block; width: 50px; height: 50px; overflow: hidden; border-radius: 50%;">
+                        <img src="{{ user.profile_image.url }}" alt="Profile Image" style="width: 100%; height: 100%; object-fit: cover;">
+                    </span>
+                    
+                    <span class="user-name">{{ user.name }}</span>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
+                    <a class="dropdown-item" href="profile.html"><i class="dw dw-user1"></i> Profile</a>
+                    <a class="dropdown-item" href="profile.html"><i class="dw dw-settings2"></i> Setting</a>
+                    <a class="dropdown-item" href="faq.html"><i class="dw dw-help"></i> Help</a>
+                    <a class="dropdown-item" href="{% url 'reservation-logout' %}"><i class="dw dw-logout"></i> Log
+                        Out</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="right-sidebar">
+    <div class="sidebar-title">
+        <h3 class="weight-600 font-16 text-blue">
+            Layout Settings
+            <span class="btn-block font-weight-400 font-12">User Interface Settings</span>
+        </h3>
+        <div class="close-sidebar" data-toggle="right-sidebar-close">
+            <i class="icon-copy ion-close-round"></i>
+        </div>
+    </div>
+    <div class="right-sidebar-body customscroll">
+        <div class="right-sidebar-body-content">
+            <h4 class="weight-600 font-18 pb-10">Header Background</h4>
+            <div class="sidebar-btn-group pb-30 mb-10">
+                <a href="javascript:void(0);" class="btn btn-outline-primary header-white active">White</a>
+                <a href="javascript:void(0);" class="btn btn-outline-primary header-dark">Dark</a>
+            </div>
+
+            <h4 class="weight-600 font-18 pb-10">Sidebar Background</h4>
+            <div class="sidebar-btn-group pb-30 mb-10">
+                <a href="javascript:void(0);" class="btn btn-outline-primary sidebar-light ">White</a>
+                <a href="javascript:void(0);" class="btn btn-outline-primary sidebar-dark active">Dark</a>
+            </div>
+
+            <h4 class="weight-600 font-18 pb-10">Menu Dropdown Icon</h4>
+            <div class="sidebar-radio-group pb-10 mb-10">
+                <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="sidebaricon-1" name="menu-dropdown-icon" class="custom-control-input"
+                        value="icon-style-1" checked="">
+                    <label class="custom-control-label" for="sidebaricon-1"><i class="fa fa-angle-down"></i></label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="sidebaricon-2" name="menu-dropdown-icon" class="custom-control-input"
+                        value="icon-style-2">
+                    <label class="custom-control-label" for="sidebaricon-2"><i class="ion-plus-round"></i></label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="sidebaricon-3" name="menu-dropdown-icon" class="custom-control-input"
+                        value="icon-style-3">
+                    <label class="custom-control-label" for="sidebaricon-3"><i
+                            class="fa fa-angle-double-right"></i></label>
+                </div>
+            </div>
+
+            <h4 class="weight-600 font-18 pb-10">Menu List Icon</h4>
+            <div class="sidebar-radio-group pb-30 mb-10">
+                <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="sidebariconlist-1" name="menu-list-icon" class="custom-control-input"
+                        value="icon-list-style-1" checked="">
+                    <label class="custom-control-label" for="sidebariconlist-1"><i class="ion-minus-round"></i></label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="sidebariconlist-2" name="menu-list-icon" class="custom-control-input"
+                        value="icon-list-style-2">
+                    <label class="custom-control-label" for="sidebariconlist-2"><i class="fa fa-circle-o"
+                            aria-hidden="true"></i></label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="sidebariconlist-3" name="menu-list-icon" class="custom-control-input"
+                        value="icon-list-style-3">
+                    <label class="custom-control-label" for="sidebariconlist-3"><i class="dw dw-check"></i></label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="sidebariconlist-4" name="menu-list-icon" class="custom-control-input"
+                        value="icon-list-style-4" checked="">
+                    <label class="custom-control-label" for="sidebariconlist-4"><i
+                            class="icon-copy dw dw-next-2"></i></label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="sidebariconlist-5" name="menu-list-icon" class="custom-control-input"
+                        value="icon-list-style-5">
+                    <label class="custom-control-label" for="sidebariconlist-5"><i
+                            class="dw dw-fast-forward-1"></i></label>
+                </div>
+                <div class="custom-control custom-radio custom-control-inline">
+                    <input type="radio" id="sidebariconlist-6" name="menu-list-icon" class="custom-control-input"
+                        value="icon-list-style-6">
+                    <label class="custom-control-label" for="sidebariconlist-6"><i class="dw dw-next"></i></label>
+                </div>
+            </div>
+
+            <div class="reset-options pt-30 text-center">
+                <button class="btn btn-danger" id="reset-settings">Reset Settings</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="left-side-bar">
+    <div class="brand-logo">
+        <a href="{% url 'reservation-dashboard' %}">
+            <img src="{%static 'images/pit_logo.png'%}" alt="" width="50" height="50">
+            <span class="text-white" style="font-weight: 800; font-size: 14px;">&nbsp; Student Reservation</span>
+        </a>
+        <div class="close-sidebar" data-toggle="left-sidebar-close">
+            <i class="ion-close-round"></i>
+        </div>
+    </div>
+    <div class="menu-block customscroll">
+        <div class="sidebar-menu">
+            <ul id="accordion-menu">
+                <li>
+                    <a href="{% url 'reservation-dashboard' %}" class="dropdown-toggle no-arrow">
+                        <span class="micon fa-solid fa-gauge" style="font-size: 25px;"></span><span class="mtext">Home</span>
+                    </a>
+                </li>
+                
+                
+                <li>
+                    <a href="javascript:void()" class="dropdown-toggle no-arrow">
+                        <span class="micon fa-solid fa-spinner"></span><span class="mtext">Status</span>
+                    </a>
+                </li>
+                
+                <li>
+                    <div class="dropdown-divider"></div>
+                </li>
+                
+                <li class="dropdown">
+                    <a href="javascript:;" class="dropdown-toggle">
+                        <img src="{% static 'images/manage-account.png' %}" width="20" height="20" class="micon" alt=""><span class="mtext"> Manage Account </span>
+                    </a>
+                    <ul class="submenu">
+                        <li><a href="{% url 'reservation-change-profile' %}">Edit Profile</a></li>
+                        <li><a href="{% url 'reservation-change-password' %}">Change Password</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="{% url 'reservation-logout' %}" class="dropdown-toggle no-arrow">
+                        <span class="micon fa-solid fa-right-from-bracket"></span><span class="mtext">Logout</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<div class="mobile-menu-overlay"></div>
+
+
+
+
+<div class="main-container">
+    <!-- Dynamic messages start -->
+    <div id="django-messages" style="display:none;">
+        {% for message in messages %}
+            <div class="message" data-type="{{ message.tags }}" data-content="{{ message|escapejs }}"></div>
+        {% endfor %}
+    </div>
+    <!-- Dynamic messages end -->
+    <div class="pd-ltr-20">
+
+
+        <!-- Bordered table  start -->
+        <div class="container-fluid">
+                    <div class="modal-content">
+                        <div class="modal-header" style="border-bottom: 2px solid #593bdb;">
+                            <h2 class="modal-title" style="color: #593bdb;">Edit Reservation</h2>
+                        </div>
+                        <div class="card-body">
+                            <div class="basic-form">
+                                <form id="editBorrowerForm" method="post" action="{% url 'reservation-update' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="id" value="{{ borrow_request_id }}">
+                                    <div class="form-row">
+                                        <div class="form-group col-md-6">
+                                            <label class="text-dark">Student ID</label>
+                                            <input type="text" name="student_id" class="form-control" value="{{ student_id }}" style="border: 1px solid #bebebe;">
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label class="text-dark">Name</label>
+                                            <input type="text" name="name" class="form-control" value="{{ name }}" style="border: 1px solid #bebebe;">
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label class="text-dark">Course</label>
+                                            <input type="text" name="course" value="{{ course }}" class="form-control" value="" style="border: 1px solid #bebebe;">
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label class="text-dark">Year</label>
+                                            <select class="form-select form-control" name="year" style="border:1px solid rgba(0, 0, 0, 0.2);" aria-label="Default select example" required>
+                                                <option value="1st Year" {% if year_level == '1st Year' %}selected{% endif %}>1st Year</option>
+                                                <option value="2nd Year" {% if year_level == '2nd Year' %}selected{% endif %}>2nd Year</option>
+                                                <option value="3rd Year" {% if year_level == '3rd Year' %}selected{% endif %}>3rd Year</option>
+                                                <option value="4th Year" {% if year_level == '4th Year' %}selected{% endif %}>4th Year</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="form-group col-md-6">
+                                            <label class="text-dark">Email</label>
+                                            <input type="text" name="email" class="form-control" value="{{ email }}" style="border: 1px solid #bebebe;">
+                                        </div>
+                                        <div class="form-group col-md-3">
+                                            <label class="text-dark">Phone</label>
+                                            <input type="text" name="phone" class="form-control" value="{{ phone }}" style="border: 1px solid #bebebe;">
+                                        </div>
+                                        <div class="form-group col-md-3">
+                                            <label class="text-dark">Date Reserve</label>
+                                            <div class="input-with-icon">
+                                                <input name="datepicker" id="dateBorrow" class="datepicker-default form-control" value="{{ reserve_date }}" style="border: 1px solid #bebebe; background: white; font-size: 14px">
+                                                <i class="fas fa-calendar-alt" style="position: absolute; top: 38px; right: 20px;"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="col-xl-6">
+
+                                            {% for item in reservation_items %}
+                                            <input type="hidden" name="items[{{ forloop.counter0 }}][id]" value="{{ item.id }}">
+                                            <div class="cardd mb-5" style="position: relative;">
+                                                <div class="card-bodyd">
+                                                    <div class="mt-4">
+                                                        <h4 class="card-title">Items</h4>
+                                                        <p>Select Item you want to borrow</p>
+                                                        <select id="itemSelect{{ forloop.counter }}" name="items[{{ forloop.counter0 }}][item_name]" class="form-control item-select">
+                                                            <option value="">Select an item...</option>
+                                                            {% for faculty_item in all_faculty_items %}
+                                                                <option value="{{ faculty_item.name }}" data-available="{{ faculty_item.quantity }}" {% if faculty_item.name == item.item_name %}selected{% endif %}>
+                                                                    {{ faculty_item.name }} (Available: {{ faculty_item.quantity }})
+                                                                </option>
+                                                            {% endfor %}
+                                                        </select>
+                                                        <div class="text-danger mt-2 error-message-select"></div>
+                                                    </div>
+                                        
+                                                    <div class="mt-4">
+                                                        <label class="text-dark">Description</label>
+                                                        <textarea name="items[{{ forloop.counter0 }}][description]" style="height: 90px; resize: vertical;" class="form-control">{{ item.description }}</textarea>
+                                                    </div>
+                                        
+                                                    <div class="mt-4">
+                                                        <label class="text-dark">Quantity</label>
+                                                        <input type="number" name="items[{{ forloop.counter0 }}][quantity]" class="form-control col-md-3 quantity-input" data-current="{{ item.quantity }}" value="{{ item.quantity }}" min="1">
+                                                        <div class="text-danger mt-2 error-message"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endfor %}
+                                        
+
+                                        
+
+
+
+                                            
+     
+                                        </div>
+                                        <div class="form-group col-md-6">
+                                            <label class="text-dark">Purpose for borrow</label>
+                                            <textarea name="purpose" class="form-control" cols="1" rows="1" style="border: 1px solid #bebebe;">{{ purpose }}</textarea>
+
+                                        </div>
+                                    </div>
+    
+                                    
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" onclick="window.history.back();" data-dismiss="modal">Back</button>
+                                        <button type="submit" id="updateButton" class="btn btn-primary">Update</button>
+
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                
+        </div>
+        
+        <!-- Bordered table End -->
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+
+
+    </div>
+</div>
+
+
+
+<!-- Add this script to hide the alerts after 5 seconds -->
+<script>
+    window.setTimeout(function () {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function (alert) {
+            alert.classList.remove('show');  // Bootstrap class to hide it
+            alert.classList.add('hide-alert');  // Custom transition class
+
+            // Set a delay to completely remove the alert after the fade-out
+            window.setTimeout(function () {
+                alert.style.display = 'none';  // Completely hide the element
+            }, 600);  // Matches the transition duration in CSS (0.6s)
+        });
+    }, 5000);
+
+
+
+
+// Function to check for duplicates in the selected items
+function checkForDuplicates() {
+    const selectedItems = [];
+    let duplicateFound = false;
+    
+    // Iterate over all item selects and check for duplicate selections
+    document.querySelectorAll('.item-select').forEach(select => {
+        const selectedItem = select.value;
+        if (selectedItem && selectedItems.includes(selectedItem)) {
+            // If the item is already in the array, it's a duplicate
+            duplicateFound = true;
+            const errorMessage = select.closest('.card-bodyd').querySelector('.error-message-select');
+            errorMessage.textContent = 'This item has already been selected.';
+        } else {
+            selectedItems.push(selectedItem);
+            const errorMessage = select.closest('.card-bodyd').querySelector('.error-message-select');
+            errorMessage.textContent = ''; // Clear previous error if no duplicate
+        }
+    });
+    
+    // Return whether duplicates were found
+    return duplicateFound;
+}
+
+// Function to update the submit button state based on the presence of errors
+function updateSubmitButtonState() {
+    const errorMessages = document.querySelectorAll('.text-danger');
+    const updateButton = document.querySelector('#updateButton');
+    const hasErrors = Array.from(errorMessages).some(message => message.textContent.trim() !== '') || checkForDuplicates(); // Include duplicate check
+    
+    // Disable the button if there are any error messages
+    updateButton.disabled = hasErrors;
+}
+
+// Event listener for quantity input validation
+document.addEventListener('input', (event) => {
+    if (event.target.matches('.quantity-input')) {
+        const quantityInput = event.target;
+        const currentQuantity = parseInt(quantityInput.dataset.current, 10) || 0; // Get the current value
+        const newQuantity = parseInt(quantityInput.value, 10);
+        const itemSelect = quantityInput.closest('.card-bodyd').querySelector('.item-select');
+        const availableQuantity = parseInt(itemSelect.selectedOptions[0].dataset.available, 10) || 0; // Get available quantity
+        const errorMessage = quantityInput.nextElementSibling;
+
+        // Clear previous error message
+        errorMessage.textContent = '';
+
+        // Validate the new quantity and show an error message if applicable
+        if (newQuantity > availableQuantity && newQuantity > currentQuantity) {
+            errorMessage.textContent = `Exceeds available stock: You cannot borrow more than ${availableQuantity}.`;
+        }
+
+        // Update the state of the button
+        updateSubmitButtonState();
+    }
+});
+
+// Event listener for select input validation
+document.addEventListener('change', (event) => {
+    if (event.target.matches('.item-select')) {
+        const selectElement = event.target;
+        const quantityInput = selectElement.closest('.card-bodyd').querySelector('.quantity-input');
+        validateQuantity(selectElement, quantityInput);
+        updateSubmitButtonState(); // Ensure the button state is checked after a select change
+    }
+});
+
+// Prevent form submission if the button is disabled
+document.querySelector('form').addEventListener('submit', (event) => {
+    const updateButton = document.querySelector('#updateButton');
+    if (updateButton.disabled) {
+        event.preventDefault(); // Prevent form submission
+        alert('Please fix the errors before updating.');
+    }
+});
+
+
+    
+    
+    
+    
+    
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Function to mark all notifications as read when the user opens the dropdown
+        document.getElementById('notification-icon').addEventListener('click', function() {
+            fetch('/mark-notifications-read/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ 'action': 'mark_read' })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Mark all notifications as read
+                    document.querySelectorAll('#notification-list li').forEach(function(li) {
+                        li.classList.add('read');
+                    });
+                    // Optionally update the count of unread notifications
+                    document.querySelector('.notification-active').textContent = '0';
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    
+        // Function to close individual notifications
+        document.querySelectorAll('.notification-close').forEach(button => {
+            button.addEventListener('click', function() {
+                const reservationId = this.getAttribute('data-id');
+    
+                fetch(`/mark-as-read/${reservationId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ 'reservation_id': reservationId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.querySelector(`li[data-id="${reservationId}"]`).remove();
+                    }
+                });
+            });
+        });
+    
+        // CSRF token helper function
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+
+
+            //toaster message
+document.addEventListener("DOMContentLoaded", function() {
+    // Configure Toastr options
+    toastr.options = {
+        "closeButton": true,
+        "progressBar": true,
+        "timeOut": "5000",
+        "positionClass": "toast-bottom-right"
+    };
+
+    // Loop through the hidden messages and display them
+    document.querySelectorAll('#django-messages .message').forEach(function(el) {
+        console.log(el);  // Add this for debugging
+        var messageType = el.getAttribute('data-type');
+        var messageContent = el.getAttribute('data-content');
+    
+
+        // Display Toastr notification based on the message type
+        if (messageType === 'success') {
+            toastr.success(messageContent);
+        } else if (messageType === 'error') {
+            toastr.error(messageContent);
+        } else if (messageType === 'warning') {
+            toastr.warning(messageContent);
+        } else if (messageType === 'info') {
+            toastr.info(messageContent);
+        }
+    });
+});
+    
+
+
+
+    
+</script>
+
+
+
+
+
+{% endblock content %}

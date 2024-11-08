@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .models import ReservationUser
+from .models import ReservationUser, ReservationItem
 from django.contrib import messages
 from django.contrib.auth.hashers import check_password
 from faculty.models import facultyItem
@@ -26,6 +26,10 @@ from django.utils.encoding import force_bytes
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.utils.http import urlsafe_base64_decode
+from django.http import JsonResponse
+from django.db import transaction
+from django.core.exceptions import ObjectDoesNotExist
+from django.shortcuts import get_list_or_404
 
 
 
@@ -236,69 +240,80 @@ def submit_reservation(request):
         email = request.POST.get('email')
         phone_number = request.POST.get('phone')
         reserve_date = request.POST.get('datepicker')
-        item_id = request.POST.get('itemm')
-        quantity = int(request.POST.get('quantityy'))  # Convert quantity to integer
-        purpose = request.POST.get('description')
-
+        purpose = request.POST.get('purpose')
+        item_ids = request.POST.getlist('itemm')
+        quantities = request.POST.getlist('quantityy')
+        descriptions = request.POST.getlist('description')
+        
         # Retrieve the user_id from the session
         user_id = request.session.get('user_id')
-
         if not user_id:
             messages.error(request, "User not logged in!")
             return redirect('reservation-login')  # Redirect to login if user is not logged in
 
-        # Validate reserve_date
-        if not reserve_date:
-            messages.error(request, "Reservation date is required.")
+        try:
+            with transaction.atomic():
+                # Check if a reservation already exists for this student_id and reserve_date
+                reservation, created = StudentReservation.objects.get_or_create(
+                    student_id=student_id,
+                    reserve_date=reserve_date,
+                    defaults={
+                        'name': name,
+                        'course': course,
+                        'year_level': year_level,
+                        'email': email,
+                        'phone_number': phone_number,
+                        'purpose': purpose,
+                        'status': 'Pending',
+                        'user_id': user_id,
+                    }
+                )
+
+                # Loop through items and handle ReservationItem entries
+                for item_id, quantity, description in zip(item_ids, quantities, descriptions):
+                    quantity = int(quantity)
+                    item = facultyItem.objects.get(id=item_id)
+
+                    # Check if the requested quantity exceeds available quantity
+                    if quantity > item.quantity:
+                        messages.error(request, f"Only {item.quantity} items available for {item.name}.")
+                        return redirect('reservation-dashboard')
+
+                    # Check if ReservationItem for this item_name already exists in the reservation
+                    reservation_item, item_created = ReservationItem.objects.get_or_create(
+                        reservation=reservation,
+                        item_name=item.name,
+                        defaults={
+                            'description': description,
+                            'quantity': quantity
+                        }
+                    )
+
+                    if not item_created:
+                        # If the item exists, increment the quantity
+                        reservation_item.quantity += quantity
+                        reservation_item.save()
+                    item.save()
+
+            messages.success(request, "Items reserved successfully!")
             return redirect('reservation-dashboard')
 
-        try:
-            # Parse the date
-            reserve_date = datetime.strptime(reserve_date, '%d %B, %Y').date()  # Ensure it's a date object
-            if reserve_date < datetime.now().date():
-                messages.error(request, "Reservation date cannot be in the past.")
-                return redirect('reservation-dashboard')
-        except ValueError:
-            messages.error(request, "Invalid reservation date format.")
-            return redirect('reservation-dashboard')
-
-        try:
-            # Fetch the item and get its user_id
-            item = facultyItem.objects.get(id=item_id)
-            item_user_id = item.user_id  # Get the user_id from the facultyItem model
         except facultyItem.DoesNotExist:
-            messages.error(request, "Selected item does not exist.")
+            messages.error(request, f"Item with ID {item_id} does not exist.")
+            return redirect('reservation-dashboard')
+        except ValueError:
+            messages.error(request, "Invalid quantity entered.")
             return redirect('reservation-dashboard')
 
-        # Check if the requested quantity exceeds available quantity
-        if quantity > item.quantity:
-            messages.error(request, f"Only {item.quantity} items available for {item.name}.")
-            return redirect('reservation-dashboard')
-
-        # Create the reservation
-        reservation = StudentReservation.objects.create(
-            student_id=student_id,
-            name=name,
-            course=course,
-            year_level=year_level,
-            email=email,
-            phone_number=phone_number,
-            reserve_date=reserve_date,
-            content_type=ContentType.objects.get_for_model(facultyItem),
-            object_id=item_id,
-            quantity=quantity,
-            purpose=purpose,
-            status='Pending',
-            user_id=user_id,
-            user_type=item_user_id, 
-        )
-
-        messages.success(request, "Item reserved successfully!")
-        return redirect('reservation-dashboard')
-
-    return redirect('reservation-dashboard')  # Handle non-POST requests
+    return redirect('reservation-dashboard')
 
 
+    
+
+def get_faculty_items(request):
+    items = facultyItem.objects.all().values('id', 'name', 'quantity')
+    item_list = list(items)
+    return JsonResponse(item_list, safe=False)
 
 
 
@@ -321,6 +336,8 @@ def reservation_status(request):
         
         # Fetch reservations for this user, including handled_by and notification, ordered by the most recent first
         reservations = StudentReservation.objects.filter(user_id=user_id, is_handled=True).order_by('-id')
+        
+        
 
         # Handle pagination
         show_entries = request.GET.get('show', 'all')
@@ -347,6 +364,141 @@ def reservation_status(request):
     except ReservationUser.DoesNotExist:
         # Handle case where the user is not found
         return redirect('reservation-login')  # Redirect to login if the user does not exist
+    
+    
+def reservation_items(request, reserve_date):
+    # Get all reservations by reserve_date
+    reservations = get_list_or_404(StudentReservation, reserve_date=reserve_date)
+    
+    # Collect all items from the reservations
+    items = []
+    for reservation in reservations:
+        reservation_items = reservation.items.values('item_name', 'description', 'quantity')
+        items.extend(reservation_items)
+    
+    # Return as JSON response
+    return JsonResponse(items, safe=False)
+
+
+def reservation_edit(request, reservation_id):
+    user_id = request.session.get('user_id')  # Retrieve user_id from session
+
+    if not user_id:
+        return redirect('reservation-login')  # Redirect to login if no user_id
+    
+    
+    # Fetch the user based on user_id
+    user = ReservationUser.objects.get(id=user_id)
+
+    # Retrieve the StudentReservation instance for the specific user
+    reservation = get_object_or_404(StudentReservation, id=reservation_id, user_id=user_id)
+
+    # Retrieve related ReservationItem instances for the specific reservation
+    reservation_items = reservation.items.all()
+
+    # Retrieve all faculty items to display in the form (assuming you want these for item selection)
+    all_faculty_items = facultyItem.objects.all()
+
+    # Prepare reservation items with IDs and other fields for the form
+    reservation_items_data = [
+        {
+            'id': item.id,
+            'item_name': item.item_name,
+            'description': item.description,
+            'quantity': item.quantity
+        } for item in reservation_items
+    ]
+
+    # Context to be passed to the template for rendering the reservation edit form
+    context = {
+        'borrow_request_id': reservation.id,
+        'student_id': reservation.student_id,
+        'name': reservation.name,
+        'course': reservation.course,
+        'year_level': reservation.year_level,
+        'email': reservation.email,
+        'phone': reservation.phone_number,
+        'user': user,
+        'reserve_date': reservation.reserve_date,
+        'purpose': reservation.purpose,
+        'status': reservation.status,
+        'reservation_items': reservation_items_data,  # Use prepared data for the items
+        'all_faculty_items': all_faculty_items,  # Pass all faculty items for selection in the form
+    }
+
+    return render(request, 'reservation-edit.html', context)
+
+
+
+
+def reservation_update(request):
+    if request.method == 'POST':
+        reservation_id = request.POST.get('id')
+        user_id = request.session.get('user_id')
+
+        # Fetch reservation
+        reservation = get_object_or_404(StudentReservation, id=reservation_id, user_id=user_id)
+
+        # Update the main reservation details
+        reservation.student_id = request.POST.get('student_id')
+        reservation.name = request.POST.get('name')
+        reservation.course = request.POST.get('course')
+        reservation.year_level = request.POST.get('year')
+        reservation.email = request.POST.get('email')
+        reservation.phone_number = request.POST.get('phone')
+        reservation.reserve_date = request.POST.get('datepicker')
+        reservation.purpose = request.POST.get('purpose')
+        reservation.save()
+
+        # Process reservation items
+        items_data = request.POST
+        item_count = len([key for key in items_data if key.startswith('items[')])
+
+        for i in range(item_count):
+            item_id = items_data.get(f'items[{i}][id]')
+            item_name = items_data.get(f'items[{i}][item_name]')
+            quantity = items_data.get(f'items[{i}][quantity]')
+            description = items_data.get(f'items[{i}][description]')
+
+            # Check if item_name is provided; skip if empty to avoid IntegrityError
+            if not item_name:
+                continue
+
+            # Update existing item or create a new one if item_id is not found
+            if item_id:
+                reservation_item = get_object_or_404(ReservationItem, id=item_id, reservation=reservation)
+                reservation_item.item_name = item_name
+                reservation_item.quantity = int(quantity) if quantity else 0
+                reservation_item.description = description
+                reservation_item.save()
+            else:
+                ReservationItem.objects.create(
+                    reservation=reservation,
+                    item_name=item_name,
+                    quantity=int(quantity) if quantity else 0,
+                    description=description,
+                )
+
+        messages.success(request, "Reservation updated successfully!")
+        return redirect('reservation-status')
+
+    return redirect('reservation-edit', reservation_id=reservation_id)
+
+
+
+
+
+
+
+
+def get_available_stock(request, item_id):
+    try:
+        item = facultyItem.objects.get(id=item_id)
+        return JsonResponse({'available_stock': item.quantity})
+    except facultyItem.DoesNotExist:
+        return JsonResponse({'error': 'Item not found'}, status=404)
+
+
 
 
 

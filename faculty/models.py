@@ -9,8 +9,7 @@ import random
 
 class facultyItem(models.Model):
     name = models.CharField(max_length=100)
-    property_id = models.CharField(max_length=10, blank=True, editable=False)  # Make property_id optional
-    description = models.TextField(null=True, blank=True)
+    property_id = models.CharField(max_length=10, blank=True)  # Remove `editable=False` to allow user input
     quantity = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -19,17 +18,18 @@ class facultyItem(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
-        # If the item is new (no primary key yet) and the property_id is not already set
+        # Generate a random property ID if the item is new and property_id is not set
         if not self.pk and not self.property_id:
-            self.property_id = str(random.randint(1, 99999)).zfill(5)  # Generate a random number, pad with zeros if needed
+            self.property_id = str(random.randint(1, 99999)).zfill(5)
 
         super().save(*args, **kwargs)  # Call the original save() method to save the object
 
     def __str__(self):
-        return f"{self.name} ({self.quantity})"
+        return f"{self.name}"
 
     class Meta:
         verbose_name_plural = "Faculty Items"
+
 
         
         
@@ -53,14 +53,13 @@ class BorrowRequest(models.Model):
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey('content_type', 'object_id')
     purpose = models.TextField(null=True, blank=True)
-    status = models.CharField(max_length=20, null=True, blank=True)
+    status = models.CharField(max_length=50, null=True, blank=True)
     note = models.CharField(max_length=200, null=True, blank=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     borrower_type = models.CharField(max_length=100, null=True)
     upload_image = models.ImageField(upload_to='borrow_upload/', null=True, blank=True)
-    
-    # New field to store the timestamp 
     created_at = models.DateTimeField(auto_now_add=True)
+
 
     def __str__(self):
         return f'{self.name} - {self.content_object}'
@@ -86,13 +85,36 @@ class BorrowRequest(models.Model):
 class BorrowRequestItem(models.Model):
     borrow_request = models.ForeignKey(BorrowRequest, related_name='items', on_delete=models.CASCADE)
     item = models.ForeignKey(facultyItem, on_delete=models.CASCADE)
-    quantityy = models.PositiveIntegerField()
     date_return = models.DateField(null=True, blank=True)
-    is_returned = models.BooleanField(default=False)  # New field to track return status
-    handled_by = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='handled_items', on_delete=models.CASCADE, null=True, blank=True)
+    quantityy = models.PositiveIntegerField()
+    is_returned = models.BooleanField(default=False)
+    description = models.TextField(null=True, blank=True)
+    handled_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        related_name='handled_items', 
+        on_delete=models.CASCADE, 
+        null=True, blank=True
+    )
 
     def __str__(self):
-        return f"{self.item.name} ({self.quantityy})"
+        return f"{self.item.name}"
+
+class BorrowRequestItemFaculty(models.Model):
+    borrow_request = models.ForeignKey(BorrowRequest, related_name='facultyitems', on_delete=models.CASCADE)
+    item = models.ForeignKey(facultyItem, on_delete=models.CASCADE)
+    date_return = models.DateField(null=True, blank=True)
+    quantityy = models.PositiveIntegerField()
+    is_returned = models.BooleanField(default=False)
+    description = models.TextField(null=True, blank=True)
+    handled_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        related_name='handled_faculty_items', 
+        on_delete=models.CASCADE, 
+        null=True, blank=True
+    )
+
+    def __str__(self):
+        return f"{self.item.name}"
 
  
 

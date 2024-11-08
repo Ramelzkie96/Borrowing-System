@@ -244,14 +244,7 @@
                 </p>
               </a>
             </li>
-            <li class="nav-item">
-              <a href="{% url 'admin-returned-record' %}" class="nav-link">
-                <i class="nav-icon fa-solid fa-arrow-rotate-left"></i>
-                <p>
-                  Returned Records
-                </p>
-              </a>
-            </li>
+      
   
             <li class="nav-header">Borrowers Reservation</li>
             <li class="nav-item">
@@ -315,47 +308,56 @@
         <div class="container-fluid">
 
 
-            <!-- Modal for Editing Item -->
-        <div class="modal fade" id="exampleModalCenter">
-            <div class="modal-dialog modal-dialog-centered" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" style="font-size: 25px; font-weight: 700;">Edit Item</h5>
-                        <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-                    </div>
-                    <div class="modal-body">
-                        <form method="POST" action="{% url 'admin-update_item' %}">
-                            {% csrf_token %}
-                            <input type="hidden" name="item_id" value="">
-                            <div class="form-group row mb-4">
-                                <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3" style="font-size: 15px">Name</label>
-                                <div class="col-sm-12 col-md-7">
-                                    <input type="text" name="name" class="form-control">
-                                </div>
-                            </div>
-                            <div class="form-group row mb-4">
-                                <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3" style="font-size: 15px">Description</label>
-                                <div class="col-sm-12 col-md-7">
-                                    <textarea type="text" name="description" class="form-control"></textarea>
-                                </div>
-                            </div>
-                            <div class="form-group row mb-4">
-                                <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3" style="font-size: 15px">Quantity</label>
-                                <div class="col-sm-12 col-md-7">
-                                    <input type="number" name="quantity" style="width: 100px;" class="form-control" min="1" max="100">
-                                </div>
-                            </div>
-                            <div class="form-group row mb-4">
-                                <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3"></label>
-                                <div class="col-sm-12 col-md-7">
-                                    <button class="btn btn-primary" type="submit" id="toastr-success-bottom-left">Update</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
+    
+    <!-- Modal for Editing Item -->
+    <div class="modal fade" id="exampleModalCenter">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" style="font-size: 25px; font-weight: 700;">Edit Item</h5>
+                  <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+              </div>
+              <div class="modal-body">
+                  <form method="POST" action="{% url 'admin-update_item' %}" id="edit-item-form">
+                      {% csrf_token %}
+                      <input type="hidden" name="item_id" value="">
+
+                      <div class="form-group row mb-4">
+                          <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3" style="font-size: 15px">Property ID</label>
+                          <div class="col-sm-12 col-md-7">
+                              <input type="text" name="property_id" class="form-control">
+                          </div>
+                      </div>
+
+                      <div class="form-group row mb-4">
+                          <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3" style="font-size: 15px">Name</label>
+                          <div class="col-sm-12 col-md-7">
+                              <input type="text" name="name" class="form-control" id="item-name" required>
+                              <div id="name-validation-error" class="text-danger" style="display: none;">This item name already exists.</div>
+                          </div>
+                      </div>
+
+                      <div class="form-group row mb-4">
+                          <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3" style="font-size: 15px">Quantity</label>
+                          <div class="col-sm-12 col-md-7">
+                              <input type="number" style="width: 100px;" class="form-control" name="quantity" min="1" max="100" required>
+                          </div>
+                      </div>
+
+                      <div class="form-group row mb-4">
+                          <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3"></label>
+                          <div class="col-sm-12 col-md-7">
+                              <button class="btn btn-primary" type="submit" id="submit-button">Update</button>
+                          </div>
+                      </div>
+                  </form>
+              </div>
+          </div>
+      </div>
+    </div>
+
+
+
           
           <!-- /.row -->
   
@@ -391,11 +393,10 @@
                             <table id="itemTable" class="table table-bordered table-striped table-responsive-sm">
                                 <thead class="dark-mode">
                                     <tr>
-                                        <th>Property ID</th>  <!-- Change ID to # for numbering -->
+                                        <th style="width: 300px;">Property ID</th>  <!-- Change ID to # for numbering -->
                                         <th>Item</th>
-                                        <th>Description</th>
                                         <th>Quantity</th>
-                                        <th style="width: 150px;">Action</th>
+                                        <th style="width: 200px;">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -404,18 +405,18 @@
                                             <tr>
                                                 <td>{{ item.property_id }}</td>  <!-- Display the loop index starting from 1 -->
                                                 <td>{{ item.name }}</td>
-                                                <td>{{ item.description }}</td>
                                                 <td>{{ item.quantity }}</td>
-                                                <td>
-                                                    <button type="button" class="btn btn-secondary edit-item-btn" 
-                                                        data-id="{{ item.id }}" 
-                                                        data-name="{{ item.name }}"
-                                                        data-description="{{ item.description }}" 
-                                                        data-quantity="{{ item.quantity }}" 
-                                                        data-toggle="modal" 
-                                                        data-target="#exampleModalCenter">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
+                                                <td style="text-align: center;">
+                                                  <button type="button" class="btn btn-secondary edit-item-btn" 
+                                                  data-id="{{ item.id }}" 
+                                                  data-name="{{ item.name }}"
+                                                  data-property-id="{{ item.property_id }}" 
+                                                  data-quantity="{{ item.quantity }}"
+                                                  data-toggle="modal" 
+                                                  data-target="#exampleModalCenter">
+                                                  <i class="fas fa-edit"></i>
+                                              </button>
+                                              
                                                     <button class="btn btn-danger btn deleteButton" data-item-id="{{ item.id }}"><i class="fas fa-trash"></i></button>
                                                 </td>
                                             </tr>
@@ -527,23 +528,54 @@
 
     //edit
     document.addEventListener('DOMContentLoaded', function() {
-        var editButtons = document.querySelectorAll('.edit-item-btn');
-        
-        editButtons.forEach(function(button) {
-            button.addEventListener('click', function() {
-                var itemId = this.getAttribute('data-id');
-                var itemName = this.getAttribute('data-name');
-                var itemDescription = this.getAttribute('data-description')
-                var itemQuantity = this.getAttribute('data-quantity');
+      var editButtons = document.querySelectorAll('.edit-item-btn');
+      
+      editButtons.forEach(function(button) {
+          button.addEventListener('click', function() {
+              var itemId = this.getAttribute('data-id');
+              var itemName = this.getAttribute('data-name');
+              var itemQuantity = this.getAttribute('data-quantity');
+              var propertyId = this.getAttribute('data-property-id');
+  
+              // Set the modal input values
+              document.querySelector('#exampleModalCenter input[name="item_id"]').value = itemId;
+              document.querySelector('#exampleModalCenter input[name="name"]').value = itemName;
+              document.querySelector('#exampleModalCenter input[name="quantity"]').value = itemQuantity;
+              document.querySelector('#exampleModalCenter input[name="property_id"]').value = propertyId;
+          });
+      });
+  });
 
-                // Set the modal input values
-                document.querySelector('#exampleModalCenter input[name="item_id"]').value = itemId;
-                document.querySelector('#exampleModalCenter input[name="name"]').value = itemName;
-                document.querySelector('#exampleModalCenter textarea[name="description"]').value = itemDescription;
-                document.querySelector('#exampleModalCenter input[name="quantity"]').value = itemQuantity;
+
+  document.getElementById('item-name').addEventListener('input', function () {
+    const nameField = this;
+    const errorDiv = document.getElementById('name-validation-error');
+    const submitButton = document.getElementById('submit-button');
+    const nameValue = nameField.value;
+
+    if (nameValue.trim().length > 0) {
+        fetch(`/admin-validate-item-name/?name=${encodeURIComponent(nameValue)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.exists) {
+                    errorDiv.style.display = 'block';
+                    submitButton.disabled = true; // Disable the button if item name exists
+                } else {
+                    errorDiv.style.display = 'none';
+                    submitButton.disabled = false; // Enable the button if item name does not exist
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                submitButton.disabled = false; // Enable the button if there's an error in the request
             });
-        });
-    });
+    } else {
+        errorDiv.style.display = 'none';
+        submitButton.disabled = false; // Enable the button if the input is cleared
+    }
+});
+
+  
 
 
     // delete button sweetalert

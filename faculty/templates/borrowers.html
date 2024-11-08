@@ -161,10 +161,7 @@
                         <img src="{% static 'images/search.png'%}" width="30" height="30" alt="">
                         <span class="nav-text">Borrow Record</span></a>
                     </li>
-                    <li><a href="{% url 'returned-record'%}" aria-expanded="false">
-                        <img src="{% static 'images/return.png'%}" width="30" height="30" alt="">
-                        <span class="nav-text">Return Record</span></a>
-                    </li>
+            
                     <li class="nav-label">Borrower's Reservation</li>
                     <li><a  href="{% url 'student-reservation' %}" aria-expanded="false">
                         <img src="{% static 'images/reservation.png'%}" width="30" height="30" alt="">
@@ -213,10 +210,25 @@
                             {% csrf_token %}
                             <div class="form-row">
                                 <div class="form-group col-md-6">
+                                    <label class="text-dark">Date Borrow</label>
+                                    <div class="input-group">
+                                        {{ form.date_borrow }}
+                                        <div class="input-group-append">
+                                            <i class="fas fa-calendar-alt" style="position: absolute; right: 14px; top: 8px; font-size: 18px;"></i>
+                                        </div>
+                                    </div>
+                                    {% if form.date_borrow.errors %}
+                                        <script>
+                                            document.querySelector('#datepicker').classList.add('error-border');
+                                        </script>
+                                    {% endif %}
+                                </div>
+
+                                <div class="form-group col-md-3">
                                     <label class="text-dark">Student ID</label>
                                     {{ form.student_id }}
                                 </div>
-                                <div class="form-group col-md-6">
+                                <div class="form-group col-md-3">
                                     <label class="text-dark">Name</label>
                                     {{ form.name }}
                                 </div>
@@ -240,20 +252,7 @@
                                     {{ form.phone }}
                                 </div>
                 
-                                <div class="form-group col-md-3">
-                                    <label class="text-dark">Date Borrow</label>
-                                    <div class="input-group">
-                                        {{ form.date_borrow }}
-                                        <div class="input-group-append">
-                                            <i class="fas fa-calendar-alt" style="position: absolute; right: 14px; top: 8px; font-size: 18px;"></i>
-                                        </div>
-                                    </div>
-                                    {% if form.date_borrow.errors %}
-                                        <script>
-                                            document.querySelector('#datepicker').classList.add('error-border');
-                                        </script>
-                                    {% endif %}
-                                </div>
+                                
                             </div>
                             <div class="form-row">
                                 <div class="form-group col-md-2">
@@ -265,13 +264,13 @@
                                 <div class="form-group col-md-2">
                                     <label class="text-dark">
                                         <input type="radio" name="borrower_type" value="Teacher" id="teacher_radio" style="width: 20px; height: 20px;" onclick="clearOtherBorrowerType()">&nbsp;
-                                        Teacher
+                                        Faculty/Employee
                                     </label>
                                 </div>
                                 <div class="form-group col-md-2">
                                     <label class="text-dark">
-                                        Others:
-                                        <input type="text" class="text-dark" name="other_borrower_type" id="other_borrower_type" style="width: 130px; height: 20px; border-top: 1px solid white; border-right: 1px solid white; border-left: 1px solid white;" oninput="checkOtherBorrowerType()">&nbsp;
+                                      
+                                        <input type="text" class="text-dark" name="other_borrower_type" id="other_borrower_type" style="display: none; width: 130px; height: 20px; border-top: 1px solid white; border-right: 1px solid white; border-left: 1px solid white;" oninput="checkOtherBorrowerType()">&nbsp;
                                     </label>
                                 </div>
                             </div>
@@ -281,22 +280,28 @@
 
                             <div class="form-row">
                                 <div class="col-xl-6">
-                                    <div class="card {% if selected_item_has_zero_quantity %}border border-danger{% endif %}"  id="card-container" style="box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px; position: relative;">
+                                    <div class="card {% if selected_item_has_zero_quantity %}border border-danger{% endif %}" style="position: relative;" id="card-container">
                                         <i class="fas fa-plus add-card" style="position: absolute; top: 10px; right: 10px; cursor: pointer; color: #007bff;"></i>
                                         <div class="card-body">
                                             <div class="mb-2">
                                                 <h4 class="card-title text-dark">Items</h4>
                                                 <br>
-                                                <p class="text-dark">Select items you want to borrow</p>
+                                                <p style="color: #474747;">Select items you want to borrow</p>
                                             </div>
                                             <div id="items-container">
                                                 <div class="item-entry">
-                                                    <label class="text-dark">Item:</label>
+                                                    <label style="color: #474747;">Item:</label>
                                                     {{ form.item }} <!-- Dropdown for selecting items -->
+                                                    <span class="text-danger error-duplicate"></span>
                                                     <div class="mt-4">
-                                                      <label class="text-dark">Quantity</label>
-                                                      <input type="number" class="form-control col-md-3"  name="quantities[]" min="1" value="1" required>
+                                                      <label class="text-dark">Description & Specification</label>
+                                                      <textarea name="description" class="form-control" id="" required></textarea>
                                                   </div>
+                                                  <div class="mt-4">
+                                                    <label class="text-dark">Quantity</label>
+                                                    <input type="number" class="form-control col-md-3"  name="quantities[]" min="1" value="1" required>
+                                                    <span class="text-danger error-quantity"></span>
+                                                </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -431,21 +436,19 @@
 
 
     document.addEventListener("DOMContentLoaded", function () {
-        const originalCard = document.querySelector("#card-container");
-      
+        const saveButton = document.querySelector("#toastr-success-bottom-left");
+    
         function addCard() {
+            const originalCard = document.querySelector(".col-xl-6");
             const newCard = originalCard.cloneNode(true);
-      
-            // Reset quantity input in the cloned card
-            const quantityInput = newCard.querySelector("input[name='quantities[]']");
-            if (quantityInput) {
-                quantityInput.value = 1;  // Reset to default value of 1
-            }
-      
-            // Clear previous validation messages for the new card
+    
+            // Clear input values in the cloned card
+            newCard.querySelector("input[name='quantities[]']").value = 1;
+            newCard.querySelector("textarea[name='description']").value = '';
+    
+            // Remove existing error messages and styling
             clearValidationErrors(newCard);
-      
-            // Set up the close icon
+    
             const closeIcon = document.createElement("i");
             closeIcon.classList.add("fas", "fa-times", "remove-card");
             Object.assign(closeIcon.style, {
@@ -456,103 +459,85 @@
                 color: "#dc3545",
             });
             newCard.appendChild(closeIcon);
-      
-            // Append the cloned card to the container
+    
             originalCard.parentNode.appendChild(newCard);
-      
-            // Event listener to remove the card on close icon click
-            closeIcon.addEventListener("click", function () {
-                newCard.remove();
-            });
-      
-            // Re-add the "Add Card" click event for the new card
+    
+            closeIcon.addEventListener("click", () => newCard.remove());
             newCard.querySelector(".add-card").addEventListener("click", addCard);
+            setupQuantityValidation(newCard);
+            setupDuplicateItemValidation(newCard);
         }
-      
+    
         document.querySelector(".add-card").addEventListener("click", addCard);
-      
-        // Form submission validation
-        const form = document.querySelector("form");
-        form.addEventListener("submit", async function (event) {
-            event.preventDefault();
-            let hasErrors = false;
-            const totalRequested = {};
+    
+        function setupQuantityValidation(card) {
+            const itemSelect = card.querySelector("select[name='item']");
+            const quantityInput = card.querySelector("input[name='quantities[]']");
+            
+            itemSelect.addEventListener("change", async function () {
+                const availableQuantity = await getAvailableQuantity(this.value);
+                quantityInput.dataset.availableQuantity = availableQuantity;
+                validateQuantity(quantityInput, availableQuantity);
+                validateDuplicateItems();
+            });
+    
+            quantityInput.addEventListener("input", function () {
+                const availableQuantity = parseInt(this.dataset.availableQuantity || "0", 10);
+                validateQuantity(this, availableQuantity);
+            });
+        }
+    
+        function setupDuplicateItemValidation(card) {
+            const itemSelect = card.querySelector("select[name='item']");
+            itemSelect.addEventListener("change", validateDuplicateItems);
+        }
+    
+        function validateQuantity(quantityInput, availableQuantity) {
+            const requestedQuantity = parseInt(quantityInput.value, 10);
+            const errorQuantitySpan = quantityInput.parentNode.querySelector('.error-quantity');
+            
+            if (requestedQuantity > availableQuantity) {
+                errorQuantitySpan.textContent = `Exceeds available stock (${availableQuantity}).`;
+                disableSaveButton();
+            } else {
+                errorQuantitySpan.textContent = '';
+                enableSaveButtonIfNoErrors();
+            }
+        }
+    
+        function validateDuplicateItems() {
+            const itemSelects = document.querySelectorAll("select[name='item']");
             const selectedItems = new Set();
-      
-            // Clear previous validation messages
-            clearValidationErrors();
-      
-            // Validate each item entry
-            const itemEntries = document.querySelectorAll(".item-entry");
-            const validationPromises = Array.from(itemEntries).map(async (itemEntry) => {
-                const itemSelect = itemEntry.querySelector("select[name='item']");
-                const quantityInput = itemEntry.querySelector("input[name='quantities[]']");  // Adjusted to match the input name
-      
-                const selectedItemId = itemSelect.value;
-                const requestedQuantity = parseInt(quantityInput.value, 10);
-      
-                // Check for duplicate item selection
-                if (selectedItems.has(selectedItemId)) {
-                    hasErrors = true;
-                    displayValidationError(itemEntry, 'Item already chosen in another card.');
-                    return;
+    
+            itemSelects.forEach(select => {
+                const itemId = select.value;
+                const errorDuplicateSpan = select.parentNode.querySelector('.error-duplicate');
+    
+                if (selectedItems.has(itemId) && itemId) {
+                    errorDuplicateSpan.textContent = 'This item is already selected in another entry.';
+                    disableSaveButton();
                 } else {
-                    selectedItems.add(selectedItemId);
-                }
-      
-                if (selectedItemId && requestedQuantity > 0) {
-                    if (!totalRequested[selectedItemId]) {
-                        totalRequested[selectedItemId] = 0;
-                    }
-                    totalRequested[selectedItemId] += requestedQuantity;
-      
-                    // Fetch available quantity for the item from server
-                    const availableQuantity = await getAvailableQuantity(selectedItemId);
-      
-                    if (totalRequested[selectedItemId] > availableQuantity) {
-                        hasErrors = true;
-                        displayValidationError(itemEntry, `Not enough item available. Available: ${availableQuantity}`);
-                    } else {
-                        removeValidationError(itemEntry);
-                    }
-                } else {
-                    hasErrors = true;
-                    displayValidationError(itemEntry, 'Please select an item and enter a valid quantity.');
+                    errorDuplicateSpan.textContent = '';
+                    selectedItems.add(itemId);
                 }
             });
-      
-            await Promise.all(validationPromises);
-      
+    
+            enableSaveButtonIfNoErrors();
+        }
+    
+        function disableSaveButton() {
+            saveButton.disabled = true;
+            saveButton.style.cursor = "not-allowed";
+        }
+    
+        function enableSaveButtonIfNoErrors() {
+            const hasErrors = document.querySelectorAll(".text-danger").some(span => span.textContent.trim() !== "");
             if (!hasErrors) {
-                console.log("Submitting form with the following quantities:", totalRequested);
-                form.submit();
-            }
-        });
-      
-        function clearValidationErrors(card) {
-            if (card) {
-                card.querySelectorAll(".text-danger").forEach(errorMsg => errorMsg.remove());
-                card.classList.remove('border-danger');
-            } else {
-                document.querySelectorAll(".text-danger").forEach(errorMsg => errorMsg.remove());
-                document.querySelectorAll('.card.border-danger').forEach(card => card.classList.remove('border-danger'));
+                saveButton.disabled = false;
+                saveButton.style.cursor = "pointer";
             }
         }
-      
-        function displayValidationError(itemEntry, message) {
-            itemEntry.closest('.card').classList.add('border-danger');
-            const errorMsg = document.createElement('div');
-            errorMsg.classList.add('text-danger');
-            errorMsg.textContent = message;
-            itemEntry.appendChild(errorMsg);
-        }
-      
-        function removeValidationError(itemEntry) {
-            const existingErrorMsg = itemEntry.querySelector('.text-danger');
-            if (existingErrorMsg) existingErrorMsg.remove();
-            itemEntry.closest('.card').classList.remove('border-danger');
-        }
-      
+    
         async function getAvailableQuantity(itemId) {
             try {
                 const response = await fetch(`/get-available-quantity/${itemId}/`);
@@ -563,7 +548,19 @@
                 return 0;
             }
         }
-      });
+    
+        setupQuantityValidation(document.querySelector(".col-xl-6"));
+        setupDuplicateItemValidation(document.querySelector(".col-xl-6"));
+    
+        function clearValidationErrors(card) {
+            card.querySelectorAll(".text-danger").forEach(span => span.textContent = '');
+            card.classList.remove("border-danger");
+        }
+    });
+    
+    
+    
+      
 </script>
 
 

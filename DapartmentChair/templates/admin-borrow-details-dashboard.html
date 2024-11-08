@@ -162,14 +162,7 @@
                             </p>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a href="{% url 'admin-returned-record' %}" class="nav-link">
-                            <i class="nav-icon fa-solid fa-arrow-rotate-left"></i>
-                            <p>
-                                Returned Records
-                            </p>
-                        </a>
-                    </li>
+            
 
                     <li class="nav-header">Borrowers Reservation</li>
                     <li class="nav-item">
@@ -246,9 +239,9 @@
                             <div class="card-body">
                                 <form id="editBorrowerForm" method="post" action="{% url 'admin-update_borrower_status_dashboard' %}">
                                     {% csrf_token %}
-
-                                    <!-- Hidden field to pass borrow_request_id to the view -->
-                                   
+                                
+                                    
+                                    
                                     <div class="row mb-1">
                                         <div class="col-4">
                                             <label class="font-weight-bold" style="font-size: 15px;">Student ID:</label>
@@ -263,78 +256,81 @@
                                             <p id="modal-date-borrow" style="font-size: 15px;">{{ date_borrow }}</p>
                                         </div>
                                     </div>
-                            
+                                
                                     <div class="row mb-1">
-                                        <div class="col-3">
+                                        <div class="col-2">
                                             <p style="font-size: 15px; font-weight: 800;">Items:</p>
                                         </div>
+                                        
                                         <div class="col-3">
+                                            <p style="font-size: 15px; font-weight: 800;">Description</p>
+                                        </div>
+                                        <div class="col-2">
                                             <p style="font-size: 15px; font-weight: 800;">Quantity:</p>
                                         </div>
-                                        <div class="col-3">
+                                        <div class="col-2">
                                             <p style="font-size: 15px; font-weight: 800;">Date Return:</p>
                                         </div>
-                                        <div class="col-3">
+                                        <div class="col-2" style="padding-left: 100px;">
                                             <p style="font-size: 15px; font-weight: 800;">Return:</p>
                                         </div>
                                     </div>
-                            
+                                
                                     <!-- Items List -->
-<div id="borrow-items-list">
-    {% for borrow_request_with_items in borrow_requests_with_items %}
-        {% for item in borrow_request_with_items.items %}
-        <input type="hidden" name="borrow_request_id" value="{{ borrow_request_with_items.borrow_request.id }}">
-            <div class="row mb-1">
-                <div class="col-3 item-text">
-                    <p {% if item.is_returned %}style="text-decoration: line-through;"{% endif %}>
-                        {% if borrow_request_with_items.borrow_request.status != "Returned" %}{{ forloop.counter }}. {% endif %}{{ item.item.name }}
-                    </p>
-                </div>
-                <div class="col-3 quantity-text">
-                    <p {% if item.is_returned %}style="text-decoration: line-through;"{% endif %}>
-                        {{ item.quantityy }}
-                    </p>
-                </div>
-                
-                <div class="col-3">
-                    {% if item.is_returned %}
-                    <p>{{ item.date_return|date:"F j, Y" }}</p>
-                    {% else %}
-                    <input type="date" class="form-control date-input" style="width: 200px;"
-                           {% if item.is_returned %} disabled {% endif %}
-                           value="{{ item.date_return|default:'' }}">
-                    {% endif %}
-                </div>
-                
-                <div class="col-3">
-                    {% if item.is_returned %}
-                    <button type="button" class="btn btn-success btn-sm" disabled>
-                        Done
-                    </button>
-                    {% else %}
-                    <button type="button" class="btn btn-outline-success check-button btn-sm" 
-                            data-item-id="{{ item.item.id }}" 
-                            data-borrow-request-item-id="{{ item.id }}" 
-                            onclick="handleReturn(this)">
-                        <i class="fas fa-check"></i>
-                    </button>
-                    {% endif %}
-                </div>
-            </div>
-        {% endfor %}
-    {% endfor %}
-</div>
-                                    
-                                    
-                                    
-                                    
-                            
+                                    <div id="borrow-items-list">
+                                        {% for borrow_request_with_items in borrow_requests_with_items %}
+                                            {% for item in borrow_request_with_items.items %}
+                                            <!-- Hidden field to pass borrow_request_id to the view -->
+                                    <input type="hidden" name="borrow_request_id" value="{{ borrow_request_with_items.borrow_request.id }}">
+                                                <div class="row mb-1">
+                                                    <div class="col-2 item-text">
+                                                        <p {% if item.is_returned %}style="text-decoration: line-through;"{% endif %}>
+                                                            {% if borrow_request_with_items.borrow_request.status != "Returned" %}{{ forloop.counter }}. {% endif %}{{ item.item.name }}
+                                                        </p>
+                                                    </div>
+                                                    <div class="col-3 description-text">
+                                                        <p {% if item.is_returned %}style="text-decoration: line-through;"{% endif %}>
+                                                            {{ item.description }}
+                                                        </p>
+                                                    </div>
+
+                                                    <div class="col-2 quantity-text">
+                                                        <p {% if item.is_returned %}style="text-decoration: line-through;"{% endif %}>
+                                                            {{ item.quantityy }}
+                                                        </p>
+                                                    </div>
+                                
+                                                    <div class="col-2">
+                                                        {% if item.is_returned %}
+                                                            <p>{{ item.date_return|date:"F j, Y" }}</p>
+                                                        {% else %}
+                                                            <input type="date" class="form-control date-input" style="width: 200px;"
+                                                                   {% if item.is_returned %} disabled {% endif %}
+                                                                   value="{{ item.date_return|default:'' }}">
+                                                        {% endif %}
+                                                    </div>
+                                
+                                                    <div class="col-2" style="padding-left: 100px;">
+                                                        {% if item.is_returned %}
+                                                            <button type="button" class="btn btn-success btn-sm" disabled>
+                                                                Done
+                                                            </button>
+                                                        {% else %}
+                                                            <button type="button" class="btn btn-outline-success check-button btn-sm" 
+                                                                    data-item-id="{{ item.item.id }}" 
+                                                                    data-borrow-request-item-id="{{ item.id }}" 
+                                                                    onclick="handleReturn(this)">
+                                                                <i class="fas fa-check"></i>
+                                                            </button>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        {% endfor %}
+                                    </div>
+                                
                                     <div class="modal-footer">
                                         <button type="button" class="btn btn-secondary" onclick="window.history.back();">Back</button>
-                                        <button type="submit" class="btn btn-primary save-btn" id="save-button">Save</button>
-
-
-
                                     </div>
                                 </form>
                             </div>
@@ -375,22 +371,23 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Check all items' return status and restore save button state on page load
         checkAllReturned();
-        restoreSaveButtonState();
     });
-    
+
     function handleReturn(button) {
         const itemId = button.getAttribute("data-item-id");
         const borrowRequestItemId = button.getAttribute("data-borrow-request-item-id");
         const row = button.closest('.row');
         const dateInput = row.querySelector('.date-input');
-    
+
+        // Clear any existing error messages
+        removeError(dateInput);
+
         if (!dateInput.value) {
             showError(dateInput, "Please select a return date before marking as returned.");
             return;
         }
-    
+
         fetch(`/admin-return-item/`, {
             method: "POST",
             headers: {
@@ -405,78 +402,71 @@
         }).then(response => response.json())
           .then(data => {
               if (data.success) {
-                  // Disable the button and input to mark as returned
                   button.disabled = true;
                   dateInput.disabled = true;
-    
-                  // Change button style and text
+
                   button.classList.remove('btn-outline-success');
                   button.classList.add('btn-success');
                   button.textContent = 'Done';
-    
-                  // Add strikethrough to indicate return
+
                   row.querySelector('.item-text p').style.textDecoration = "line-through";
+                  row.querySelector('.description-text p').style.textDecoration = "line-through";
                   row.querySelector('.quantity-text p').style.textDecoration = "line-through";
-    
-                  // Format the date
+
                   const date = new Date(dateInput.value);
                   const options = { day: 'numeric', month: 'long', year: 'numeric' };
-                  const formattedDate = date.toLocaleDateString('en-US', options); // e.g., "26 February, 2025"
-    
-                  // Create a new paragraph element to show the return date
+                  const formattedDate = date.toLocaleDateString('en-US', options);
+
                   const returnDateParagraph = document.createElement("p");
-                  returnDateParagraph.textContent = formattedDate; // Use the formatted return date
-    
-                  // Insert the new return date paragraph into the correct column
-                  const dateColumn = row.querySelector('.col-3:nth-child(3)');
-                  dateColumn.innerHTML = ""; // Clear the previous input
-                  dateColumn.appendChild(returnDateParagraph); // Add the formatted return date paragraph
-    
-                  // Check if all items are returned
+                  returnDateParagraph.textContent = formattedDate;
+
+                  const dateColumn = row.querySelector('.col-2:nth-child(4)');
+                  dateColumn.innerHTML = "";
+                  dateColumn.appendChild(returnDateParagraph);
+
                   checkAllReturned();
               } else {
                   showError(dateInput, "Error processing return. Please try again.");
               }
           });
     }
-    
+
     function showError(dateInput, message) {
+        removeError(dateInput); // Clear any existing error message
+
         const errorSpan = document.createElement("span");
         errorSpan.className = "error-message";
         errorSpan.style.color = "red";
         errorSpan.style.fontSize = "small";
         errorSpan.textContent = message;
-    
+
         // Insert the error message right below the date input
         dateInput.insertAdjacentElement("afterend", errorSpan);
     }
-    
-    function checkAllReturned() {
-        const allCheckButtons = document.querySelectorAll('.check-button');
-        const saveButton = document.querySelector('.save-btn');
-    
-        // Check if all check buttons are disabled
-        const allReturned = Array.from(allCheckButtons).every(button => button.disabled);
-    
-        // Enable the save button if all items are returned
-        if (allReturned) {
-            saveButton.disabled = false;
-            localStorage.setItem('saveButtonEnabled', 'true'); // Store state in local storage
-        } else {
-            saveButton.disabled = true;
-            localStorage.setItem('saveButtonEnabled', 'false'); // Store state in local storage
+
+    function removeError(dateInput) {
+        const existingError = dateInput.parentNode.querySelector('.error-message');
+        if (existingError) {
+            existingError.remove();
         }
     }
-    
-    function restoreSaveButtonState() {
-        const saveButton = document.querySelector('.save-btn');
-        const isEnabled = localStorage.getItem('saveButtonEnabled') === 'true';
-        saveButton.disabled = !isEnabled; // Set the button state based on local storage
+
+    function checkAllReturned() {
+        const allCheckButtons = document.querySelectorAll('.check-button');
+        const form = document.getElementById('editBorrowerForm');
+
+        // Check if all check buttons are disabled (i.e., all items are marked as returned)
+        const allReturned = Array.from(allCheckButtons).every(button => button.disabled);
+
+        // Automatically submit the form if all items are returned
+        if (allReturned) {
+            form.submit();
+        }
     }
-    
-    
-    
-    </script>
+</script>
+
+
+
 
 
 {% endblock content %}

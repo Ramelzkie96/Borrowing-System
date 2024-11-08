@@ -268,14 +268,6 @@
                 </p>
               </a>
             </li>
-            <li class="nav-item">
-              <a href="{% url 'admin-returned-record' %}" class="nav-link">
-                <i class="nav-icon fa-solid fa-arrow-rotate-left"></i>
-                <p>
-                  Returned Records
-                </p>
-              </a>
-            </li>
   
             <li class="nav-header">Borrowers Reservation</li>
             <li class="nav-item">
@@ -340,7 +332,63 @@
 
 
 
+                    <!-- Modal for Viewing Item -->
+                    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 800px;">
+                            <div class="modal-content">
+                                <div class="modal-header" style="border-bottom: 2px solid #593bdb;">
+                                    <h5 class="modal-title" id="exampleModalCenterTitle" style="font-size: 25px; font-weight: 700;">Borrower Details</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row mb-1">
+                                        <div class="col-4">
+                                            <label class="font-weight-bold" style="font-size: 15px;">Student ID:</label>
+                                            <p id="modal-student-id" style="font-size: 15px;"></p>
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="font-weight-bold" style="font-size: 15px;">Name:</label>
+                                            <p id="modal-name" style="font-size: 15px;"></p>
+                                        </div>
+                                        <div class="col-4">
+                                            <label class="font-weight-bold" style="font-size: 15px;">Date Borrow:</label>
+                                            <p id="modal-date-borrow" style="font-size: 15px;"></p>
+                                        </div>
+                                    </div>
+                    
+                                    <div class="row mb-1">
+                                        <div class="col-3">
+                                            <p style="font-size: 15px; font-weight: 800;">Items:</p>
+                                        </div>
 
+                                        
+                                        <div class="col-3">
+                                            <p style="font-size: 15px; font-weight: 800;">Description:</p>
+                                        </div>
+
+                                        <div class="col-3">
+                                            <p style="font-size: 15px; font-weight: 800;">Quantity:</p>
+                                        </div>
+
+                                        <div class="col-3">
+                                            <p style="font-size: 15px; font-weight: 800;">Date Return:</p>
+                                        </div>
+                    
+                                      
+                                       
+                                    </div>
+                    
+                                    <div id="borrow-items-list">
+                                        <!-- Dynamic borrow item list will be injected here -->
+                                    </div>
+                                </div>
+                    
+                             
+                            </div>
+                        </div>
+                    </div>
 
 
 
@@ -353,43 +401,44 @@
         
         
                 <!-- Send Email Notification Modal -->
-                <div class="modal fade" id="exampleModalLong" aria-hidden="true" style="display: none;">
-                  <div class="modal-dialog">
-                      <div class="modal-content">
-                          <div class="modal-header" style="border-bottom: 2px solid #593bdb;">
-                              <h5 class="modal-title" style=" font-weight: 700;">Send Email Notification</h5>
-                              <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
-                          </div>
-                          <form id="emailNotificationForm" method="post" action="{% url 'admin-send_email' %}">
-                              {% csrf_token %}
-                              <div class="modal-body">
-                                  <div class="form-group">
-                                      <label for="emailTitle">Title</label>
-                                      <input type="text" class="form-control" id="emailTitle" name="title" required>
-                                  </div>
-                                  <div class="form-group">
-                                      <label for="emailAddress">Email</label>
-                                      <input type="email" class="form-control" id="emailAddress" name="email" required>
-                                  </div>
-                                  <div class="form-group">
-                                      <label for="emailMessage">Message</label>
-                                      <textarea class="form-control" id="emailMessage" name="message" rows="4" required></textarea>
-                                  </div>
-                              </div>
-                              <div class="modal-footer">
-                                  <!-- Close and Submit Buttons -->
-                                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                  <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Send Email</button>
-        
-                                  <!-- Loader (hidden by default) -->
-                                  <div id="loader" style="display:none; margin-left: 10px;">
-                                      <div class="loader"></div>
-                                  </div>
-                              </div>
-                          </form>
-                      </div>
-                  </div>
-              </div>
+                            <!-- Updated Send Email Notification Modal -->
+<div class="modal fade" id="exampleModalLong" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" style="border-bottom: 2px solid #593bdb;">
+                <h5 class="modal-title">Send Email Notification</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
+            </div>
+            <form id="emailNotificationForm" method="post" action="{% url 'send_email' %}">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="emailTitle" style="color: #333;">Title</label>
+                        <input type="text" class="form-control" id="emailTitle" name="title" required style="border: 1px solid #474747;">
+                    </div>
+                    <div class="form-group">
+                        <label for="emailAddress" style="color: #333;">Email</label>
+                        <input type="email" class="form-control" id="emailAddress" name="email" required style="border: 1px solid #474747;">
+                    </div>
+                    <!-- New paragraph to display the message -->
+                    <p id="emailMessageDisplay" style="margin-top: 10px; color: #333;"></p>
+                    <div class="form-group">
+                        <label for="emailMessage" style="color: #333;">Message</label>
+                        <textarea class="form-control" id="emailMessage" name="message" rows="4" required style="border: 1px solid #474747;"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Send Email</button>
+                    <div id="loader" style="display:none; margin-left: 10px;">
+                        <div class="loader"></div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
           
           <!-- /.row -->
   
@@ -430,8 +479,17 @@
                                 </div>
                             </div>
 
-                    
-        
+                            <div class="dataTables_length" id="example_length" style="width: 200px;">
+                                <label>Status Filter 
+                                    <select name="example_length" aria-controls="example" class="form-control" id="statusFilter">
+                                        <option value="all" {% if current_show == 'all' %}selected{% endif %}>All</option>
+                                        <option value="Unreturned">Unreturned</option>
+                                        <option value="Partial Item Returned">Partial Item Returned</option>
+                                        <option value="Fully Returned">Fully Returned</option>
+                                    </select>
+                                </label>
+                            </div>
+                            
                             <table id="itemTable" class="table table-bordered table-striped table-responsive-sm mt-3">
                                 <thead class="dark-mode">
                                     <tr>
@@ -450,7 +508,7 @@
                                 <tbody>
                                     {% if page_obj %}
                                         {% for request in page_obj %}
-                                            <tr>
+                                            <tr data-status="{{ request.status }}">
                                                 <td>{{ request.student_id }}</td>
                                                 <td>{{ request.name }}</td>
                                                 <td>{{ request.course }}</td>
@@ -458,14 +516,13 @@
                                                 <td>{{ request.phone }}</td>
                                                 <td>{{ request.date_borrow }}</td>
                                                 <td>{{ request.time_ago }}</td>
-                                                <td style="display: none;">{{ request.date_borrow }}</td>
                                                 <td>
-                                                    {% if request.status == "Borrowed" %}
-                                                        <div class="badge badge-success" style="color: white;">{{ request.status }}</div>
-                                                    {% elif request.status == "Returned" %}
-                                                        <div class="badge badge-danger">{{ request.status }}</div>
+                                                    {% if request.status == "Unreturned" %}
+                                                        <div class="badge badge-secondary" style="color: white;">{{ request.status }}</div>
+                                                    {% elif request.status == "Fully Returned" %}
+                                                        <div class="badge badge-success">{{ request.status }}</div>
                                                     {% else %}
-                                                        <div class="badge badge-secondary">{{ request.status }}</div>
+                                                        <div class="badge badge-primary">{{ request.status }}</div>
                                                     {% endif %}
                                                 </td>
                                                 <td class="text-center">
@@ -473,57 +530,58 @@
                                                         <i class="fa-solid fa-file-pdf"></i>
                                                     </a>
                                                 </td>
-                                
                                                 <td style="text-align: center; vertical-align: middle;">
-                                                    <div class="dropdownnn">
-                                                        <a class="btn btn-link font-24 p-0 line-height-1 no-arrow -toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
-                                                            <img src="{% static 'images/mores.png' %}" alt="" width="30" height="30">
-                                                        </a>
-                                                        <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
-                                                            <button onclick="redirectToBorrowerDetails('{{ request.student_id }}', '{{ request.name }}', '{{ request.date_borrow }}', '{{ request.id }}')" class="dropdown-item">
-                                                                <i class="fas fa-eye"></i>&nbsp; Borrower Details
-                                                            </button>
-                                                            
-                                                            
-                                                            
-                                                            
-                                
-                                                            {% if request.user_id == user.id or request.handled_by_id == user.id %}  <!-- Ensure the request is associated with the current user or handled by the user -->
-                                                            
-                                                            
-                                                            <button onclick="redirectToUpdateBorrowRequest('{{ request.id }}', '{{ request.student_id }}', '{{ request.name }}', '{{ request.course }}', '{{ request.year }}', '{{ request.email }}', '{{ request.phone }}', '{{ request.content_object.id }}', '{{ request.content_object.name }}', '{{ request.quantity }}', '{{ request.date_borrow }}', '{{ request.purpose }}', '{{ request.borrower_type }}')" class="dropdown-item edit-item-btn">
-                                                                <i class="fas fa-edit"></i>&nbsp; Edit
-                                                            </button>
-                                                            
-
-                                                    
-                                                            {% endif %}
-                                                            
-                                                  
-                                                            <button type="button" class="dropdown-item send-email-btn" data-toggle="modal" data-target="#exampleModalLong"
-                                                            data-email="{{ request.email }}"
-                                                            data-sender-name="{{ user.username }}"
-                                                            data-borrow-id="{{ request.id }}">
-                                                                <i class="fa-regular fa-envelope"></i>&nbsp; Send Notification
-                                                            </button>
+                                                    {% if request.status == "Unreturned" or request.status == "Partial Item Returned" %}
+                                                        <!-- Show dropdown only if status is "Borrowed" -->
+                                                        <div class="dropdownnn">
+                                                            <a class="btn btn-link font-24 p-0 line-height-1 no-arrow -toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
+                                                                <img src="{% static 'images/mores.png' %}" alt="" width="30" height="30">
+                                                            </a>
+                                                            <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
+                                                                <button onclick="redirectToBorrowerDetails('{{ request.student_id }}', '{{ request.name }}', '{{ request.date_borrow }}', '{{ request.id }}', '{{ request.status }}', '{{ request.status }}')" class="dropdown-item">
+                                                                    <i class="fas fa-eye"></i>&nbsp; Borrower Details
+                                                                </button>
+                                                                
+                                                
+                                                                <button onclick="redirectToUpdateBorrowRequest('{{ request.id }}', '{{ request.student_id }}', '{{ request.name }}', '{{ request.course }}', '{{ request.year }}', '{{ request.email }}', '{{ request.phone }}', '{{ request.content_object.id }}', '{{ request.content_object.name }}', '{{ request.date_borrow }}', '{{ request.purpose }}', '{{ request.borrower_type }}', '{{ request.description }}')" class="dropdown-item edit-item-btn">
+                                                                    <i class="fas fa-edit"></i>&nbsp; Edit
+                                                                </button>
+                                                                
+                                                                
+                                                
+                                                                <button type="button" class="dropdown-item send-email-btn" data-toggle="modal" data-target="#exampleModalLong"
+                                                                data-email="{{ request.email }}"
+                                                                data-sender-name="{{ user.username }}"
+                                                                data-borrow-id="{{ request.id }}">
+                                                                    <i class="fa-regular fa-envelope"></i>&nbsp; Send Notification
+                                                                </button>
+                                                            </div>
                                                         </div>
-                                                    </div>
+                                                    {% elif request.status == "Fully Returned" %}
+                                                        <!-- Show view button only if status is "Returned" -->
+                                                        <button type="button" class="btn btn-primary view-item-btn btn-sm" data-toggle="modal" data-target="#exampleModalCenter"
+                                                                data-request-id="{{ request.id }}"
+                                                                data-student-id="{{ request.student_id }}"
+                                                                data-name="{{ request.name }}"
+                                                                data-year="{{ request.year }}"
+                                                                data-date="{{ request.date_borrow }}">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                    {% endif %}
                                                 </td>
+                                                
                                             </tr>
                                         {% endfor %}
                                     {% else %}
                                         <tr>
                                             <td colspan="10" class="text-center">
-                                                <div>
-                                                    No borrow requests found.
-                                                </div>
+                                                <div>No borrow requests found.</div>
                                             </td>
                                         </tr>
                                     {% endif %}
                                 </tbody>
-                                
-                                
                             </table>
+                            
                             
                             
         
@@ -606,12 +664,7 @@
     </aside>
     <!-- /.control-sidebar -->
   
-    <!-- Main Footer -->
-    <footer class="main-footer">
-        <strong>Borrowing System By: </strong>
-        Run Time Terror.
-        
-      </footer>
+
   </div>
 
 
@@ -624,15 +677,18 @@
     }
 
 
-    function redirectToBorrowerDetails(studentId, name, dateBorrow, borrowRequestId) {
-        const url = `{% url 'admin-borrower-details' %}?student_id=${studentId}&name=${encodeURIComponent(name)}&date_borrow=${dateBorrow}&borrow_request_id=${borrowRequestId}`;
+    function redirectToBorrowerDetails(studentId, name, dateBorrow, borrowRequestId, status) {
+        const url = `{% url 'admin-borrower-details' %}?student_id=${studentId}&name=${encodeURIComponent(name)}&date_borrow=${dateBorrow}&borrow_request_id=${borrowRequestId}&status=${status}`;
         window.location.href = url;
     }
+    
 
-    function redirectToUpdateBorrowRequest(borrowRequestId, studentId, name, course, year, email, phone, itemId, itemName, quantity, dateBorrow, purpose, borrowerType) {
-        const url = `{% url 'admin-update-borrower' %}?id=${borrowRequestId}&student_id=${studentId}&name=${encodeURIComponent(name)}&course=${encodeURIComponent(course)}&year=${year}&email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}&item_id=${itemId}&item_name=${encodeURIComponent(itemName)}&quantity=${quantity}&date=${dateBorrow}&purpose=${encodeURIComponent(purpose)}&borrower_type=${borrowerType}`;
+    function redirectToUpdateBorrowRequest(borrowRequestId, studentId, name, course, year, email, phone, itemId, itemName, dateBorrow, purpose, borrowerType, description) {
+        const url = `{% url 'admin-update-borrower' %}?id=${borrowRequestId}&student_id=${studentId}&name=${encodeURIComponent(name)}&course=${encodeURIComponent(course)}&year=${year}&email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}&item_id=${itemId}&item_name=${encodeURIComponent(itemName)}&date=${dateBorrow}&purpose=${encodeURIComponent(purpose)}&borrower_type=${borrowerType}&description=${encodeURIComponent(description)}`;
         window.location.href = url;
     }
+    
+    
     
     
 
@@ -744,7 +800,7 @@ function searchTable() {
 
       // Iterate through each cell in the row
       for (j = 0; j < td.length; j++) {
-          if (j === 8 || j === 9 || j == 10) continue; // Skip "Status" and "Action" columns
+          if (j == 7 || j === 8 || j === 9 || j == 10) continue; // Skip "Status" and "Action" columns
           if (td[j]) {
               txtValue = td[j].textContent || td[j].innerText;
               if (txtValue.toUpperCase().indexOf(filter) > -1) {
@@ -818,53 +874,45 @@ function removeNoRecordRow() {
   
 
   
-// Send email notification
+//send email
 document.addEventListener('DOMContentLoaded', function () {
-    // Add click event listener to the send email buttons
     document.querySelectorAll('.send-email-btn').forEach(function (button) {
         button.addEventListener('click', function () {
-            // Get the email, borrow ID, and sender name from the data attributes
             const email = this.getAttribute('data-email');
             const borrowId = this.getAttribute('data-borrow-id');
-            const senderName = this.getAttribute('data-sender-name'); // Get the sender's username
-  
-            // Set the email in the modal
+            
             document.getElementById('emailAddress').value = email;
-  
-            // Set the default title in the modal
             document.getElementById('emailTitle').value = 'Reminder: Outstanding Borrowed Items';
-  
+            
             // Fetch the unreturned items for the given borrow ID
             fetch(`/admin-get-unreturned-items/${borrowId}/`)
                 .then(response => response.json())
                 .then(data => {
-                    const emailMessageTextarea = document.getElementById('emailMessage');
+                    const emailMessageDisplay = document.getElementById('emailMessageDisplay');
                     if (data.success) {
                         const unreturnedItems = data.items;
-                        let messageContent = 'The following items need to be returned:\n\n';
-  
+                        let messageContent = 'The following items need to be returned:<br><br>';
+                        
                         if (unreturnedItems.length > 0) {
                             unreturnedItems.forEach((item, index) => {
-                                messageContent += `${index + 1}. ${item.name} (Quantity: ${item.quantity})\n`;
+                                messageContent += `${index + 1}. ${item.name} (Quantity: ${item.quantity})<br>`;
                             });
-                            // Append the sender's username to the message
-                            messageContent += `\nSent by: ${senderName} (Information Technology Department)`; // Add sender's name below the items
                         } else {
                             messageContent = 'All items have been returned.';
                         }
-  
-                        // Set the message content in the textarea
-                        emailMessageTextarea.value = messageContent;
+                        
+                        // Display the message in the <p> tag
+                        emailMessageDisplay.innerHTML = messageContent;
                     } else {
-                        emailMessageTextarea.value = 'Error fetching items.';
+                        emailMessageDisplay.textContent = 'Error fetching items.';
                     }
                 })
                 .catch(() => {
-                    document.getElementById('emailMessage').value = 'Error fetching items.';
+                    document.getElementById('emailMessageDisplay').textContent = 'Error fetching items.';
                 });
         });
     });
-  });
+});
 
 
 
@@ -942,6 +990,103 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
+
+
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    const statusFilter = document.getElementById('statusFilter');
+    const tableBody = document.querySelector('#itemTable tbody');
+    const tableRows = tableBody.querySelectorAll('tr');
+
+    statusFilter.addEventListener('change', function () {
+        const selectedStatus = this.value.toLowerCase();
+        let rowCount = 0;
+
+        // Hide or show rows based on the selected status
+        tableRows.forEach(row => {
+            const rowStatus = row.getAttribute('data-status').toLowerCase();
+
+            if (selectedStatus === 'all' || rowStatus === selectedStatus) {
+                row.style.display = ''; // Show the row
+                rowCount++;
+            } else {
+                row.style.display = 'none'; // Hide the row
+            }
+        });
+
+        // Check if any rows are visible
+        if (rowCount === 0) {
+            // If no rows are visible, add a "No record found" row
+            let noRecordRow = document.getElementById('noRecordRow');
+            if (!noRecordRow) {
+                noRecordRow = document.createElement('tr');
+                noRecordRow.id = 'noRecordRow';
+                noRecordRow.innerHTML = `
+                    <td colspan="10" class="text-center">
+                        <div>No record found.</div>
+                    </td>
+                `;
+                tableBody.appendChild(noRecordRow);
+            }
+        } else {
+            // Remove the "No record found" row if rows are visible
+            const noRecordRow = document.getElementById('noRecordRow');
+            if (noRecordRow) {
+                tableBody.removeChild(noRecordRow);
+            }
+        }
+    });
+});
+
+
+
+</script>
+
+
+<script>
+    $(document).ready(function() {
+        $('.view-item-btn').on('click', function() {
+            const studentId = $(this).data('student-id');
+            const dateBorrow = $(this).data('date');
+            const name = $(this).data('name');
+    
+            // Populate modal fields
+            $('#modal-student-id').text(studentId);
+            $('#modal-date-borrow').text(dateBorrow);
+            $('#modal-name').text(name);
+    
+            // Clear previous items
+            $('#borrow-items-list').empty();
+    
+            // Fetch items related to this borrow request
+            $.ajax({
+                url: '/admin-fetch_borrow_request_items/',
+                type: 'GET',
+                data: {
+                    student_id: studentId,
+                    date_borrow: dateBorrow,
+                },
+                success: function(data) {
+                    data.items.forEach((item, index) => {
+                        $('#borrow-items-list').append(
+                            `<div class="row mb-1">
+                                <div class="col-3">${index + 1}. ${item.item_name}</div>
+                                <div class="col-3">${item.description}</div>
+                                <div class="col-3">${item.quantity}</div>
+                                <div class="col-3">${item.date_return ? item.date_return : 'Not Returned'}</div>
+                            </div>`
+                        );
+                    });
+                },
+                error: function() {
+                    $('#borrow-items-list').append('<div class="row mb-1"><div class="col-12">Error loading items.</div></div>');
+                }
+            });
+        });
+    });
+    
+    
 </script>
 
 {% endblock content %}
