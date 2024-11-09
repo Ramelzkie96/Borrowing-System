@@ -386,12 +386,13 @@
                                         </div>
                                     </div>
 
-                                    <div class="dataTables_length" id="example_length" style="width: 140px;">
+                                    <div class="dataTables_length" id="example_length" style="width: 250px;">
                                         <label class="text-dark">Status Filter 
                                             <select name="example_length" aria-controls="example" class="form-control" id="statusFilter">
                                                 <option value="all" {% if current_show == 'all' %}selected{% endif %}>All</option>
-                                                <option value="Borrowed" {% if current_show == 'Borrowed' %}selected{% endif %}>Borrowed</option>
-                                                <option value="Returned" {% if current_show == 'Returned' %}selected{% endif %}>Returned</option>
+                                                <option value="Unreturned" {% if current_show == 'Unreturned' %}selected{% endif %}>Unreturned</option>
+                                                <option value="Partial Item Returned" {% if current_show == 'Partial Item Returned' %}selected{% endif %}>Partial Item Returned</option>
+                                                <option value="Fully Returned" {% if current_show == 'Fully Returned' %}selected{% endif %}>Fully Returned</option>
                                             </select>
                                         </label>
                                         
@@ -481,7 +482,7 @@
                                                     </tr>
                                                 {% endfor %}
                                             {% else %}
-                                                <tr>
+                                                <tr class="no-records">
                                                     <td colspan="10" class="text-center">
                                                         <div style="color: #333;">
                                                             No borrow requests found.
@@ -989,7 +990,7 @@ function getCookie(name) {
                     borrowItemsList.innerHTML = '';
             
                     // Fetch items related to this borrow request
-                    fetch(`/fetch_borrow_request_items/?student_id=${studentId}&date_borrow=${dateBorrow}`)
+                    fetch(`/fetch_borrow_request_items_record/?student_id=${studentId}&date_borrow=${dateBorrow}`)
                         .then(response => response.json())
                         .then(data => {
                             console.log('Items received:', data.items); // Log items received

@@ -59,21 +59,58 @@
 
 
 {% block content %}
-	<div class="login-header box-shadow">
-		<div class="container-fluid d-flex justify-content-between align-items-center">
-			<div class="brand-logo">
-				<a href="javascript:void()">
-                    <img src="{%static 'images/pit_logo.png'%}" alt="" width="65" height="65">
-                    <span class="text-primary" style="font-weight: 800;">&nbsp; Student Reservation Item</span>
-                </a>
-			</div>
-			<div class="login-menu">
-				<ul>
-					<li><a href="{%url 'home_redirect'%}">Faculty Login</a></li>
-				</ul>
-			</div>
-		</div>
-	</div>
+<div class="login-header box-shadow">
+    <div class="container-fluid d-flex justify-content-between align-items-center">
+        <div class="brand-logo">
+            <a href="javascript:void()">
+                <img src="{% static 'images/pit_logo.png' %}" alt="" class="logo-img">
+                <span class="text-primary header-text" style="font-weight: 800;">&nbsp; Student Reservation Item</span>
+            </a>
+        </div>
+        <div class="login-menu">
+            <ul>
+                <li><a href="{% url 'home_redirect' %}" class="login-link">Faculty Login</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Responsive styles */
+    .logo-img {
+        width: 65px;
+        height: 65px;
+    }
+
+    /* Smaller logo and text for tablets and smaller devices */
+    @media (max-width: 768px) {
+        .logo-img {
+            width: 50px;
+            height: 50px;
+        }
+        .header-text {
+            font-size: 18px; /* Adjust font size as needed */
+        }
+        .login-link {
+            font-size: 14px; /* Smaller font for Faculty Login link */
+        }
+    }
+
+    /* Further size adjustments for extra small screens */
+    @media (max-width: 576px) {
+        .logo-img {
+            width: 40px;
+            height: 40px;
+        }
+        .header-text {
+            font-size: 16px;
+        }
+        .login-link {
+            font-size: 12px;
+			display: none;
+        }
+    }
+</style>
 
 
     <!-- Dynamic messages start -->
@@ -85,17 +122,17 @@
     <!-- Dynamic messages end -->
 
 	<div class="login-wrap d-flex align-items-center flex-wrap justify-content-center">
-		<div class="container">
-			<div class="row align-items-center">
-				<div class="col-md-6 col-lg-7">
-					<img src="{% static 'images/reserve.png'%}" alt="">
-				</div>
-				<div class="col-md-6 col-lg-5">
-					<div class="login-box bg-white box-shadow border-radius-10">
-						<div class="login-title">
-							<h2 class="text-center text-primary">Student Register</h2>
-						</div>
-						<form method="POST" action="{% url 'reservation-register' %}">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6 col-lg-7">
+                    <img src="{% static 'images/reserve.png' %}" alt="" class="responsive-img">
+                </div>
+                <div class="col-md-6 col-lg-5">
+                    <div class="login-box bg-white box-shadow border-radius-10">
+                        <div class="login-title">
+                            <h2 class="text-center text-primary">Student Register</h2>
+                        </div>
+                        <form method="POST" action="{% url 'reservation-register' %}">
                             {% csrf_token %}
                             <div class="row">
                                 <div class="col-md-6">
@@ -117,7 +154,6 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        
                                         <label>Course :</label>
                                         <input type="text" class="form-control" name="course" value="{{ request.POST.course }}" required>
                                     </div>
@@ -144,7 +180,6 @@
                                             <div class="invalid-feedback" style="color: red;">{{ email_error }}</div>
                                         {% endif %}
                                     </div>
-                                    
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -177,18 +212,52 @@
                                     </div>
                                     <div class="font-16 weight-600 pt-10 pb-10 text-center" data-color="#707373">OR</div>
                                     <div class="input-group mb-0">
-                                        <a class="btn btn-outline-primary btn-lg btn-block" href="{%url 'reservation-login'%}">Already Have an Account</a>
+                                        <a class="btn btn-outline-primary btn-lg btn-block" href="{% url 'reservation-login' %}">Already Have an Account</a>
                                     </div>
                                 </div>
                             </div>
                         </form>
-                        
-                        
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        /* Responsive image */
+        .responsive-img {
+            width: 100%;
+            height: auto;
+            max-width: 500px; /* Max width to prevent excessive scaling */
+        }
+    
+        /* Responsive form adjustments */
+        @media (max-width: 768px) {
+            .login-title h2 {
+                font-size: 24px; /* Smaller heading font for mobile */
+            }
+            .form-group label {
+                font-size: 14px; /* Adjust label size */
+            }
+            .btn {
+                font-size: 16px; /* Adjust button font size */
+            }
+        }
+    
+        /* Further size adjustments for smaller screens */
+        @media (max-width: 576px) {
+            .login-title h2 {
+                font-size: 20px;
+            }
+            .form-group label {
+                font-size: 12px;
+            }
+            .btn {
+                font-size: 14px;
+            }
+        }
+    </style>
+    
 
 
     <!-- Add this script to hide the alerts after 5 seconds -->

@@ -378,12 +378,12 @@
                                             <td>{{ request.date_borrow }}</td>
                                             <td>{{ request.time_ago }}</td>
                                             <td>
-                                                {% if request.status == "Borrowed" %}
-                                                    <div class="badge badge-success" style="color: white;">{{ request.status }}</div>
-                                                {% elif request.status == "Returned" %}
-                                                    <div class="badge badge-primary">{{ request.status }}</div>
+                                                {% if request.status == "Unreturned" %}
+                                                    <div class="badge badge-warning" style="color: white;">{{ request.status }}</div>
+                                                {% elif request.status == "Fully Returned" %}
+                                                    <div class="badge badge-success text-white">{{ request.status }}</div>
                                                 {% else %}
-                                                    <div class="badge badge-secondary">{{ request.status }}</div>
+                                                    <div class="badge badge-primary">{{ request.status }}</div>
                                                 {% endif %}
                                             </td>
                                 
@@ -534,9 +534,8 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Select all buttons with the 'view-item-btn' class
         const viewButtons = document.querySelectorAll('.view-item-btn');
-
+    
         viewButtons.forEach(button => {
             button.addEventListener('click', function() {
                 const requestId = button.getAttribute('data-request-id');
@@ -544,34 +543,29 @@
                 const name = button.getAttribute('data-name');
                 const course = button.getAttribute('data-course');
                 const dateBorrow = button.getAttribute('data-date');
-
+    
                 // Populate modal fields
                 document.getElementById('modal-student-id').textContent = studentId;
                 document.getElementById('modal-name').textContent = name;
                 document.getElementById('modal-course').textContent = course;
                 document.getElementById('modal-date-borrow').textContent = dateBorrow;
-
+    
                 // Clear previous items
                 const borrowItemsList = document.getElementById('borrow-items-list');
                 borrowItemsList.innerHTML = '';
-
-                // Fetch items related to this borrow request using Fetch API
+    
+                // Fetch items related to this borrow request
                 fetch(`/fetch_borrow_request_items/?request_id=${requestId}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
+                    .then(response => response.json())
                     .then(data => {
                         if (data.items && data.items.length > 0) {
                             data.items.forEach((item, index) => {
                                 const itemRow = document.createElement('div');
                                 itemRow.classList.add('row', 'mb-1');
-
+    
                                 itemRow.innerHTML = `
                                     <div class="col-4" style="color: #474747;">${index + 1}. ${item.item_name}</div>
-                                    <div class="col-4" style="color: #474747;">${index + 1}. ${item.description}</div>
+                                    <div class="col-4" style="color: #474747;">${item.description}</div>
                                     <div class="col-4" style="color: #474747;">${item.quantity}</div>
                                 `;
                                 borrowItemsList.appendChild(itemRow);
@@ -586,6 +580,7 @@
             });
         });
     });
+    
 </script>
 
 

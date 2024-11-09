@@ -183,41 +183,45 @@
             {% endfor %}
         </div>
         <!-- Dynamic messages end -->
-    <div class="container-fluid">
-        <div class="card" style="border-top: 4px solid #593bdb; box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 4px;">
-            <div class="card-header">
-                <h4 class="card-title text-primary" style="font-size: 30px;">Change Profile</h4>
-            </div>
-            <div class="card-body">
-                <div class="basic-form">
-                    <form method="post" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        <div class="form-group row mb-4">
-                            <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Change Image</label>
-                            <div class="col-sm-12 col-md-7">
-                                <!-- Display user's profile picture or default image if none exists -->
-                                <img id="profileImage" src="{% if profile_picture %}{{ profile_picture.url }}{% else %}{{ default_image_url }}{% endif %}" alt="Profile Image" class="img-fluid rounded-circle" style="width: 60px; height: 60px; object-fit: cover; box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;"><br>
-                                <input type="file" id="fileInput" name="profilePicture" class="mt-3" style="border: 1px solid #bebebe; padding: 0.5rem; border-radius: 0.25rem;">
+        <div class="container-fluid">
+            <div class="card" style="border-top: 4px solid #593bdb; box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 4px;">
+                <div class="card-header">
+                    <h4 class="card-title text-primary" style="font-size: 30px;">Change Profile</h4>
+                </div>
+                <div class="card-body">
+                    <div class="basic-form">
+                        <form method="post" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <!-- Change Image Section -->
+                            <div class="form-group row mb-4">
+                                <label class="col-form-label text-md-right col-12 col-md-3 text-dark" style="font-size: 15px">Change Image</label>
+                                <div class="col-12 col-md-7">
+                                    <!-- Display user's profile picture or default image if none exists -->
+                                    <img id="profileImage" src="{% if profile_picture %}{{ profile_picture.url }}{% else %}{{ default_image_url }}{% endif %}" alt="Profile Image" class="img-fluid rounded-circle" style="width: 60px; height: 60px; object-fit: cover; box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;"><br>
+                                    <input type="file" id="fileInput" name="profilePicture" class="mt-3" style="border: 1px solid #bebebe; padding: 0.5rem; border-radius: 0.25rem;">
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-group row mb-4">
-                            <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Username</label>
-                            <div class="col-sm-12 col-md-7">
-                                <input type="text" name="username" class="form-control" style="border: 1px solid #bebebe; width: 53%;" value="{{ username }}" required>
+        
+                            <!-- Username Section -->
+                            <div class="form-group row mb-4">
+                                <label class="col-form-label text-md-right col-12 col-md-3 text-dark" style="font-size: 15px">Username</label>
+                                <div class="col-12 col-md-7">
+                                    <input type="text" name="username" class="form-control" style="border: 1px solid #bebebe;" value="{{ username }}" required>
+                                </div>
                             </div>
-                        </div>
-    
-                        <div class="form-group row mb-4">
-                            <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3"></label>
-                            <div class="col-sm-12 col-md-7">
-                                <button type="submit" class="btn btn-primary" id="toastr-success-top-right">Save</button>
+        
+                            <!-- Save Button Section -->
+                            <div class="form-group row mb-4">
+                                <div class="col-12 col-md-7 offset-md-3">
+                                    <button type="submit" class="btn btn-primary" id="toastr-success-top-right">Save</button>
+                                </div>
                             </div>
-                        </div>
-                    </form>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+        
     
     
     

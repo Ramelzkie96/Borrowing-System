@@ -41,12 +41,12 @@ urlpatterns = [
     path('admin-borrower-report/<str:id>/', views.generate_report, name='admin-borrower-report'),
     path('admin-fetch_borrow_request_items/', views.fetch_borrow_request_items, name='admin-fetch_borrow_request_items'),
     path('admin-student-reservation/', views.admin_student_reservation, name='admin-student-reservation'),
-    path('admin-update-reservation-status/', views.update_reservation_status, name='admin-update_reservation_status'),
     path('admin-change-profile', views.change_profile, name='admin-change-profile'),
     path('admin-change-password', views.change_password, name='admin-change-password'),
     path('admin-validate-item-name/', views.validate_item_name, name='admin-validate_item_name'),
     path('admin-get-available-quantity/<int:item_id>/', views.get_available_quantity, name='admin-get_available_quantity'),
-    path('api/admin-reservation-items/<str:reserve_date>/', views.reservation_items, name='admin-reservation-items'),
+    path('admin-update-reservation-status/<int:reservation_id>/', views.status_update, name='admin-update-reservation-status'),
+    path('admin-update-reservation-item-status/', views.update_reservation_item_status, name='admin-update_reservation_item_status'),
     
 ] 
 if settings.DEBUG:

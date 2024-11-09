@@ -146,6 +146,27 @@
     .dropdown-item:hover {
         background-color: #f1f1f1;
     }
+
+
+    .plus-icon {
+        position: absolute;
+        top: 10px; /* Move the icon to the top */
+        right: 10px; /* Keep it at the right edge */
+        cursor: pointer;
+        font-size: 1.5rem; /* Adjust font size for visibility */
+        z-index: 10; /* Ensure the icon is above other content */
+    }
+    
+    /* Media Query for smaller screens */
+    @media (max-width: 576px) {
+        .plus-icon {
+            font-size: 1.2rem; /* Reduce font size on smaller screens */
+            top: 5px; /* Adjust position for smaller screens */
+            right: 5px; /* Adjust position for smaller screens */
+        }
+    }
+    
+
     
     
     
@@ -266,44 +287,45 @@
                 </a>
             </div>
         </div>
+        
+
         <div class="user-notification">
             <div class="dropdown">
-                <a class="dropdown-toggle no-arrow" href="#" role="button" data-toggle="dropdown" id="notification-icon">
+                <a class="dropdown-toggle no-arrow" href="#" role="button" data-toggle="dropdown">
                     <i class="icon-copy dw dw-notification"></i>
-                    {% if unread_notification > 0 %}
-                        <span class="notification-active text-danger" style="font-size: 15px; font-weight: 800; position: absolute;">
-                            {{ unread_notification }}
-                        </span>
-                    {% endif %}
+                    <span class="notification-active" style="font-size: 15px; font-weight: 800; position: absolute; color: red;" data-count="{{ reservation_items|length }}">
+                        {{ reservation_items|length }}
+                    </span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-right">
                     <div class="notification-list mx-h-350 customscroll">
-                        <ul id="notification-list">
-                            {% if reservations %}
-                                {% for reservation in reservations %}
-                                    <li data-id="{{ reservation.id }}" class="{% if reservation.is_read %} read {% endif %}">
-                                        <a href="#">
-                                            <img src="{{ reservation.handled_by_profile_picture }}" alt="Handled by {{ reservation.handled_by }}">
-                                            <div class="notification-content">
-                                                <h3>{{ reservation.handled_by }}</h3>
-                                                <p>{{ reservation.notification }}</p>
-                                            </div>
-                                            <button class="notification-close" data-id="{{ reservation.id }}">
-                                                <i class="icon-copy dw dw-delete-3"></i>
-                                            </button>
-                                        </a>
-                                    </li>
-                                {% endfor %}
-                            {% else %}
-                                <li class="no-notifications text-center">
-                                    <p>No available notifications</p>
-                                </li>
-                            {% endif %}
+                        <ul>
+                            {% for item in reservation_items %}
+                            <li style="position: relative; padding-right: 30px;" data-id="{{ item.id }}">
+                                <a href="#">
+                                    <img src="{{ item.handled_by_profile_picture }}" alt="Profile Picture">
+                                    <div class="notification-content">
+                                        <h3>{{ item.user_type }}</h3>
+                                        <p>{{ item.notification }}</p>
+                                        <p>{{ item.time_ago }}</p>
+                                    </div>
+                                    <button class="notification-close" data-id="{{ item.id }}">
+                                        <i class="icon-copy dw dw-delete-3"></i>
+                                    </button>
+                                </a>
+                            </li>
+                            {% empty %}
+                            <li>No notifications</li>
+                            {% endfor %}
                         </ul>
                     </div>
                 </div>
             </div>
         </div>
+        
+        
+
+        
         
         
         
@@ -542,7 +564,7 @@
                                     <div class="form-group col-md-3">
                                         <label class="text-dark">Date Reserve</label>
                                         <div class="input-with-icon">
-                                            <input name="datepicker" id="dateBorrow" class="datepicker-default form-control" style="border: 1px solid #bebebe; background: white; font-size: 14px">
+                                            <input name="datepicker" id="dateBorrow" class="datepicker-default form-control" style="border: 1px solid #bebebe; background: white; font-size: 14px" required>
                                             <i class="fas fa-calendar-alt" style="position: absolute; top: 38px; right: -50px;"></i>
                                         </div>
                                     </div>
@@ -551,7 +573,7 @@
                                     <div class="col-xl-6">
                                         <div class="cardd mb-5" style="position: relative;">
                                             <!-- Plus Icon -->
-                                            <div class="plus-icon" style="position: absolute; bottom: 10px; right: 10px; cursor: pointer;">
+                                            <div class="plus-icon" style="position: absolute; top: 10px; right: 10px; cursor: pointer;">
                                                 <i class="fa fa-plus text-primary"></i>
                                             </div>
                                         
@@ -565,12 +587,12 @@
                                                     </select>
                                                     <div class="text-danger mt-2"></div>
                                                 </div>
-                                        
+                                            
                                                 <div class="mt-4">
                                                     <label class="text-dark">Description</label>
                                                     <textarea name="description" style="height: 50px; resize: vertical;" class="form-control" required></textarea>
                                                 </div>
-                                        
+                                            
                                                 <div class="mt-4">
                                                     <label class="text-dark">Quantity</label>
                                                     <input type="number" name="quantityy" id="quantityy" class="form-control col-md-3" required style="border: 1px solid #bebebe;" value="1" min="1" oninput="if(this.value < 1) { this.value = 1; }">
@@ -578,9 +600,11 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        
- 
                                     </div>
+                                    
+                                    
+
+                                    
                                     <div class="form-group col-md-6">
                                         <label class="text-dark">Purpose for borrow</label>
                                         <textarea name="purpose" class="form-control" cols="1" rows="1" style="border: 1px solid #bebebe;"></textarea>
@@ -590,7 +614,7 @@
                                 
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
-                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                    <button type="submit" class="btn btn-primary" onclick="validateForm()">Submit</button>
                                 </div>
                             </form>
                         </div>
@@ -612,6 +636,7 @@
 
 <!-- Add this script to hide the alerts after 5 seconds -->
 <script>
+    
     let itemQuantities = {}; // Object to store quantities of each item
 
 function populateItems() {
@@ -692,56 +717,69 @@ document.addEventListener('input', (event) => {
     }
 });
 
-// Function to handle duplicating the card
+
+// Function to handle duplicating the col-xl-6 div
 function duplicateCard(event) {
-    const originalCard = event.target.closest('.cardd');
-    if (!originalCard) return;
+    const originalCol = event.target.closest('.col-xl-6');  // Find the closest col-xl-6 to the clicked plus icon
+    if (!originalCol) return;  // Ensure there's a col-xl-6 to duplicate
 
-    const newCard = originalCard.cloneNode(true);
-    newCard.removeAttribute('id');
+    const newColDiv = originalCol.cloneNode(true);  // Clone the entire col-xl-6 div
 
-    // Reset quantity input and clear error messages
-    const quantityInput = newCard.querySelector('input[name="quantityy"]');
+    // Reset quantity input and clear error messages in the new card
+    const quantityInput = newColDiv.querySelector('input[name="quantityy"]');
     if (quantityInput) {
-        quantityInput.value = 1; // Reset quantity
-        quantityInput.nextElementSibling.textContent = ''; // Clear quantity error message
+        quantityInput.value = 1;  // Reset quantity
+        quantityInput.nextElementSibling.textContent = '';  // Clear quantity error message
     }
 
     // Clear selected item in the new card and clear errors
-    const selectElement = newCard.querySelector('select[name="itemm"]');
+    const selectElement = newColDiv.querySelector('select[name="itemm"]');
     if (selectElement) {
-        selectElement.selectedIndex = 0; // Reset to the default option
-        selectElement.nextElementSibling.textContent = ''; // Clear select error message
+        selectElement.selectedIndex = 0;  // Reset to the default option
+        selectElement.nextElementSibling.textContent = '';  // Clear select error message
     }
 
     // Clear the description field in the new card
-    const descriptionInput = newCard.querySelector('textarea[name="description"]'); // Adjust if it's not a textarea
+    const descriptionInput = newColDiv.querySelector('textarea[name="description"]');
     if (descriptionInput) {
-        descriptionInput.value = ''; // Clear the description field
+        descriptionInput.value = '';  // Clear the description field
     }
 
-    // Add "X" icon for deleting the card
+    // Add "X" icon for deleting the col-xl-6 div
     const closeIcon = document.createElement('div');
     closeIcon.innerHTML = '<i class="fa fa-times text-danger" style="cursor: pointer;"></i>';
     closeIcon.style.position = 'absolute';
     closeIcon.style.top = '10px';
     closeIcon.style.right = '10px';
-    newCard.appendChild(closeIcon);
-    closeIcon.addEventListener('click', () => newCard.remove());
+    newColDiv.appendChild(closeIcon);
+    closeIcon.addEventListener('click', () => newColDiv.remove());  // Remove the col-xl-6 div on click
 
-    // Append the new card to the container
-    originalCard.parentNode.appendChild(newCard);
-    populateItems(); // Call the function to fetch and populate items
+    // Append the new col-xl-6 div to the container
+    originalCol.closest('.form-row').appendChild(newColDiv);
+
+    // Repopulate the items for the new card
+    populateItems();
+
+    // Reattach the event listener to the new plus icon in the duplicated col-xl-6
+    const newPlusIcon = newColDiv.querySelector('.plus-icon');
+    if (newPlusIcon) {
+        newPlusIcon.addEventListener('click', duplicateCard);
+    }
 }
 
 // Call this function when the document is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    populateItems(); // Fetch and populate items on load
+    populateItems();  // Fetch and populate items on load
+
+    // Attach event listener to all plus icons (both original and dynamically added)
     document.querySelectorAll('.plus-icon').forEach(plusIcon => {
-        plusIcon.addEventListener('click', duplicateCard); // Add event listeners to all current plus icons
+        plusIcon.addEventListener('click', duplicateCard);  // Add event listeners to all plus icons
     });
-    updateSubmitButtonState(); // Check the initial state of the submit button
+
+    updateSubmitButtonState();  // Check the initial state of the submit button
 });
+
+
 
 
     
@@ -821,16 +859,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
+    
+
     document.addEventListener('DOMContentLoaded', function() {
         // Get all delete buttons
         const deleteButtons = document.querySelectorAll('.notification-close');
+        const notificationCountElement = document.querySelector('.notification-active');
     
         deleteButtons.forEach(function(button) {
             button.addEventListener('click', function(e) {
                 e.preventDefault();
                 
-                // Get the reservation id from the button's data-id attribute
-                const reservationId = this.getAttribute('data-id');
+                // Get the item id from the button's data-id attribute
+                const itemId = this.getAttribute('data-id');
     
                 // Send an AJAX request to delete the notification and reset is_handled to false
                 fetch('/delete-notification/', {
@@ -839,16 +880,22 @@ document.addEventListener('DOMContentLoaded', () => {
                         'Content-Type': 'application/json',
                         'X-CSRFToken': '{{ csrf_token }}'  // Ensure CSRF token is set
                     },
-                    body: JSON.stringify({ 'reservation_id': reservationId })
+                    body: JSON.stringify({ 'item_id': itemId })  // Use 'item_id' here
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         // If successful, remove the notification item from the list
-                        const notificationItem = document.querySelector(`li[data-id="${reservationId}"]`);
+                        const notificationItem = document.querySelector(`li[data-id="${itemId}"]`);
                         if (notificationItem) {
                             notificationItem.remove();  // Remove the entire notification
                         }
+    
+                        // Update the notification count in real time
+                        let currentCount = parseInt(notificationCountElement.getAttribute('data-count'));
+                        currentCount = currentCount > 0 ? currentCount - 1 : 0;
+                        notificationCountElement.setAttribute('data-count', currentCount);
+                        notificationCountElement.textContent = currentCount;
                     } else {
                         console.error('Error:', data.message || 'Failed to delete notification');
                     }
@@ -859,6 +906,8 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     });
+    
+    
 
 
 

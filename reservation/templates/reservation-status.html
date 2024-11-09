@@ -125,6 +125,25 @@
     .notification-content {
         padding-right: 30px; /* Space for the close icon */
     }
+
+    @media (max-width: 768px) {
+        .modal-body p {
+            font-size: 12px !important; /* Adjust font size for smaller screens */
+        }
+    }
+    
+
+    .responsive-text {
+        font-size: 15px;
+    }
+    
+    @media (max-width: 768px) {
+        .responsive-text {
+            font-size: 12px;
+        }
+    }
+    
+    
 </style>
 
 {% endblock %}
@@ -193,39 +212,36 @@
                 </a>
             </div>
         </div>
+        
+
         <div class="user-notification">
             <div class="dropdown">
-                <a class="dropdown-toggle no-arrow" href="#" role="button" data-toggle="dropdown" id="notification-icon">
+                <a class="dropdown-toggle no-arrow" href="#" role="button" data-toggle="dropdown">
                     <i class="icon-copy dw dw-notification"></i>
-                    {% if unread_notification > 0 %}
-                        <span class="notification-active text-danger" style="font-size: 15px; font-weight: 800; position: absolute;">
-                            {{ unread_notification }}
-                        </span>
-                    {% endif %}
+                    <span class="notification-active" style="font-size: 15px; font-weight: 800; position: absolute; color: red;" data-count="{{ reservation_items|length }}">
+                        {{ reservation_items|length }}
+                    </span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-right">
                     <div class="notification-list mx-h-350 customscroll">
-                        <ul id="notification-list">
-                            {% if reservations %}
-                                {% for reservation in reservations %}
-                                    <li data-id="{{ reservation.id }}" class="{% if reservation.is_read %} read {% endif %}">
-                                        <a href="#">
-                                            <img src="{{ reservation.handled_by_profile_picture }}" alt="Handled by {{ reservation.handled_by }}">
-                                            <div class="notification-content">
-                                                <h3>{{ reservation.handled_by }}</h3>
-                                                <p>{{ reservation.notification }}</p>
-                                            </div>
-                                            <button class="notification-close" data-id="{{ reservation.id }}">
-                                                <i class="icon-copy dw dw-delete-3"></i>
-                                            </button>
-                                        </a>
-                                    </li>
-                                {% endfor %}
-                            {% else %}
-                                <li class="no-notifications text-center">
-                                    <p>No available notifications</p>
-                                </li>
-                            {% endif %}
+                        <ul>
+                            {% for item in reservation_items %}
+                            <li style="position: relative; padding-right: 30px;" data-id="{{ item.id }}">
+                                <a href="#">
+                                    <img src="{{ item.handled_by_profile_picture }}" alt="Profile Picture">
+                                    <div class="notification-content">
+                                        <h3>{{ item.user_type }}</h3>
+                                        <p>{{ item.notification }}</p>
+                                        <p>{{ item.time_ago }}</p>
+                                    </div>
+                                    <button class="notification-close" data-id="{{ item.id }}">
+                                        <i class="icon-copy dw dw-delete-3"></i>
+                                    </button>
+                                </a>
+                            </li>
+                            {% empty %}
+                            <li>No notifications</li>
+                            {% endfor %}
                         </ul>
                     </div>
                 </div>
@@ -242,11 +258,9 @@
                     <span class="user-name">{{ user.name }}</span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
-                    <a class="dropdown-item" href="profile.html"><i class="dw dw-user1"></i> Profile</a>
-                    <a class="dropdown-item" href="profile.html"><i class="dw dw-settings2"></i> Setting</a>
-                    <a class="dropdown-item" href="faq.html"><i class="dw dw-help"></i> Help</a>
-                    <a class="dropdown-item" href="{% url 'reservation-logout' %}"><i class="dw dw-logout"></i> Log
-                        Out</a>
+                    <a class="dropdown-item" href="{% url 'reservation-change-profile' %}"><i class="dw dw-user1"></i>Edit Profile</a>
+                    <a class="dropdown-item" href="{% url 'reservation-change-password' %}"><i class="dw dw-user1"></i>Change Password</a>
+                    <a class="dropdown-item" href="{% url 'reservation-logout' %}"><i class="dw dw-logout"></i> Log Out</a>
                 </div>
             </div>
         </div>
@@ -406,103 +420,110 @@
     <div class="pd-ltr-20">
 
 
-        <!-- Bordered table  start -->
-        <div class="pd-20 card-box mb-30 mt-5">
-            <div class="clearfix mb-20">
-                <div class="pull-left">
-                    <h4 class="text-blue h4" style="font-size: 25px;">Item Reservation Status</h4>
-                    <label>Show entries &nbsp;
-                        <select name="example_length" aria-controls="example" class="form-control" onchange="updateShowEntries(this.value)" style="width: 100px;">
-                            <option value="all" {% if current_show == 'all' %}selected{% endif %}>All</option>
-                            <option value="5" {% if current_show == 5 %}selected{% endif %}>5</option>
-                            <option value="10" {% if current_show == 10 %}selected{% endif %}>10</option>
-                            <option value="25" {% if current_show == 25 %}selected{% endif %}>25</option>
-                            <option value="50" {% if current_show == 50 %}selected{% endif %}>50</option>
-                            <option value="100" {% if current_show == 100 %}selected{% endif %}>100</option>
-                        </select>
-                    </label>
-                </div>
-                <div class="pull-right" style="position: relative;">
-                    <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%);"></i>
-                    <input type="text" placeholder="Search..." style="padding-left: 30px; width: 100%; height: 40px; border: 1px solid #ccc; border-radius: 5px;" id="searchInput" onkeyup="searchTable()">
-                </div>
-            </div>
-            <table class="table table-bordered table-striped" id="itemTable">
-                <thead style="background-color: #031e23; color: white;">
-                    <tr>
-                        <th scope="col">STUDENT ID</th>
-                        <th scope="col">NAME</th>
-                        <th scope="col">COURSE</th>
-                        <th scope="col">YEAR</th>
-                        <th scope="col">PHONE</th>
-                        <th scope="col">DATE RESERVE</th>
-                        <th scope="col">STATUS</th>
-                        <th scope="col">ACTION</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% if student_reservations %}
-                        {% for reservation in student_reservations %}
-                            <tr>
-                                <td>{{ reservation.student_id }}</td>
-                                <td>{{ reservation.name }}</td>
-                                <td>{{ reservation.course }}</td>
-                                <td>{{ reservation.year_level }}</td>
-                                <td>{{ reservation.phone_number }}</td> <!-- Assuming content_object refers to the item -->
-                                <td>{{ reservation.reserve_date }}</td>
-                                <td>
-                                    {% if reservation.status == "Approved" %}
-                                        <div class="badge badge-success">{{ reservation.status }}</div>
-                                    {% elif reservation.status == "Pending" %}
-                                        <div class="badge badge-info">{{ reservation.status }}</div>
-                                    {% else %}
-                                        <div class="badge badge-danger">{{ reservation.status }}</div>
-                                    {% endif %}
-                                </td>
-                                <td style="text-align: center; vertical-align: middle; display: flex; justify-content: center;">
-                                    {% if reservation.status == "Approved" or reservation.status == "Denied" %}
-                                        <!-- If Approved or Denied, show the View button outside the dropdown -->
-                                        <button class="btn btn-secondary btn-sm view-item-btn" data-toggle="modal" data-target="#exampleModalCenter"
-                                            data-student-id="{{ reservation.student_id }}"
-                                            data-name="{{ reservation.name }}"
-                                            data-date="{{ reservation.reserve_date }}">
-                                            <i class="fas fa-eye" style="font-size: 15px;"></i>
-                                        </button>
-                                    {% else %}
-                                        <!-- If Pending, show both View and Edit buttons inside the dropdown -->
-                                        <div class="dropdownnn">
-                                            <a class="btn btn-link font-24 p-0 line-height-1 no-arrow -toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
-                                                <img src="{% static 'images/mores.png' %}" alt="" width="30" height="30">
-                                            </a>
-                                            <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
-                                                <button class="dropdown-item btn-secondary btn-sm view-item-btn" data-toggle="modal" data-target="#exampleModalCenter"
-                                                    data-student-id="{{ reservation.student_id }}"
-                                                    data-name="{{ reservation.name }}"
-                                                    data-date="{{ reservation.reserve_date }}">
-                                                    <i class="fas fa-eye" style="font-size: 15px;"></i>&nbsp;View Reservation
-                                                </button>
-                                                <button class="dropdown-item btn-primary btn-sm" onclick="redirectToEditForm('{{ reservation.id }}', '{{ reservation.student_id }}', '{{ reservation.name }}', '{{ reservation.year_level }}', '{{ reservation.email }}', '{{ reservation.phone_number }}', '{{ reservation.reserve_date }}', '{{ reservation.purpose }}')" class="dropdown-item edit-item-btn">
-                                                    <i class="fas fa-edit"></i>&nbsp; Edit Reservation
-                                                </button>
-                                            </div>
-                                        </div>
-                                    {% endif %}
-                                </td>
-                                
-                                
-                                
-                                
-                                
-                            </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr>
-                            <td colspan="9" class="text-center">No reservations found.</td>
-                        </tr>
-                    {% endif %}
-                </tbody>
-            </table>
+        <!-- Bordered table start -->
+<div class="pd-20 card-box mb-30 mt-5">
+    <div class="clearfix mb-20">
+        <div class="pull-left">
+            <h4 class="text-blue h4" style="font-size: 25px;">Item Reservation Status</h4>
+            <label>Show entries &nbsp;
+                <select name="example_length" aria-controls="example" class="form-control" onchange="updateShowEntries(this.value)" style="width: 100px;">
+                    <option value="all" {% if current_show == 'all' %}selected{% endif %}>All</option>
+                    <option value="5" {% if current_show == 5 %}selected{% endif %}>5</option>
+                    <option value="10" {% if current_show == 10 %}selected{% endif %}>10</option>
+                    <option value="25" {% if current_show == 25 %}selected{% endif %}>25</option>
+                    <option value="50" {% if current_show == 50 %}selected{% endif %}>50</option>
+                    <option value="100" {% if current_show == 100 %}selected{% endif %}>100</option>
+                </select>
+            </label>
         </div>
+        <div class="pull-right" style="position: relative;">
+            <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%);"></i>
+            <input type="text" placeholder="Search..." style="padding-left: 30px; width: 100%; height: 40px; border: 1px solid #ccc; border-radius: 5px;" id="searchInput" onkeyup="searchTable()">
+        </div>
+    </div>
+    <!-- Table wrapped with table-responsive class -->
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped" id="itemTable">
+            <thead style="background-color: #031e23; color: white;">
+                <tr>
+                    <th scope="col">STUDENT ID</th>
+                    <th scope="col">NAME</th>
+                    <th scope="col">COURSE</th>
+                    <th scope="col">YEAR</th>
+                    <th scope="col">PHONE</th>
+                    <th scope="col">DATE RESERVE</th>
+                    <th scope="col">STATUS</th>
+                    <th scope="col">ACTION</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if student_reservations %}
+                    {% for reservation in student_reservations %}
+                        <tr>
+                            <td>{{ reservation.student_id }}</td>
+                            <td>{{ reservation.name }}</td>
+                            <td>{{ reservation.course }}</td>
+                            <td>{{ reservation.year_level }}</td>
+                            <td>{{ reservation.phone_number }}</td> <!-- Assuming content_object refers to the item -->
+                            <td>{{ reservation.reserve_date }}</td>
+                            <td>
+                                {% if reservation.status == "Approved" %}
+                                    <div class="badge badge-success">{{ reservation.status }}</div>
+                                {% elif reservation.status == "Pending" %}
+                                    <div class="badge badge-info">{{ reservation.status }}</div>
+                                {% elif reservation.status == "Completed" %}
+                                    <div class="badge badge-success">{{ reservation.status }}</div>
+                                {% elif reservation.status == "Partially Processed" %}
+                                    <div class="badge badge-primary">{{ reservation.status }}</div>
+                                {% else %}
+                                    <div class="badge badge-danger">{{ reservation.status }}</div>
+                                {% endif %}
+                            </td>
+                            <td style="text-align: center; vertical-align: middle; display: flex; justify-content: center;">
+                                {% if reservation.status == "Approved" or reservation.status == "Denied" or reservation.status == "Completed"%}
+                                    <!-- If Approved or Denied, show the View button outside the dropdown -->
+                                    <button class="btn btn-secondary btn-sm view-item-btn" data-toggle="modal" data-target="#exampleModalCenter"
+                                        data-student-id="{{ reservation.student_id }}"
+                                        data-name="{{ reservation.name }}"
+                                        data-user-id="{{ request.user.id }}"
+                                        data-reservation-id="{{ reservation.id }}"
+                                        data-date="{{ reservation.reserve_date }}">
+                                        <i class="fas fa-eye" style="font-size: 15px;"></i>
+                                    </button>
+                                {% else %}
+                                    <!-- If Pending, show both View and Edit buttons inside the dropdown -->
+                                    <div class="dropdownnn">
+                                        <a class="btn btn-link font-24 p-0 line-height-1 no-arrow -toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
+                                            <img src="{% static 'images/mores.png' %}" alt="" width="30" height="30">
+                                        </a>
+                                        <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
+                                            <button class="dropdown-item btn-secondary btn-sm view-item-btn" data-toggle="modal" data-target="#exampleModalCenter"
+                                                data-student-id="{{ reservation.student_id }}"
+                                                data-name="{{ reservation.name }}"
+                                                data-user-id="{{ request.user.id }}"
+                                                data-date="{{ reservation.reserve_date }}"
+                                                data-reservation-id="{{ reservation.id }}">
+                                                <i class="fas fa-eye" style="font-size: 15px;"></i>&nbsp;View Reservation
+                                            </button>
+                                            <button class="dropdown-item btn-primary btn-sm" onclick="redirectToEditForm('{{ reservation.id }}', '{{ reservation.student_id }}', '{{ reservation.name }}', '{{ reservation.year_level }}', '{{ reservation.email }}', '{{ reservation.phone_number }}', '{{ reservation.reserve_date }}', '{{ reservation.purpose }}')" class="dropdown-item edit-item-btn">
+                                                <i class="fas fa-edit"></i>&nbsp; Edit Reservation
+                                            </button>
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="9" class="text-center">No reservations found.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div> <!-- End table-responsive -->
+</div>
+
         
         <!-- Bordered table End -->
 
@@ -510,61 +531,55 @@
 
 
 
-        <!-- Modal for Viewing Item -->
-        <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 800px;">
-                <div class="modal-content">
-                    <div class="modal-header" style="border-bottom: 2px solid #593bdb;">
-                        <h5 class="modal-title" id="exampleModalCenterTitle" style="font-size: 25px; font-weight: 700;">View Reservation Details</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
+<!-- Modal for Viewing Item -->
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 1000px; width: 100%;">
+        <div class="modal-content">
+            <div class="modal-header" style="border-bottom: 2px solid #593bdb;">
+                <h5 class="modal-title" id="exampleModalCenterTitle" style="font-size: 25px; font-weight: 700;">View Reservation Details</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-1">
+                    <div class="col-12 col-sm-4">
+                        <label class="font-weight-bold text-dark" style="font-size: 15px;">Student ID:</label>
+                        <p id="modal-student-id" style="font-size: 15px; color: #474747;"></p>
                     </div>
-                    <div class="modal-body">
-                        <div class="row mb-1">
-                            <div class="col-4">
-                                <label class="font-weight-bold text-dark" style="font-size: 15px;">Student ID:</label>
-                                <p id="modal-student-id" style="font-size: 15px; color: #474747;"></p>
-                            </div>
-                            <div class="col-4">
-                                <label class="font-weight-bold text-dark" style="font-size: 15px;">Name:</label>
-                                <p id="modal-name" style="font-size: 15px; color: #474747;"></p>
-                            </div>
-
-                            <div class="col-4">
-                                <label class="font-weight-bold text-dark" style="font-size: 15px;">Date Reserve:</label>
-                                <p id="modal-date-borrow" style="font-size: 15px; color: #474747;"></p>
-                            </div>
-                        </div>
-        
-                        <div class="row mb-1">
-                            <div class="col-4">
-                                <p style="font-size: 15px; font-weight: 800;" class="text-dark">Items:</p>
-                            </div>
-
-                            
-                            <div class="col-4">
-                                <p style="font-size: 15px; font-weight: 800;" class="text-dark">Description:</p>
-                            </div>
-
-                            <div class="col-4">
-                                <p style="font-size: 15px; font-weight: 800;" class="text-dark">Quantity:</p>
-                            </div>
-
-        
-                          
-                           
-                        </div>
-        
-                        <div id="borrow-items-list">
-                            <!-- Dynamic borrow item list will be injected here -->
-                        </div>
+                    <div class="col-12 col-sm-4">
+                        <label class="font-weight-bold text-dark" style="font-size: 15px;">Name:</label>
+                        <p id="modal-name" style="font-size: 15px; color: #474747;"></p>
                     </div>
-        
-                 
+                    <div class="col-12 col-sm-4">
+                        <label class="font-weight-bold text-dark" style="font-size: 15px;">Date Reserve:</label>
+                        <p id="modal-date-borrow" style="font-size: 15px; color: #474747;"></p>
+                    </div>
+                </div>
+
+                <div class="row mb-1">
+                    <div class="col-3">
+                        <p class="text-dark font-weight-bold" style="font-size: 15px;">Items:</p>
+                    </div>
+                    <div class="col-3">
+                        <p class="text-dark font-weight-bold" style="font-size: 15px;">Description:</p>
+                    </div>
+                    <div class="col-3">
+                        <p class="text-dark font-weight-bold" style="font-size: 15px;">Quantity:</p>
+                    </div>
+                    <div class="col-3">
+                        <p class="text-dark font-weight-bold" style="font-size: 15px;">Status:</p>
+                    </div>
+                </div>
+
+                <div id="borrow-items-list">
+                    <!-- Dynamic borrow item list will be injected here -->
                 </div>
             </div>
         </div>
+    </div>
+</div>
+
 
 
 
@@ -684,7 +699,7 @@
         <div class="footer-wrap pd-20 mb-20 card-box">
             Borrowing System By: <a href="https://github.com/dropways" target="_blank">Run Time Terror</a>
         </div>
-    </div>
+
 </div>
 
 
@@ -713,7 +728,6 @@
 
 
 
-
     document.addEventListener('DOMContentLoaded', function () {
         const viewItemButtons = document.querySelectorAll('.view-item-btn');
     
@@ -722,42 +736,44 @@
                 const studentId = button.getAttribute('data-student-id');
                 const name = button.getAttribute('data-name');
                 const date = button.getAttribute('data-date');
+                const reservationId = button.getAttribute('data-reservation-id'); // Get reservation ID
     
                 document.getElementById('modal-student-id').innerText = studentId;
                 document.getElementById('modal-name').innerText = name;
                 document.getElementById('modal-date-borrow').innerText = date;
     
-                // Fetch borrow items related to this reservation
-                fetchBorrowItems(date);
+                // Fetch borrow items based on reservation ID
+                fetchBorrowItems(reservationId);
             });
         });
     });
     
     // Function to fetch borrow items
-    function fetchBorrowItems(reserveDate) {
-        fetch(`/api/reservation-items/${reserveDate}/`) // Use reserve_date in the URL
+    function fetchBorrowItems(reservationId) {
+        fetch(`/api/reservation-items/${reservationId}/`)
             .then(response => response.json())
             .then(data => {
                 const itemsList = document.getElementById('borrow-items-list');
                 itemsList.innerHTML = ''; // Clear existing items
     
-                // Loop through the items and add numbering
                 data.forEach((item, index) => {
                     const itemRow = document.createElement('div');
                     itemRow.classList.add('row', 'mb-1');
     
                     itemRow.innerHTML = `
-                        <div class="col-4">
-                            <p style="font-size: 15px; color: #474747;">${index + 1}. ${item.item_name}</p>
+                        <div class="col-3">
+                            <p class="responsive-text" style="color: #474747;">${index + 1}. ${item.item_name}</p>
                         </div>
-                        <div class="col-4">
-                            <p style="font-size: 15px; color: #474747;">${item.description}</p>
+                        <div class="col-3">
+                            <p class="responsive-text" style="color: #474747;">${item.description}</p>
                         </div>
-                        <div class="col-4">
-                            <p style="font-size: 15px; color: #474747;">${item.quantity}</p>
+                        <div class="col-3">
+                            <p class="responsive-text" style="color: #474747;">${item.quantity}</p>
+                        </div>
+                        <div class="col-3">
+                            <p class="responsive-text" style="color: #474747;">${item.status}</p>
                         </div>
                     `;
-    
                     itemsList.appendChild(itemRow);
                 });
             })
@@ -765,6 +781,8 @@
                 console.error('Error fetching reservation items:', error);
             });
     }
+    
+    
     
 
 
@@ -845,16 +863,19 @@
     });
 
 
+
+
     document.addEventListener('DOMContentLoaded', function() {
         // Get all delete buttons
         const deleteButtons = document.querySelectorAll('.notification-close');
+        const notificationCountElement = document.querySelector('.notification-active');
     
         deleteButtons.forEach(function(button) {
             button.addEventListener('click', function(e) {
                 e.preventDefault();
                 
-                // Get the reservation id from the button's data-id attribute
-                const reservationId = this.getAttribute('data-id');
+                // Get the item id from the button's data-id attribute
+                const itemId = this.getAttribute('data-id');
     
                 // Send an AJAX request to delete the notification and reset is_handled to false
                 fetch('/delete-notification/', {
@@ -863,16 +884,22 @@
                         'Content-Type': 'application/json',
                         'X-CSRFToken': '{{ csrf_token }}'  // Ensure CSRF token is set
                     },
-                    body: JSON.stringify({ 'reservation_id': reservationId })
+                    body: JSON.stringify({ 'item_id': itemId })  // Use 'item_id' here
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
                         // If successful, remove the notification item from the list
-                        const notificationItem = document.querySelector(`li[data-id="${reservationId}"]`);
+                        const notificationItem = document.querySelector(`li[data-id="${itemId}"]`);
                         if (notificationItem) {
                             notificationItem.remove();  // Remove the entire notification
                         }
+    
+                        // Update the notification count in real time
+                        let currentCount = parseInt(notificationCountElement.getAttribute('data-count'));
+                        currentCount = currentCount > 0 ? currentCount - 1 : 0;
+                        notificationCountElement.setAttribute('data-count', currentCount);
+                        notificationCountElement.textContent = currentCount;
                     } else {
                         console.error('Error:', data.message || 'Failed to delete notification');
                     }
@@ -883,6 +910,8 @@
             });
         });
     });
+
+    
 
 
             //toaster message
@@ -935,7 +964,7 @@ function searchTable() {
             td = tr[i].getElementsByTagName("td");
             for (j = 0; j < td.length; j++) {
                 // Ensure buttons, dropdowns, badges, and action columns are not affected
-                if (j === 7 || j === 8 || j === 9 || td[j].querySelector('.dropdownnn') || td[j].querySelector('.badge') || td[j].querySelector('.action-buttons')) {
+                if (j == 6 || j === 7 || j === 8 || j === 9 || td[j].querySelector('.dropdownnn') || td[j].querySelector('.badge') || td[j].querySelector('.action-buttons')) {
                     continue; // Skip "Status", "Action", and dropdowns, badges
                 }
                 td[j].innerHTML = td[j].textContent || td[j].innerText; // Reset text content
@@ -956,7 +985,7 @@ function searchTable() {
 
         // Iterate through each cell in the row
         for (j = 0; j < td.length; j++) {
-            if (j === 7 || j === 8 || j === 9) continue; // Skip "Status" and "Action" columns
+            if (j == 6 || j === 7 || j === 8 || j === 9) continue; // Skip "Status" and "Action" columns
             if (td[j]) {
                 txtValue = td[j].textContent || td[j].innerText;
                 if (txtValue.toUpperCase().indexOf(filter) > -1) {

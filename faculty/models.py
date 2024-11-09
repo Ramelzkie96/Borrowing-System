@@ -82,23 +82,6 @@ class BorrowRequest(models.Model):
             return f"{int(diff.total_seconds() // 31536000)} years ago"
 
 
-class BorrowRequestItem(models.Model):
-    borrow_request = models.ForeignKey(BorrowRequest, related_name='items', on_delete=models.CASCADE)
-    item = models.ForeignKey(facultyItem, on_delete=models.CASCADE)
-    date_return = models.DateField(null=True, blank=True)
-    quantityy = models.PositiveIntegerField()
-    is_returned = models.BooleanField(default=False)
-    description = models.TextField(null=True, blank=True)
-    handled_by = models.ForeignKey(
-        settings.AUTH_USER_MODEL, 
-        related_name='handled_items', 
-        on_delete=models.CASCADE, 
-        null=True, blank=True
-    )
-
-    def __str__(self):
-        return f"{self.item.name}"
-
 class BorrowRequestItemFaculty(models.Model):
     borrow_request = models.ForeignKey(BorrowRequest, related_name='facultyitems', on_delete=models.CASCADE)
     item = models.ForeignKey(facultyItem, on_delete=models.CASCADE)

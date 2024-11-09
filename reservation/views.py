@@ -30,10 +30,10 @@ from django.http import JsonResponse
 from django.db import transaction
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_list_or_404
+from django.views.decorators.http import require_POST
 
 
 
-# Create your views here.
 def reservation_dashboard(request):
     # Get user_id from session
     user_id = request.session.get('user_id')
@@ -48,23 +48,19 @@ def reservation_dashboard(request):
         
         # Get the total number of reservations for this user
         total_reservations = StudentReservation.objects.filter(user_id=user_id, status='Pending').count()
-        
-        # Get only unread notifications that have been handled by staff
-        unread_notifications = StudentReservation.objects.filter(user_id=user_id, is_read=False, is_handled=True).count()
-            
-        # Fetch reservations for this user, including handled_by and notification, ordered by the most recent first
-        reservations = StudentReservation.objects.filter(user_id=user_id, is_handled=True).order_by('-id')
 
-        # Fetch all items from facultyItem model for the selection options
-        items = facultyItem.objects.all()
-        
-        # Pass the user, total_reservations, unread_notifications, and reservations to the template
+        # Fetch only unread notifications for the badge count
+        reservation_items = ReservationItem.objects.filter(
+            reservation__user_id=user_id, is_handled=True
+        ).order_by('-handled_by', '-id')
+
+  
+
+        # Pass the user, total_reservations, reservation_items, unread_count to the template
         context = {
             'user': user,
             'total_reservations': total_reservations,
-            'unread_notification': unread_notifications,
-            'reservations': reservations,
-            'items': items,
+            'reservation_items': reservation_items,
         }
         return render(request, 'reservation-dashboard.html', context)
     
@@ -77,18 +73,11 @@ def reservation_dashboard(request):
 
 
 
+
+
+
     
     
-@csrf_exempt
-def mark_notifications_read(request):
-    if request.method == 'POST':
-        # Fetch notifications for the user
-        user_id = request.session.get('user_id')
-        if user_id:
-            # Update unread notifications to mark them as read
-            StudentReservation.objects.filter(user_id=user_id, is_read=False).update(is_read=True)
-            return JsonResponse({'success': True})
-    return JsonResponse({'success': False}, status=400)
 
 
 
@@ -97,23 +86,28 @@ def delete_notification(request):
     if request.method == 'POST':
         try:
             data = json.loads(request.body)
-            reservation_id = data.get('reservation_id')
+            item_id = data.get('item_id')  # Expecting the ReservationItem ID in the request data
 
-            # Ensure the user is authenticated and owns the reservation
+            # Check if the user is authenticated
             user_id = request.session.get('user_id')
             if user_id:
-                # Find the reservation and clear the specified fields
-                reservation = StudentReservation.objects.filter(id=reservation_id, user_id=user_id).first()
-                if reservation:
-                    reservation.handled_by_profile_picture = None
-                    reservation.handled_by = None
-                    reservation.notification = None
-                    reservation.is_handled = False  # Set is_handled to False
-                    reservation.save()
+                # Find the reservation item related to the user via the linked StudentReservation
+                reservation_item = ReservationItem.objects.filter(id=item_id, reservation__user_id=user_id).first()
+                
+                if reservation_item:
+                    # Clear the notification-related fields on the ReservationItem
+                    reservation_item.handled_by_profile_picture = None
+                    reservation_item.handled_by = None
+                    reservation_item.notification = None
+                    reservation_item.is_handled = False  # Set is_handled to False
+                    reservation_item.save()
+                    
                     return JsonResponse({'success': True})
-            return JsonResponse({'success': False, 'message': 'Reservation not found or unauthorized'}, status=400)
+            return JsonResponse({'success': False, 'message': 'Notification not found or unauthorized'}, status=400)
+        
         except Exception as e:
             return JsonResponse({'success': False, 'error': str(e)}, status=500)
+    
     return JsonResponse({'success': False}, status=400)
 
 
@@ -251,6 +245,14 @@ def submit_reservation(request):
             messages.error(request, "User not logged in!")
             return redirect('reservation-login')  # Redirect to login if user is not logged in
 
+        # Retrieve the logged-in user instance
+        logged_in_user = ReservationUser.objects.get(id=user_id)
+
+        # Validate that reserve_date is provided
+        if not reserve_date:
+            messages.error(request, "Please select a reservation date.")
+            return redirect('reservation-dashboard')  # Redirect back to the reservation form
+
         try:
             with transaction.atomic():
                 # Check if a reservation already exists for this student_id and reserve_date
@@ -265,7 +267,7 @@ def submit_reservation(request):
                         'phone_number': phone_number,
                         'purpose': purpose,
                         'status': 'Pending',
-                        'user_id': user_id,
+                        'user': logged_in_user,
                     }
                 )
 
@@ -284,8 +286,11 @@ def submit_reservation(request):
                         reservation=reservation,
                         item_name=item.name,
                         defaults={
+                            'user': logged_in_user,  # Associate with the logged-in user
                             'description': description,
-                            'quantity': quantity
+                            'quantity': quantity,
+                            'status': 'Pending',
+                            'user_facultyItem': item.user,  # Store the user from facultyItem
                         }
                     )
 
@@ -293,6 +298,8 @@ def submit_reservation(request):
                         # If the item exists, increment the quantity
                         reservation_item.quantity += quantity
                         reservation_item.save()
+
+                    # No need to store the handled_by field, as requested
                     item.save()
 
             messages.success(request, "Items reserved successfully!")
@@ -306,6 +313,9 @@ def submit_reservation(request):
             return redirect('reservation-dashboard')
 
     return redirect('reservation-dashboard')
+
+
+
 
 
     
@@ -331,11 +341,10 @@ def reservation_status(request):
         # Fetch reservations for the logged-in user
         student_reservations = StudentReservation.objects.filter(user_id=user.id).order_by('-id')
         
-        # Get only unread notifications that have been handled by staff
-        unread_notification = StudentReservation.objects.filter(user_id=user_id, is_read=False, is_handled=True).count()
-        
-        # Fetch reservations for this user, including handled_by and notification, ordered by the most recent first
-        reservations = StudentReservation.objects.filter(user_id=user_id, is_handled=True).order_by('-id')
+        # Fetch only unread notifications for the badge count
+        reservation_items = ReservationItem.objects.filter(
+            reservation__user_id=user_id, is_handled=True
+        ).order_by('-handled_by', '-id')
         
         
 
@@ -355,8 +364,7 @@ def reservation_status(request):
         context = {
             'user': user,
             'student_reservations': page_obj,
-            'reservations': reservations,
-            'unread_notification': unread_notification,
+            'reservation_items': reservation_items,
             'current_show': current_show
         }
         return render(request, 'reservation-status.html', context)
@@ -366,18 +374,15 @@ def reservation_status(request):
         return redirect('reservation-login')  # Redirect to login if the user does not exist
     
     
-def reservation_items(request, reserve_date):
-    # Get all reservations by reserve_date
-    reservations = get_list_or_404(StudentReservation, reserve_date=reserve_date)
-    
-    # Collect all items from the reservations
-    items = []
-    for reservation in reservations:
-        reservation_items = reservation.items.values('item_name', 'description', 'quantity')
-        items.extend(reservation_items)
-    
-    # Return as JSON response
-    return JsonResponse(items, safe=False)
+def reservation_items(request, reservation_id): 
+    # Get ReservationItem entries for the selected reservation
+    items = ReservationItem.objects.filter(reservation__id=reservation_id).values(
+        'item_name', 'description', 'quantity', 'status'
+    )
+    return JsonResponse(list(items), safe=False)
+
+
+
 
 
 def reservation_edit(request, reservation_id):
@@ -398,6 +403,11 @@ def reservation_edit(request, reservation_id):
 
     # Retrieve all faculty items to display in the form (assuming you want these for item selection)
     all_faculty_items = facultyItem.objects.all()
+    
+    # Fetch only unread notifications for the badge count
+    reservation_itemss = ReservationItem.objects.filter(
+        reservation__user_id=user_id, is_handled=True
+    ).order_by('-handled_by', '-id')
 
     # Prepare reservation items with IDs and other fields for the form
     reservation_items_data = [
@@ -423,6 +433,7 @@ def reservation_edit(request, reservation_id):
         'purpose': reservation.purpose,
         'status': reservation.status,
         'reservation_items': reservation_items_data,  # Use prepared data for the items
+        'reservation_itemss': reservation_itemss,
         'all_faculty_items': all_faculty_items,  # Pass all faculty items for selection in the form
     }
 
@@ -512,11 +523,10 @@ def changeprofile(request):
         # Fetch the ReservationUser instance
         user = ReservationUser.objects.get(id=user_id)
         
-        # Get only unread notifications that have been handled by staff
-        unread_notification = StudentReservation.objects.filter(user_id=user_id, is_read=False, is_handled=True).count()
-        
-        # Fetch reservations for this user, including handled_by and notification, ordered by the most recent first
-        reservations = StudentReservation.objects.filter(user_id=user_id, is_handled=True).order_by('-id')
+        # Fetch only unread notifications for the badge count
+        reservation_items = ReservationItem.objects.filter(
+            reservation__user_id=user_id, is_handled=True
+        ).order_by('-handled_by', '-id')
 
         if request.method == 'POST':
             # Retrieve form data
@@ -545,8 +555,7 @@ def changeprofile(request):
             'user': user,
             'profile_picture': user.profile_image.url if user.profile_image else None,
             'default_image_url': '/media/profile_pics/users.jpg',  # URL to default image
-            'reservations': reservations,
-            'unread_notification': unread_notification,
+            'reservation_items': reservation_items
         }
         return render(request, 'reservation-changeprofile.html', context)
     
@@ -565,11 +574,10 @@ def changepassword(request):
         # Fetch the ReservationUser instance
         user = ReservationUser.objects.get(id=user_id)
         
-        # Get only unread notifications that have been handled by staff
-        unread_notification = StudentReservation.objects.filter(user_id=user_id, is_read=False, is_handled=True).count()
-        
-        # Fetch reservations for this user, including handled_by and notification, ordered by the most recent first
-        reservations = StudentReservation.objects.filter(user_id=user_id, is_handled=True).order_by('-id')
+        # Fetch only unread notifications for the badge count
+        reservation_items = ReservationItem.objects.filter(
+            reservation__user_id=user_id, is_handled=True
+        ).order_by('-handled_by', '-id')
         
         if request.method == 'POST':
             old_password = request.POST.get('old_password')
@@ -607,8 +615,7 @@ def changepassword(request):
             'user': user,
             'profile_picture': user.profile_image.url if user.profile_image else None,
             'default_image_url': '/media/profile_pics/users.jpg',  # URL to default image
-            'reservations': reservations,
-            'unread_notification': unread_notification,
+            'reservation_items': reservation_items
         }
         # On GET request, render the form
         return render(request, 'reservation-changepassword.html', context)

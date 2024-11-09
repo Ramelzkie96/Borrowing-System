@@ -309,97 +309,7 @@
 
 
 
-      <!-- modal view -->
-      <!-- Modal for Viewing Item -->
-      <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 800px;">
-            <div class="modal-content">
-                <div class="modal-header" style="border-bottom: 2px solid #593bdb;">
-                    <h5 class="modal-title" id="exampleModalCenterTitle" style="font-size: 25px; font-weight: 700;">View Reservation Details</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="row mb-1">
-                        <div class="col-4">
-                            <label class="font-weight-bold " style="font-size: 15px;">Student ID:</label>
-                            <p id="modal-student-id" style="font-size: 15px;"></p>
-                        </div>
-                        <div class="col-4">
-                            <label class="font-weight-bold " style="font-size: 15px;">Name:</label>
-                            <p id="modal-name" style="font-size: 15px;"></p>
-                        </div>
 
-                        <div class="col-4">
-                            <label class="font-weight-bold " style="font-size: 15px;">Date Reserve:</label>
-                            <p id="modal-date-borrow" style="font-size: 15px;"></p>
-                        </div>
-                    </div>
-    
-                    <div class="row mb-1">
-                        <div class="col-4">
-                            <p style="font-size: 15px; font-weight: 800;" class="">Items:</p>
-                        </div>
-
-                        
-                        <div class="col-4">
-                            <p style="font-size: 15px; font-weight: 800;" class="">Description:</p>
-                        </div>
-
-                        <div class="col-4">
-                            <p style="font-size: 15px; font-weight: 800;" class="">Quantity:</p>
-                        </div>
-
-    
-                      
-                       
-                    </div>
-    
-                    <div id="borrow-items-list">
-                        <!-- Dynamic borrow item list will be injected here -->
-                    </div>
-                </div>
-    
-             
-            </div>
-        </div>
-    </div>
-
-
-
-<!-- send notification -->
-<div class="modal fade" id="exampleModalLong" aria-hidden="true">
-  <div class="modal-dialog">
-      <div class="modal-content">
-          <div class="modal-header" style="border-bottom: 2px solid #593bdb;">
-              <h5 class="modal-title">Send Notification</h5>
-              <button type="button" class="close" onclick="closeModal()"><span>×</span></button>
-          </div>
-          <form id="emailNotificationForm" method="post" action="{% url 'admin-update_reservation_status' %}">
-              {% csrf_token %}
-              <div class="modal-body">
-                  <div class="form-group">
-                      <label for="Message" >Message</label>
-                      <textarea class="form-control" id="Message" name="message" rows="4" required ></textarea>
-                  </div>
-
-                  <!-- Hidden inputs to store reservation ID and status -->
-                  <input type="hidden" id="reservationIdInput" name="reservation_id">
-                  <input type="hidden" id="statusInput" name="status">
-              </div>
-              <div class="modal-footer">
-                  <!-- Close and Submit Buttons -->
-                  <button type="button" class="btn btn-secondary" onclick="closeModal()">Close</button>
-                  <button type="submit" class="btn btn-primary" id="submitButton">
-                      <span id="buttonText">Send Email</span>
-                      <span id="buttonSpinner" class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none;"></span>
-                  </button> 
-              </div>
-          </form>
-      </div>
-  </div>
-</div>
    
       <!-- /.content-header -->
   
@@ -456,9 +366,9 @@
                                         <th scope="col">Name</th>
                                         <th scope="col">Course</th>
                                         <th scope="col">Year</th>
-                                     
+                                        <th scope="col">Phone Number</th>
                                         <th scope="col">Date Reserve</th>
-                                        <th scope="col">Status</th>
+                                        <th scope="col">Time Span</th>
                                         <th scope="col" style="width: 80px;">Action</th>
                                     </tr>
                                 </thead>
@@ -470,33 +380,15 @@
                                                 <td>{{ request.name }}</td>
                                                 <td>{{ request.course }}</td>
                                                 <td>{{ request.year_level }}</td>
-                                                
+                                                <td>{{ request.phone_number }}</td>
                                                 <td>{{ request.reserve_date}}</td>
-                                                <td>
-                                                    <div id="status-badge-{{ request.id }}" class="badge {% if request.status == 'Approved' %}badge-success text-white{% elif request.status == 'Denied' %}badge-danger{% else %}badge-warning {% endif %}">
-                                                        {{ request.status }}
-                                                    </div>
-                                                </td>
+                                                <td>{{ request.time_ago }}</td>
                                                 <td style="text-align: center; vertical-align: middle;">
-                                                    <div class="dropdown">
-                                                        <a class="btn btn-link font-24 p-0 line-height-1 no-arrow dropdown" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
-                                                            <img src="{% static 'images/mores.png' %}" alt="" width="30" height="30">
-                                                        </a>
-                                                        <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
-                                                            <button class="dropdown-item" onclick="openNotificationModal('{{ request.id }}', 'Approved')">
-                                                                <img src="{% static 'images/check-btn.png' %}" alt="" width="25" height="25">&nbsp; Approved
-                                                            </button>
-                                                            <button class="dropdown-item" onclick="openNotificationModal('{{ request.id }}', 'Denied')">
-                                                                <img src="{% static 'images/deny-btn.png' %}" alt="" width="25" height="25">&nbsp; Denied
-                                                            </button>
-                                                            <button class="dropdown-item view-item-btn" data-toggle="modal" data-target="#exampleModalCenter"
-                                                            data-student-id="{{ request.student_id }}"
-                                                            data-name="{{ request.name }}"
-                                                            data-date="{{ request.reserve_date }}">
-                                                                <img src="{% static 'images/eye-btn.png' %}" alt="" width="25" height="25">&nbsp; View
-                                                            </button>
-                                                        </div>
-                                                    </div>
+                                                    <a href="{% url 'admin-update-reservation-status' reservation_id=request.id %}">
+                                                        <button type="button" class="btn btn-secondary">
+                                                            <i class="fas fa-eye"></i>
+                                                        </button>
+                                                    </a>
                                                 </td>  
                                             </tr>
                                         {% endfor %}
@@ -603,6 +495,12 @@
 
 
 <script>
+
+
+
+
+
+
   document.getElementById("searchInput").addEventListener("input", function () {
     searchTable();
 });

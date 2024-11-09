@@ -4,6 +4,9 @@ from django.core.validators import MinLengthValidator
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from datetime import timedelta
+from django.utils import timezone
+from django.conf import settings
 
 
 class ReservationUser(models.Model):
@@ -56,25 +59,68 @@ class StudentReservation(models.Model):
     purpose = models.TextField(null=True)
     status = models.CharField(max_length=20, default='Pending')
     user = models.ForeignKey('ReservationUser', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    
+    def __str__(self):
+        return f"Reservation by {self.name} for {self.content_object.name}"
+    
+    
+    def time_ago(self):
+        now = timezone.now()
+        diff = now - self.created_at
+        
+        if diff < timedelta(minutes=1):
+            return f"{int(diff.total_seconds())} seconds ago"
+        elif diff < timedelta(hours=1):
+            return f"{int(diff.total_seconds() // 60)} minutes ago"
+        elif diff < timedelta(days=1):
+            return f"{int(diff.total_seconds() // 3600)} hours ago"
+        elif diff < timedelta(days=30):
+            return f"{int(diff.total_seconds() // 86400)} days ago"
+        elif diff < timedelta(days=365):
+            return f"{int(diff.total_seconds() // 2592000)} months ago"
+        else:
+            return f"{int(diff.total_seconds() // 31536000)} years ago"
+    
+    
+class ReservationItem(models.Model):
+    reservation = models.ForeignKey(StudentReservation, on_delete=models.CASCADE, related_name='items')
+    user = models.ForeignKey(ReservationUser, on_delete=models.CASCADE)  # Link to ReservationUser
+    item_name = models.CharField(max_length=100)
+    description = models.TextField()
+    quantity = models.PositiveIntegerField()
+    status = models.CharField(max_length=50, null=True)
     notification = models.CharField(max_length=500, null=True)
     handled_by = models.CharField(max_length=50, blank=True, null=True)
     handled_by_profile_picture = models.URLField(max_length=500, blank=True, null=True)
     is_read = models.BooleanField(default=False)
     is_handled = models.BooleanField(default=False)
     user_type = models.CharField(max_length=50, blank=True, null=True) 
-
-    def __str__(self):
-        return f"Reservation by {self.name} for {self.content_object.name}"
-    
-    
-class ReservationItem(models.Model):
-    reservation = models.ForeignKey(StudentReservation, on_delete=models.CASCADE, related_name='items')
-    item_name = models.CharField(max_length=100)
-    description = models.TextField()
-    quantity = models.PositiveIntegerField()
+    is_update = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True, null=True)
+    user_facultyItem = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)  # Modified to store the user
 
     def __str__(self):
         return f"{self.item_name} (Qty: {self.quantity}) for {self.reservation.name}"
+    
+    
+    
+    def time_ago(self):
+        now = timezone.now()
+        diff = now - self.created_at
+        
+        if diff < timedelta(minutes=1):
+            return f"{int(diff.total_seconds())} seconds ago"
+        elif diff < timedelta(hours=1):
+            return f"{int(diff.total_seconds() // 60)} minutes ago"
+        elif diff < timedelta(days=1):
+            return f"{int(diff.total_seconds() // 3600)} hours ago"
+        elif diff < timedelta(days=30):
+            return f"{int(diff.total_seconds() // 86400)} days ago"
+        elif diff < timedelta(days=365):
+            return f"{int(diff.total_seconds() // 2592000)} months ago"
+        else:
+            return f"{int(diff.total_seconds() // 31536000)} years ago"
 
     
     

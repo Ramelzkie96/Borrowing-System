@@ -193,39 +193,37 @@
                 </a>
             </div>
         </div>
+        
+
+
         <div class="user-notification">
             <div class="dropdown">
-                <a class="dropdown-toggle no-arrow" href="#" role="button" data-toggle="dropdown" id="notification-icon">
+                <a class="dropdown-toggle no-arrow" href="#" role="button" data-toggle="dropdown">
                     <i class="icon-copy dw dw-notification"></i>
-                    {% if unread_notification > 0 %}
-                        <span class="notification-active text-danger" style="font-size: 15px; font-weight: 800; position: absolute;">
-                            {{ unread_notification }}
-                        </span>
-                    {% endif %}
+                    <span class="notification-active" style="font-size: 15px; font-weight: 800; position: absolute; color: red;" data-count="{{ reservation_items|length }}">
+                        {{ reservation_itemss|length }}
+                    </span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-right">
                     <div class="notification-list mx-h-350 customscroll">
-                        <ul id="notification-list">
-                            {% if reservations %}
-                                {% for reservation in reservations %}
-                                    <li data-id="{{ reservation.id }}" class="{% if reservation.is_read %} read {% endif %}">
-                                        <a href="#">
-                                            <img src="{{ reservation.handled_by_profile_picture }}" alt="Handled by {{ reservation.handled_by }}">
-                                            <div class="notification-content">
-                                                <h3>{{ reservation.handled_by }}</h3>
-                                                <p>{{ reservation.notification }}</p>
-                                            </div>
-                                            <button class="notification-close" data-id="{{ reservation.id }}">
-                                                <i class="icon-copy dw dw-delete-3"></i>
-                                            </button>
-                                        </a>
-                                    </li>
-                                {% endfor %}
-                            {% else %}
-                                <li class="no-notifications text-center">
-                                    <p>No available notifications</p>
-                                </li>
-                            {% endif %}
+                        <ul>
+                            {% for item in reservation_itemss %}
+                            <li style="position: relative; padding-right: 30px;" data-id="{{ item.id }}">
+                                <a href="#">
+                                    <img src="{{ item.handled_by_profile_picture }}" alt="Profile Picture">
+                                    <div class="notification-content">
+                                        <h3>{{ item.user_type }}</h3>
+                                        <p>{{ item.notification }}</p>
+                                        <p>{{ item.time_ago }}</p>
+                                    </div>
+                                    <button class="notification-close" data-id="{{ item.id }}">
+                                        <i class="icon-copy dw dw-delete-3"></i>
+                                    </button>
+                                </a>
+                            </li>
+                            {% empty %}
+                            <li>No notifications</li>
+                            {% endfor %}
                         </ul>
                     </div>
                 </div>
@@ -363,7 +361,7 @@
                 
                 
                 <li>
-                    <a href="javascript:void()" class="dropdown-toggle no-arrow">
+                    <a href="{% url 'reservation-status' %}" class="dropdown-toggle no-arrow">
                         <span class="micon fa-solid fa-spinner"></span><span class="mtext">Status</span>
                     </a>
                 </li>
@@ -707,6 +705,54 @@ document.querySelector('form').addEventListener('submit', (event) => {
             }
             return cookieValue;
         }
+    });
+
+
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get all delete buttons
+        const deleteButtons = document.querySelectorAll('.notification-close');
+        const notificationCountElement = document.querySelector('.notification-active');
+    
+        deleteButtons.forEach(function(button) {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Get the item id from the button's data-id attribute
+                const itemId = this.getAttribute('data-id');
+    
+                // Send an AJAX request to delete the notification and reset is_handled to false
+                fetch('/delete-notification/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'  // Ensure CSRF token is set
+                    },
+                    body: JSON.stringify({ 'item_id': itemId })  // Use 'item_id' here
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // If successful, remove the notification item from the list
+                        const notificationItem = document.querySelector(`li[data-id="${itemId}"]`);
+                        if (notificationItem) {
+                            notificationItem.remove();  // Remove the entire notification
+                        }
+    
+                        // Update the notification count in real time
+                        let currentCount = parseInt(notificationCountElement.getAttribute('data-count'));
+                        currentCount = currentCount > 0 ? currentCount - 1 : 0;
+                        notificationCountElement.setAttribute('data-count', currentCount);
+                        notificationCountElement.textContent = currentCount;
+                    } else {
+                        console.error('Error:', data.message || 'Failed to delete notification');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            });
+        });
     });
 
 

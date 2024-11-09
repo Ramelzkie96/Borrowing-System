@@ -106,7 +106,7 @@
                     data-accordion="false">
                     <li class="nav-header">Main Menu</li>
                     <li class="nav-item">
-                        <a href="{% url 'admin-dashboard' %}" class="nav-link active">
+                        <a href="{% url 'admin-dashboard' %}" class="nav-link">
                             <i class="nav-icon fas fa-tachometer-alt"></i>
                             <p>
                                 Dashboard
@@ -155,7 +155,7 @@
                         </a>
                     </li>
                     <li class="nav-item ">
-                        <a href="{% url 'admin-borrow-record' %}" class="nav-link">
+                        <a href="{% url 'admin-borrow-record' %}" class="nav-link active">
                             <i class="nav-icon fas fa-clipboard"></i>
                             <p>
                                 Borrowed Records
@@ -239,19 +239,18 @@
                             <div class="card-body">
                                 <form id="editBorrowerForm" method="post" action="{% url 'admin-update_borrower_status_dashboard' %}">
                                     {% csrf_token %}
-                                
-                                    
-                                    
+                                    <input type="hidden" name="status" value="{{ borrow_request.status }}">
+
                                     <div class="row mb-1">
-                                        <div class="col-4">
+                                        <div class="col-3">
                                             <label class="font-weight-bold" style="font-size: 15px;">Student ID:</label>
                                             <p id="modal-student-id" style="font-size: 15px;">{{ student_id }}</p>
                                         </div>
-                                        <div class="col-4">
+                                        <div class="col-3">
                                             <label class="font-weight-bold" style="font-size: 15px;">Name:</label>
                                             <p id="modal-name" style="font-size: 15px;">{{ name }}</p>
                                         </div>
-                                        <div class="col-4">
+                                        <div class="col-3">
                                             <label class="font-weight-bold" style="font-size: 15px;">Date Borrow:</label>
                                             <p id="modal-date-borrow" style="font-size: 15px;">{{ date_borrow }}</p>
                                         </div>
@@ -276,63 +275,64 @@
                                         </div>
                                     </div>
                                 
-                                    <!-- Items List -->
-                                    <div id="borrow-items-list">
-                                        {% for borrow_request_with_items in borrow_requests_with_items %}
-                                            {% for item in borrow_request_with_items.items %}
-                                            <!-- Hidden field to pass borrow_request_id to the view -->
-                                    <input type="hidden" name="borrow_request_id" value="{{ borrow_request_with_items.borrow_request.id }}">
-                                                <div class="row mb-1">
-                                                    <div class="col-2 item-text">
-                                                        <p {% if item.is_returned %}style="text-decoration: line-through;"{% endif %}>
-                                                            {% if borrow_request_with_items.borrow_request.status != "Returned" %}{{ forloop.counter }}. {% endif %}{{ item.item.name }}
-                                                        </p>
-                                                    </div>
-                                                    <div class="col-3 description-text">
-                                                        <p {% if item.is_returned %}style="text-decoration: line-through;"{% endif %}>
-                                                            {{ item.description }}
-                                                        </p>
-                                                    </div>
+                                                                        <!-- Items List -->
+<div id="borrow-items-list">
+    {% for item in all_items %}
+        <input type="hidden" name="borrow_request_id" value="{{ item.borrow_request.id }}">
+        <div class="row mb-1">
+            <div class="col-2 item-text">
+                <p {% if item.is_returned %}style="text-decoration: line-through;"{% endif %} style="color: #474747;">
+                    {{ forloop.counter }}. {{ item.item.name }}
+                </p>
+            </div>
+            <div class="col-3 description-text">
+                <p {% if item.is_returned %}style="text-decoration: line-through; color: #474747;"{% endif %} style="color: #474747;">
+                    {{ item.description }}
+                </p>
+            </div>
 
-                                                    <div class="col-2 quantity-text">
-                                                        <p {% if item.is_returned %}style="text-decoration: line-through;"{% endif %}>
-                                                            {{ item.quantityy }}
-                                                        </p>
-                                                    </div>
-                                
-                                                    <div class="col-2">
-                                                        {% if item.is_returned %}
-                                                            <p>{{ item.date_return|date:"F j, Y" }}</p>
-                                                        {% else %}
-                                                            <input type="date" class="form-control date-input" style="width: 200px;"
-                                                                   {% if item.is_returned %} disabled {% endif %}
-                                                                   value="{{ item.date_return|default:'' }}">
-                                                        {% endif %}
-                                                    </div>
-                                
-                                                    <div class="col-2" style="padding-left: 100px;">
-                                                        {% if item.is_returned %}
-                                                            <button type="button" class="btn btn-success btn-sm" disabled>
-                                                                Done
-                                                            </button>
-                                                        {% else %}
-                                                            <button type="button" class="btn btn-outline-success check-button btn-sm" 
-                                                                    data-item-id="{{ item.item.id }}" 
-                                                                    data-borrow-request-item-id="{{ item.id }}" 
-                                                                    onclick="handleReturn(this)">
-                                                                <i class="fas fa-check"></i>
-                                                            </button>
-                                                        {% endif %}
-                                                    </div>
-                                                </div>
-                                            {% endfor %}
-                                        {% endfor %}
-                                    </div>
+            <div class="col-2 quantity-text">
+                <p {% if item.is_returned %}style="text-decoration: line-through;"{% endif %} style="color: #474747;">
+                    {{ item.quantityy }}
+                </p>
+            </div>
+
+            <div class="col-2">
+                {% if item.is_returned %}
+                    <p style="color: #474747;">{{ item.date_return|date:"F j, Y" }}</p>
+                {% else %}
+                    <input type="date" class="form-control date-input" style="width: 200px;"
+                        value="{{ item.date_return|default:'' }}">
+                {% endif %}
+            </div>
+
+            <div class="col-2" style="padding-left: 100px;">
+                {% if item.is_returned %}
+                    <button type="button" class="btn btn-success btn-sm" disabled>
+                        Done
+                    </button>
+                {% else %}
+                    <button type="button" class="btn btn-outline-success check-button btn-sm" 
+                            data-item-id="{{ item.item.id }}" 
+                            data-borrow-request-item-id="{{ item.id }}" 
+                            onclick="handleReturn(this)">
+                        <i class="fas fa-check"></i>
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
                                 
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" onclick="window.history.back();">Back</button>
+                                        <a href="{% url 'admin-dashboard' %}">
+                                            <button type="button" class="btn btn-secondary">Back</button>
+                                        </a>
+                                        
                                     </div>
                                 </form>
+                                
                             </div>
                         </div>
 
@@ -371,7 +371,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        checkAllReturned();
+        checkItemStatus();
     });
 
     function handleReturn(button) {
@@ -424,7 +424,7 @@
                   dateColumn.innerHTML = "";
                   dateColumn.appendChild(returnDateParagraph);
 
-                  checkAllReturned();
+                  checkItemStatus(); // Update BorrowRequest status
               } else {
                   showError(dateInput, "Error processing return. Please try again.");
               }
@@ -451,19 +451,38 @@
         }
     }
 
-    function checkAllReturned() {
+    function checkItemStatus() {
         const allCheckButtons = document.querySelectorAll('.check-button');
         const form = document.getElementById('editBorrowerForm');
-
-        // Check if all check buttons are disabled (i.e., all items are marked as returned)
-        const allReturned = Array.from(allCheckButtons).every(button => button.disabled);
-
-        // Automatically submit the form if all items are returned
-        if (allReturned) {
+    
+        // Collect the checked items and check the status of each item
+        const allChecked = Array.from(allCheckButtons).every(button => button.disabled);
+        const someChecked = Array.from(allCheckButtons).some(button => button.disabled);
+    
+        // Update BorrowRequest status
+        const statusElement = document.getElementById('borrow-request-status');
+        
+        if (allChecked) {
+            form.querySelector('input[name="status"]').value = "Fully Returned";  // Set status to Fully Returned
+        } else if (someChecked) {
+            form.querySelector('input[name="status"]').value = "Partial Item Returned";  // Set status to Partial Item Returned
+        } else {
+            form.querySelector('input[name="status"]').value = "Unreturned";  // Set status to Unreturned
+        }
+    
+        // Submit the form only if the status is "Fully Returned" or "Partial Item Returned"
+        if (allChecked || someChecked) {
             form.submit();
         }
     }
+    
 </script>
+
+
+
+
+
+
 
 
 

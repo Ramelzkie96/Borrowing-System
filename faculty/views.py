@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import facultyItem
 from django.contrib import messages 
 from django.http import JsonResponse  
-from .models import BorrowRequest, facultyItem, BorrowRequestItem, BorrowRequestItemFaculty
+from .models import BorrowRequest, facultyItem, BorrowRequestItemFaculty
 from .forms import BorrowRequestMultimediaForm
 from django.views.decorators.http import require_POST  
 from django.core.mail import send_mail 
@@ -11,7 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from .forms import EmailNotificationForm
 from django.conf import settings 
 from django.contrib.contenttypes.models import ContentType  
-from reservation.models import StudentReservation
+from reservation.models import StudentReservation, ReservationItem
 from django.contrib.auth.decorators import login_required  
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash  
@@ -29,6 +29,7 @@ import json
 from django.db import transaction
 from django.db.models import Max, Count
 from collections import OrderedDict
+from django.urls import reverse
 
 
 
@@ -171,32 +172,20 @@ def borrowers(request):
             if date_borrow_parsed < timezone.now().date():
                 messages.error(request, 'ERROR! Date Borrow cannot be set to a past date.')
             else:
-                # Find existing borrow requests for the same student and date
-                existing_borrow_requests = BorrowRequest.objects.filter(
-                    student_id=student_id,
-                    date_borrow=date_borrow
-                )
-
-                # Check if all items are returned in the existing borrow request
-                borrow_request = None
-                if existing_borrow_requests:
-                    for request_instance in existing_borrow_requests:
-                        if all(item.is_returned for item in request_instance.items.all()):
-                            # All items returned, we can create a new borrow request
-                            borrow_request = None
-                            break
-                        else:
-                            # Not all items are returned, use this borrow request
-                            borrow_request = request_instance
-                            break
-
                 borrower_type = request.POST.get('borrower_type')
                 if borrower_type not in ['Student', 'Teacher']:
                     other_borrower_type = request.POST.get('other_borrower_type')
                     if other_borrower_type:
                         borrower_type = other_borrower_type
 
-                # Create a new BorrowRequest if no existing one with all items returned
+                # Check if there is an existing BorrowRequest with the same student_id, date_borrow, and user
+                borrow_request = BorrowRequest.objects.filter(
+                    student_id=student_id,
+                    date_borrow=date_borrow,
+                    user=request.user
+                ).first()
+
+                # If no such BorrowRequest exists, create a new one
                 if not borrow_request:
                     borrow_request = BorrowRequest(
                         student_id=student_id,
@@ -235,6 +224,7 @@ def borrowers(request):
                             )
                             return redirect('borrowers')  # Redirect back to form
 
+                        # Check if an item entry exists for this BorrowRequest
                         borrow_request_item = BorrowRequestItemFaculty.objects.filter(
                             borrow_request=borrow_request,
                             item=selected_item,
@@ -242,10 +232,12 @@ def borrowers(request):
                         ).first()
 
                         if borrow_request_item:
+                            # Update quantity and description for the existing item
                             borrow_request_item.quantityy += requested_quantity
                             borrow_request_item.description = description  # Update the description if needed
                             borrow_request_item.save()
                         else:
+                            # Create a new item entry for this BorrowRequest
                             BorrowRequestItemFaculty.objects.create(
                                 borrow_request=borrow_request,
                                 item=selected_item,
@@ -254,7 +246,11 @@ def borrowers(request):
                                 is_returned=False,
                                 handled_by=request.user  # Set handled_by to the current user here
                             )
+                            
+                            borrow_request.status = 'Unreturned'
+                            borrow_request.save()
 
+                        # Decrease item quantity in stock
                         selected_item.quantity -= requested_quantity
                         selected_item.save()
 
@@ -269,6 +265,7 @@ def borrowers(request):
         'multimedia_items': multimedia_items,
         'has_available_items': has_available_items,
     })
+
 
 
 
@@ -348,27 +345,27 @@ def borrower_details(request):
     status = request.GET.get('status')
     user_id = request.user.id
 
-    # Filter borrow requests based on date and user handling the items
+    # Filter BorrowRequest based on the user handling the items and borrow request date
     borrow_requests = BorrowRequest.objects.filter(
+        facultyitems__handled_by=user_id,
         date_borrow=date_borrow,
-        facultyitems__handled_by=user_id
     ).distinct()
 
     if not borrow_requests.exists():
         return render(request, '404.html', status=404)
     
-    # Collect unique items across all borrow requests
-    unique_items = OrderedDict()  # Using OrderedDict to maintain insertion order without duplicates
+    # Collect all items, including duplicates, across all borrow requests handled by the user
+    all_items = []
     for borrow_request in borrow_requests:
-        for item in borrow_request.facultyitems.all():
-            unique_items[item.item.id] = item  # Store each item by its ID to ensure uniqueness
+        items = borrow_request.facultyitems.filter(handled_by=user_id)
+        all_items.extend(items)  # Append each item to the list, allowing duplicates
 
     context = {
         'student_id': student_id,
         'name': name,
         'date_borrow': date_borrow,
         'status': status,
-        'unique_items': unique_items.values(),  # Pass only the unique items to the template
+        'all_items': all_items,  # Pass all items, including duplicates, to the template
     }
     
     return render(request, 'borrower-details.html', context)
@@ -376,7 +373,35 @@ def borrower_details(request):
 
 
 
+
 def fetch_borrow_request_items(request):
+    if request.method == 'GET':
+        request_id = request.GET.get('request_id')
+        
+        items = BorrowRequestItemFaculty.objects.filter(
+            borrow_request_id=request_id,
+            is_returned=False
+        ).select_related('item')
+
+        item_list = [
+            {
+                'item_name': borrow_item.item.name,
+                'description': borrow_item.description,
+                'quantity': borrow_item.quantityy,
+                'date_return': borrow_item.date_return.strftime('%d %B, %Y') if borrow_item.date_return else None,
+            }
+            for borrow_item in items
+        ]
+
+        return JsonResponse({'items': item_list})
+
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+
+
+
+
+def fetch_borrow_request_items_record(request):
     if request.method == 'GET':
         student_id = request.GET.get('student_id')
         date_borrow = request.GET.get('date_borrow')
@@ -402,6 +427,7 @@ def fetch_borrow_request_items(request):
         return JsonResponse({'items': item_list})
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
 
 
 
@@ -782,20 +808,17 @@ def student_reservation(request):
         return HttpResponseForbidden("You do not have permission to access this page.")
     
     # Get the logged-in user's ID
-    user_id = request.session.get('user_id')
+    user_id = request.user.id  # Use request.user.id to directly get the logged-in user's ID
 
-    # Get the user type of the logged-in user
-    user_faculty_items = facultyItem.objects.filter(user_id=user_id)
+    # Filter ReservationItems based on user_facultyItem
+    reservation_items = ReservationItem.objects.filter(user_facultyItem=user_id)
 
-    # Get the IDs of the faculty items associated with the logged-in user
-    faculty_item_ids = user_faculty_items.values_list('id', flat=True)
-
-    # Filter to show reservations related to the logged-in user and user type
+    # Get the associated StudentReservations from the filtered ReservationItems
     reserved_request = StudentReservation.objects.filter(
-        user_id=user_id,  # Ensure only reservations linked to the logged-in user are shown
-       
+        id__in=reservation_items.values('reservation')
     ).order_by('-id')
 
+    # Pagination logic
     show_entries = request.GET.get('show', 'all')
     if show_entries == 'all':
         paginator = Paginator(reserved_request, 1000000)  # Large number to ensure all items are on one page
@@ -814,64 +837,119 @@ def student_reservation(request):
     })
     
     
+
+
+
 @login_required
-def update_reservation_status(request):
+def status_update(request, reservation_id):
     # Restrict access to faculty users only
     if not request.user.faculty:
         return HttpResponseForbidden("You do not have permission to access this page.")
     
-    if request.method == 'POST':
-        reservation_id = request.POST.get('reservation_id')
-        new_status = request.POST.get('status')
-        notification_message = request.POST.get('message')
+    # Fetch the reservation
+    reservation = get_object_or_404(StudentReservation, id=reservation_id)
+    
+    # Fetch the items associated with the reservation that the logged-in user is handling
+    items = reservation.items.filter(user_facultyItem=request.user)
 
-        # Fetch the reservation object
-        reservation = get_object_or_404(StudentReservation, id=reservation_id)
-        reservation.status = new_status
-        reservation.notification = notification_message
+    context = {
+        'reservation': reservation,
+        'items': items,
+    }
+    return render(request, 'reservation-approval-status.html', context)
 
-        # Use the user_id of the logged-in user
-        handled_by = request.user.username  # Store the user_id of the logged-in user
 
-        # Capture the profile picture of the user handling the update
+
+
+@login_required
+@require_POST
+def update_reservation_item_status(request):
+    data = json.loads(request.body)
+    item_id = data.get('item_id')
+    new_status = data.get('status')
+
+    try:
+        # Fetch the reservation item
+        item = ReservationItem.objects.get(id=item_id)
+
+        # Fetch the associated StudentReservation
+        reservation = item.reservation  # This gets the associated StudentReservation
+
+        # Update the status of the ReservationItem
+        item.status = new_status
+        item.notification = f"{item.item_name} has been {new_status}"
+        item.user_type = request.user.username  # Store the username of the current user
+
+        # Set the profile picture URL
         if request.user.profile_picture:
-            profile_picture_url = request.user.profile_picture.url
+            item.handled_by_profile_picture = request.user.profile_picture.url
         else:
-            # Use a default image if no profile picture is set
-            profile_picture_url = f'{settings.MEDIA_URL}profile_pics/users.jpg'
+            item.handled_by_profile_picture = f'{settings.MEDIA_URL}profile_pics/users.jpg'
 
-        # Save the profile picture in the reservation
-        reservation.handled_by_profile_picture = profile_picture_url
+        # Set is_update to True when approved or denied
+        item.is_update = True
+        item.is_read = False
+        item.is_handled = True
+        item.created_at = timezone.now()
+        item.save()
 
-        # Set is_handled to True and is_read to False to mark it as a new notification
-        reservation.is_handled = True
-        reservation.is_read = False
+        time_ago = item.time_ago()
 
-        # Save the reservation with the updated fields
-        reservation.handled_by = handled_by
+        # Check the statuses of all items in the reservation
+        items = reservation.items.all()
+        all_approved = all(item.status == 'Approved' for item in items)
+        all_denied = all(item.status == 'Denied' for item in items)
+        any_pending = any(item.status == 'Pending' for item in items)
+
+        # Update the status of the StudentReservation based on item statuses
+        if all_approved:
+            reservation.status = 'Approved'
+            redirect_needed = True  # Set flag to redirect
+        elif all_denied:
+            reservation.status = 'Denied'
+            redirect_needed = True  # Set flag to redirect
+        elif any_pending:
+            reservation.status = 'Partially Processed'
+            redirect_needed = False
+        else:
+            reservation.status = 'Completed'
+            redirect_needed = True  # Redirect when all items are processed but not all the same status
+
         reservation.save()
 
-        # Send an email notification to the student
-        student_email = reservation.email
+        # Prepare response
+        response_data = {
+            'success': True,
+            'message': f"Item '{item.item_name}' status updated to {new_status}.",
+            'new_status': new_status,
+            'new_class': 'badge-success' if new_status == 'Approved' else 'badge-danger',  # Customize class based on status
+            'time_ago': time_ago  # Send the specific time ago of this item
+        }
 
-        try:
-            send_mail(
-                'Reservation Status Update',
-                notification_message,
-                settings.EMAIL_HOST_USER,  # From email
-                [student_email],           # To email
-                fail_silently=False,
-            )
-            messages.success(request, 'Status updated and email sent successfully!')
-        except Exception as e:
-            messages.error(request, f'Failed to send email: {str(e)}')
+        # Send email notification
+        # subject = f"Reservation Item Status Updated: {item.item_name}"
+        # message = f"Dear {reservation.name},\n\nThe status of your reservation item '{item.item_name}' has been updated to '{new_status}'.\n\nNotification: {item.notification}\n\nBest regards,\nYour Reservation Team"
+        # from_email = settings.EMAIL_HOST_USER
+        # recipient_list = [reservation.email]
 
-        # Redirect to a page where the user can see the result or continue with other actions
-        return redirect('student-reservation')  # Adjust this to the appropriate URL name
+        # Send the email
+        # send_mail(subject, message, from_email, recipient_list)
 
-    # Handle cases where the request method is not POST
-    messages.error(request, 'Invalid request')
-    return redirect('student-reservation')  # Adjust this to the appropriate URL name
+        # Redirect to 'admin-student-reservation' if needed
+        if redirect_needed:
+            response_data['redirect_url'] = reverse('student-reservation')
+
+        return JsonResponse(response_data)
+
+    except ReservationItem.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Item not found.'})
+
+
+
+
+
+
+
 
 
 

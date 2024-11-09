@@ -215,102 +215,97 @@ button:disabled {
                             style="border-top: 4px solid #593bdb; box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 4px;">
                             <div class="card-header">
 
-                                <h4 class="card-title" style="font-size: 30px; font-weight: 700;">Borrower Details</h4>
+                                <h4 class="card-title" style="font-size: 30px; font-weight: 700;">Reservation Approval</h4>
                             </div>
                             <div class="card-body">
-                                <form id="editBorrowerForm" method="post" action="{% url 'update_borrower_status' %}">
+                                <form id="statusBorrowerForm" method="post">
                                     {% csrf_token %}
-                                    <input type="hidden" name="status" value="{{ borrow_request.status }}">
-
+                                    <input type="hidden" name="status" value="">
+                                
                                     <div class="row mb-1">
                                         <div class="col-3">
                                             <label class="font-weight-bold text-dark" style="font-size: 15px;">Student ID:</label>
-                                            <p id="modal-student-id" style="font-size: 15px; color: #474747;">{{ student_id }}</p>
+                                            <p id="modal-student-id" style="font-size: 15px; color: #474747;">{{ reservation.student_id }}</p>
                                         </div>
                                         <div class="col-3">
                                             <label class="font-weight-bold text-dark" style="font-size: 15px;">Name:</label>
-                                            <p id="modal-name" style="font-size: 15px; color: #474747;">{{ name }}</p>
+                                            <p id="modal-name" style="font-size: 15px; color: #474747;">{{ reservation.name }}</p>
                                         </div>
                                         <div class="col-3">
-                                            <label class="font-weight-bold text-dark" style="font-size: 15px;">Date Borrow:</label>
-                                            <p id="modal-date-borrow" style="font-size: 15px; color: #474747;">{{ date_borrow }}</p>
+                                            <label class="font-weight-bold text-dark" style="font-size: 15px;">Course:</label>
+                                            <p id="modal-course" style="font-size: 15px; color: #474747;">{{ reservation.course }}</p>
+                                        </div>
+                                        <div class="col-3">
+                                            <label class="font-weight-bold text-dark" style="font-size: 15px;">Date Reserve:</label>
+                                            <p id="modal-date-borrow" style="font-size: 15px; color: #474747;">{{ reservation.reserve_date }}</p>
                                         </div>
                                     </div>
                                 
                                     <div class="row mb-1">
-                                        <div class="col-2">
+                                        <div class="col-3">
                                             <p style="font-size: 15px; font-weight: 800;" class="text-dark">Items:</p>
                                         </div>
-                                        
                                         <div class="col-3">
                                             <p style="font-size: 15px; font-weight: 800;" class="text-dark">Description</p>
                                         </div>
-                                        <div class="col-2">
+                                        <div class="col-3">
                                             <p style="font-size: 15px; font-weight: 800;" class="text-dark">Quantity:</p>
                                         </div>
-                                        <div class="col-2">
-                                            <p style="font-size: 15px; font-weight: 800;" class="text-dark">Date Return:</p>
-                                        </div>
-                                        <div class="col-2" style="padding-left: 100px;">
-                                            <p style="font-size: 15px; font-weight: 800;" class="text-dark">Return:</p>
+                                        <div class="col-3">
+                                            <p style="font-size: 15px; font-weight: 800;" class="text-dark">Approval:</p>
                                         </div>
                                     </div>
                                 
                                     <!-- Items List -->
-<div id="borrow-items-list">
-    {% for item in all_items %}
-        <input type="hidden" name="borrow_request_id" value="{{ item.borrow_request.id }}">
-        <div class="row mb-1">
-            <div class="col-2 item-text">
-                <p {% if item.is_returned %}style="text-decoration: line-through;"{% endif %} style="color: #474747;">
-                    {{ forloop.counter }}. {{ item.item.name }}
-                </p>
-            </div>
-            <div class="col-3 description-text">
-                <p {% if item.is_returned %}style="text-decoration: line-through; color: #474747;"{% endif %} style="color: #474747;">
-                    {{ item.description }}
-                </p>
-            </div>
+                                        <div id="borrow-items-list">
+                                            {% for item in items %}
+                                                <input type="hidden" name="borrow_request_id" value="{{ reservation.id }}">
+                                                <div class="row mb-1" id="item-row-{{ item.id }}">
+                                                    <div class="col-3" 
+                                                    {% if item.is_update %}  style="text-decoration: line-through; color: black;" {% endif %}>
+                                                        <p style="color: #474747;">{{ forloop.counter }}. {{ item.item_name }}</p>
+                                                    </div>
+                                                    <div class="col-3" 
+                                                    {% if item.is_update %}    style="text-decoration: line-through; color: black"{% endif %}>
+                                                        <p style="color: #474747;">{{ item.description }}</p>
+                                                    </div>
+                                                    <div class="col-3" 
+                                                    {% if item.is_update %}  style="text-decoration: line-through; color: black;" {% endif %}>
+                                                        <p style="color: #474747;">{{ item.quantity }}</p>
+                                                    </div>
+                                                    <div class="col-3">
+                                                        <!-- Approve Button -->
+                                                        {% if item.status != 'Denied' %}
+                                                            <button type="button" class="btn btn-success btn-sm approveButton text-white"
+                                                                    data-item-id="{{ item.id }}" data-status="Approved"
+                                                                    {% if item.is_update or item.status == 'Approved' %}disabled style="cursor: not-allowed; padding: 2px 5px; font-size: 12px; color: white;"{% else %}style="padding: 2px 5px; font-size: 12px;"{% endif %}
+                                                                    onclick="updateItemStatus('{{ item.id }}', 'Approved')">
+                                                                Approve
+                                                            </button>
+                                                            <div id="loading-approve-{{ item.id }}" class="loading-spinner" style="display: none;"></div> <!-- Loading Spinner -->
+                                                        {% endif %}
+                                                        
+                                                        <!-- Denied Button -->
+                                                        {% if item.status != 'Approved' %}
+                                                            <button type="button" class="btn btn-danger btn-sm denyButton"
+                                                                    data-item-id="{{ item.id }}" data-status="Denied"
+                                                                    {% if item.is_update or item.status == 'Denied' %}disabled style="cursor: not-allowed; padding: 2px 5px; font-size: 12px;"{% else %}style="padding: 2px 5px; font-size: 12px;"{% endif %}
+                                                                    onclick="updateItemStatus('{{ item.id }}', 'Denied')">
+                                                                Denied
+                                                            </button>
+                                                            <div id="loading-deny-{{ item.id }}" class="loading-spinner" style="display: none;"></div> <!-- Loading Spinner -->
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
 
-            <div class="col-2 quantity-text">
-                <p {% if item.is_returned %}style="text-decoration: line-through;"{% endif %} style="color: #474747;">
-                    {{ item.quantityy }}
-                </p>
-            </div>
-
-            <div class="col-2">
-                {% if item.is_returned %}
-                    <p style="color: #474747;">{{ item.date_return|date:"F j, Y" }}</p>
-                {% else %}
-                    <input type="date" class="form-control date-input" style="width: 200px;"
-                        value="{{ item.date_return|default:'' }}">
-                {% endif %}
-            </div>
-
-            <div class="col-2" style="padding-left: 100px;">
-                {% if item.is_returned %}
-                    <button type="button" class="btn btn-success btn-sm" disabled>
-                        Done
-                    </button>
-                {% else %}
-                    <button type="button" class="btn btn-outline-success check-button btn-sm" 
-                            data-item-id="{{ item.item.id }}" 
-                            data-borrow-request-item-id="{{ item.id }}" 
-                            onclick="handleReturn(this)">
-                        <i class="fas fa-check"></i>
-                    </button>
-                {% endif %}
-            </div>
-        </div>
-    {% endfor %}
-</div>
 
                                 
                                     <div class="modal-footer">
-                                        <a href="{% url 'borrow-record' %}">
+                                        <a href="{% url 'student-reservation' %}">
                                             <button type="button" class="btn btn-secondary">Back</button>
                                         </a>
-                                        
                                     </div>
                                 </form>
                             </div>
@@ -337,112 +332,84 @@ button:disabled {
 
 
 
+
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            checkItemStatus();
-        });
-    
-        function handleReturn(button) {
-            const itemId = button.getAttribute("data-item-id");
-            const borrowRequestItemId = button.getAttribute("data-borrow-request-item-id");
-            const row = button.closest('.row');
-            const dateInput = row.querySelector('.date-input');
-    
-            // Clear any existing error messages
-            removeError(dateInput);
-    
-            if (!dateInput.value) {
-                showError(dateInput, "Please select a return date before marking as returned.");
-                return;
+        function updateItemStatus(itemId, status) {
+            // Show loading spinner
+            const loadingSpinner = document.getElementById(`loading-${status.toLowerCase()}-${itemId}`);
+            if (loadingSpinner) {
+                loadingSpinner.style.display = 'inline-block'; // Show the loading spinner
             }
-    
-            fetch(`/return-item/`, {
-                method: "POST",
+        
+            // Disable the buttons while the request is being processed
+            const approveButton = document.querySelector(`button[data-item-id="${itemId}"][data-status="Approved"]`);
+            const denyButton = document.querySelector(`button[data-item-id="${itemId}"][data-status="Denied"]`);
+        
+            if (approveButton) approveButton.disabled = true;
+            if (denyButton) denyButton.disabled = true;
+        
+            // Send the request to the server
+            fetch("{% url 'update_reservation_item_status' %}", {
+                method: 'POST',
                 headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": "{{ csrf_token }}"
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
                 },
                 body: JSON.stringify({
-                    item_id: itemId,
-                    borrow_request_item_id: borrowRequestItemId,
-                    date_return: dateInput.value
+                    'item_id': itemId,
+                    'status': status
                 })
-            }).then(response => response.json())
-              .then(data => {
-                  if (data.success) {
-                      button.disabled = true;
-                      dateInput.disabled = true;
-    
-                      button.classList.remove('btn-outline-success');
-                      button.classList.add('btn-success');
-                      button.textContent = 'Done';
-    
-                      row.querySelector('.item-text p').style.textDecoration = "line-through";
-                      row.querySelector('.description-text p').style.textDecoration = "line-through";
-                      row.querySelector('.quantity-text p').style.textDecoration = "line-through";
-    
-                      const date = new Date(dateInput.value);
-                      const options = { day: 'numeric', month: 'long', year: 'numeric' };
-                      const formattedDate = date.toLocaleDateString('en-US', options);
-    
-                      const returnDateParagraph = document.createElement("p");
-                      returnDateParagraph.textContent = formattedDate;
-    
-                      const dateColumn = row.querySelector('.col-2:nth-child(4)');
-                      dateColumn.innerHTML = "";
-                      dateColumn.appendChild(returnDateParagraph);
-    
-                      checkItemStatus(); // Update BorrowRequest status
-                  } else {
-                      showError(dateInput, "Error processing return. Please try again.");
-                  }
-              });
-        }
-    
-        function showError(dateInput, message) {
-            removeError(dateInput); // Clear any existing error message
-    
-            const errorSpan = document.createElement("span");
-            errorSpan.className = "error-message";
-            errorSpan.style.color = "red";
-            errorSpan.style.fontSize = "small";
-            errorSpan.textContent = message;
-    
-            // Insert the error message right below the date input
-            dateInput.insertAdjacentElement("afterend", errorSpan);
-        }
-    
-        function removeError(dateInput) {
-            const existingError = dateInput.parentNode.querySelector('.error-message');
-            if (existingError) {
-                existingError.remove();
-            }
-        }
-    
-        function checkItemStatus() {
-            const allCheckButtons = document.querySelectorAll('.check-button');
-            const form = document.getElementById('editBorrowerForm');
+            })
+            .then(response => response.json())  // Parse JSON response
+            .then(data => {
+                // Hide loading spinner once request is complete
+                if (loadingSpinner) {
+                    loadingSpinner.style.display = 'none';
+                }
         
-            // Collect the checked items and check the status of each item
-            const allChecked = Array.from(allCheckButtons).every(button => button.disabled);
-            const someChecked = Array.from(allCheckButtons).some(button => button.disabled);
+                if (data.success) {
+                    // Get the elements to update in real time
+                    const itemRow = document.getElementById(`item-row-${itemId}`);
         
-            // Update BorrowRequest status
-            const statusElement = document.getElementById('borrow-request-status');
-            
-            if (allChecked) {
-                form.querySelector('input[name="status"]').value = "Fully Returned";  // Set status to Fully Returned
-            } else if (someChecked) {
-                form.querySelector('input[name="status"]').value = "Partial Item Returned";  // Set status to Partial Item Returned
-            } else {
-                form.querySelector('input[name="status"]').value = "Unreturned";  // Set status to Unreturned
-            }
+                    // Apply line-through styling to the entire row (item name, description, and quantity)
+                    itemRow.querySelectorAll('p').forEach(element => {
+                        element.style.textDecoration = 'line-through';
+                        element.style.textDecorationColor = 'black'; // Ensures the line-through color is black
+                        element.style.color = 'black'; // Ensures the text color itself is also black
+                    });
         
-            // Submit the form only if the status is "Fully Returned" or "Partial Item Returned"
-            if (allChecked || someChecked) {
-                form.submit();
-            }
+                    // Disable and style the clicked button, remove the opposite button
+                    if (status === 'Approved') {
+                        approveButton.disabled = true;
+                        approveButton.style.cursor = 'not-allowed';
+                        approveButton.style.textDecoration = 'line-through';
+                        if (denyButton) denyButton.remove();
+                    } else if (status === 'Denied') {
+                        denyButton.disabled = true;
+                        denyButton.style.cursor = 'not-allowed';
+                        if (approveButton) approveButton.remove();
+                    }
+        
+                    // Optionally, display a success message
+                    alert(data.message);
+        
+                    // Redirect if URL is provided
+                    if (data.redirect_url) {
+                        window.location.href = data.redirect_url;
+                    }
+                } else {
+                    alert("Failed to update the status.");
+                }
+            })
+            .catch(error => {
+                // Hide loading spinner on error
+                if (loadingSpinner) {
+                    loadingSpinner.style.display = 'none';
+                }
+                console.error('Error:', error);  // Catch any errors
+            });
         }
         
     </script>
+
 {% endblock content %}
