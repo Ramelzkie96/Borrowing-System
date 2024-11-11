@@ -1,67 +1,47 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
-*{
+/* Base styles */
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Poppins',sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
-body{
-  background:linear-gradient(
-    rgba(0, 0, 0, 0.5), 
-    rgba(0, 0, 0, 0.5)
-  ), url(../images/ictbg.jpg);
-  
+body {
+  background: linear-gradient(
+      rgba(0, 0, 0, 0.5),
+      rgba(0, 0, 0, 0.5)
+    ),
+    url(../images/ictbg.jpg);
   background-size: cover;
   overflow: hidden;
-}
-body::before { 
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%; 
-  background: linear-gradient(
-    rgba(0, 0, 0, 0.5), 
-    rgba(0, 0, 0, 0.5)
-  ), url(../images/ictbg.jpg); 
-  background-size: cover;
-  z-index: -1;
-}
-::selection{
-  background: rgba(26,188,156,0.3);
-}
-.logo {
-  position: relative;
   display: flex;
-  padding-left: 50px;
-  padding-right: 50px;
-  padding-top: 30px;
-  justify-content: space-between;
-  
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
 }
-.img1 {
-  width: 50px;
-  height: 50px;
+
+::selection {
+  background: rgba(26, 188, 156, 0.3);
 }
-.img2 {
-  width: 50px;
-  height: 50px;
-}
-.container{
-  position: relative;
-  top: -10px;
+
+.container {
   max-width: 500px;
-  margin: 170px auto;
-  box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+  width: 90%;
+  margin: auto;
+  padding: 20px;
+
+  border-radius: 10px; /* Optional for softer edges */
+  background-color: transparent; /* Slight transparency */
 }
-.wrapper{
-  width: 100%;
-  background: #fff;
+
+.wrapper {
+  background: rgba(255, 255, 255, 0.95); /* Slight transparency */
   border-radius: 5px;
-  box-shadow: 0px 4px 10px 1px rgba(0,0,0,0.1);
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Adjust for lighter shadow */
 }
-.wrapper .title{
+
+
+.wrapper .title {
   height: 90px;
   background: #343957;
   border-radius: 5px 5px 0 0;
@@ -72,21 +52,30 @@ body::before {
   align-items: center;
   justify-content: center;
 }
-.wrapper form{
-  padding: 30px 25px 25px 25px;
+
+.wrapper img {
+  width: 40px;
+  height: 40px;
 }
+
+.wrapper form {
+  padding: 30px 25px;
+}
+
 .wrapper form span {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    top: -15px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  top: -15px;
 }
-.wrapper form .row{
+
+.wrapper form .row {
   height: 50px;
   margin-bottom: 30px;
   position: relative;
 }
-.wrapper form .row input{
+
+.wrapper form .row input {
   height: 100%;
   width: 100%;
   outline: none;
@@ -96,14 +85,8 @@ body::before {
   font-size: 16px;
   transition: all 0.3s ease;
 }
-form .row input:focus{
-  border-color: #343957;
-  box-shadow: inset 0px 0px 2px 2px rgba(26,188,156,0.25);
-}
-form .row input::placeholder{
-  color: #999;
-}
-.wrapper form .row i{
+
+.wrapper form .row i {
   position: absolute;
   width: 47px;
   height: 100%;
@@ -116,41 +99,94 @@ form .row input::placeholder{
   align-items: center;
   justify-content: center;
 }
-.wrapper form .pass{
-  margin: -8px 0 20px 0;
-}
-.wrapper form .pass a{
-  color: #343957;
-  font-size: 17px;
-  text-decoration: none;
-}
-.wrapper form .pass a:hover{
-  text-decoration: underline;
-}
-.wrapper form .button input{
+
+.wrapper form .button input {
   color: #fff;
   font-size: 20px;
   font-weight: 500;
-  padding-left: 0px;
   background: #343957;
   border: 1px solid #343957;
   cursor: pointer;
 }
-form .button input:hover{
+
+.wrapper form .button input:hover {
   background: #484e6f;
 }
-.wrapper form .signup-link{
+
+.wrapper form .pass a,
+.wrapper form .signup-link a {
+  color: #343957;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+.wrapper form .signup-link {
   text-align: center;
   margin-top: 20px;
   font-size: 17px;
 }
-.wrapper form .signup-link a{
-  color: #343957;
-  text-decoration: none;
-}
-form .signup-link a:hover{
+
+.wrapper form .pass a:hover,
+.wrapper form .signup-link a:hover {
   text-decoration: underline;
 }
+
+/* Responsive adjustments */
+@media (max-width: 1000px) {
+  .container {
+    margin: 50px auto;
+  }
+
+  .wrapper .title {
+    font-size: 24px;
+  }
+  .wrapper img {
+    width: 30px;
+    height: 30px;
+  }
+
+  .wrapper form .row input {
+    font-size: 14px;
+    padding-left: 50px;
+  }
+
+  .wrapper form .button input {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 600px) {
+  .wrapper .title {
+    font-size: 20px;
+  }
+  .wrapper img {
+    width: 20px;
+    height: 20px;
+  }
+
+  .wrapper form {
+    padding: 20px;
+  }
+
+  .wrapper form .row input {
+    font-size: 14px;
+    padding-left: 50px;
+  }
+
+  .wrapper form .button input {
+    font-size: 16px;
+  }
+
+  .wrapper form .pass a,
+  .wrapper form .signup-link a {
+    font-size: 14px;
+  }
+
+  .wrapper form .signup-link {
+    font-size: 14px;
+  }
+}
+
 
 
 /* Toast Container */
@@ -222,57 +258,3 @@ transition: width 4s linear; /* Duration should match the toast timeout */
   to { opacity: 0; }
 }
 
-@media screen and (max-width: 550px) {
-  .container {
-    max-width: 400px;
-    top: 50px;
-    left: 40px;
-    width: 100%;
-    margin: 10px 10px;
-  }
-}
-
-@media screen and (max-width: 456px) {
-  .container {
-    max-width: 350px;
-    /* top: 50px;
-    left: 40px; */
-    width: 100%;
-    margin: 10px 10px;
-  }
-}
-
-@media screen and (max-width: 392px) {
-  .container {
-    max-width: 340px;
-    left: 15px;
-    width: 100%;
-    margin: 10px 10px;
-  }
-  .title-login {
-    font-size: 18px;
-  }
-  .img1 {
-    width: 60px;
-    height: 60px;
-  }
-  .img2 {
-    width: 60px;
-    height: 60px;
-  }
-  .logo {
-    top: 40px;
-  }
-}
-@media screen and (max-width: 361px) {
-  .container {
-    max-width: 320px;
-    left: 10px;
-    width: 100%;
-    margin: 10px 10px;
-  }
-
-  .wrapper .title {
-    font-size: 25px;
-  }
-}

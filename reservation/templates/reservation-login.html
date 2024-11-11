@@ -57,39 +57,50 @@
 
 
 <div class="login-header box-shadow">
-    <div class="container-fluid d-flex justify-content-between align-items-center">
+    <div class="container-fluid d-flex justify-content-between align-items-center flex-wrap">
         <div class="brand-logo">
             <a href="javascript:void()">
                 <img src="{% static 'images/pit_logo.png' %}" alt="" class="logo-img">
                 <span class="text-primary header-text" style="font-weight: 800;">&nbsp; Student Reservation Item</span>
             </a>
         </div>
-        <div class="login-menu">
-            <ul>
-                <li><a href="{% url 'home_redirect' %}" class="login-link">Faculty Login</a></li>
-            </ul>
-        </div>
+       
     </div>
 </div>
 
 <style>
-    /* Responsive styles */
+    /* Base styles */
     .logo-img {
         width: 65px;
-        height: 65px;
+        height: 20px;
     }
 
-    /* Smaller logo and text for tablets and smaller devices */
+    .login-header {
+        padding: 15px 0;
+    }
+
+    .login-menu ul {
+        padding: 0;
+        margin: 0;
+        list-style-type: none;
+    }
+
+    /* Responsive styles */
     @media (max-width: 768px) {
+        .container-fluid {
+            flex-direction: column; /* Stack items vertically */
+            align-items: center;
+            text-align: center;
+        }
         .logo-img {
             width: 50px;
             height: 50px;
         }
         .header-text {
-            font-size: 18px; /* Adjust font size as needed */
+            font-size: 14px; /* Adjust font size as needed */
         }
         .login-link {
-            font-size: 14px; /* Smaller font for Faculty Login link */
+            font-size: 8px; /* Smaller font for Faculty Login link */
         }
     }
 
@@ -103,11 +114,11 @@
             font-size: 16px;
         }
         .login-link {
-            font-size: 12px;
-			display: none;
+            font-size: 8px;
         }
     }
 </style>
+
 
 
 
@@ -163,9 +174,13 @@
 											<input class="btn btn-primary btn-lg btn-block" type="submit" value="Login">
 										</div>
 										<div class="font-16 weight-600 pt-2 pb-2 text-center" data-color="#707373">OR</div>
-										<div class="input-group mb-0">
+										<div class="input-group mb-2">
 											<a class="btn btn-outline-primary btn-lg btn-block" href="{% url 'reservation-register' %}">Register To Create Account</a>
 										</div>
+										<div class="input-group mb-0">
+											<p class="btn btn-outline-white btn-lg btn-block" data-color="#707373">Back to faculty <a href="{% url 'home_redirect' %}" class="text-primary">Login</a> </p>
+										</div>
+										
 									</div>
 								</div>
 							</form>

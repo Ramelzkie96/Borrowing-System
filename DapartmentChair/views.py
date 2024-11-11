@@ -1034,30 +1034,29 @@ def borrower_details(request):
 
 
 
-@login_required
+@login_required 
 def borrower_details_dashboard(request):
-    if not request.user.is_superuser:
+    if not (request.user.is_superuser or request.user.faculty):
         return HttpResponseForbidden("You do not have permission to access this page.")
-    
+
     student_id = request.GET.get('student_id')
     name = request.GET.get('name')
     date_borrow = request.GET.get('date_borrow')
     status = request.GET.get('status')
     user_id = request.user.id
 
-    # Filter BorrowRequest based on the user handling the items and borrow request date
+    # Filter BorrowRequest based on the borrow request date (no filtering by handled_by)
     borrow_requests = BorrowRequest.objects.filter(
-        facultyitems__handled_by=user_id,
         date_borrow=date_borrow,
     ).distinct()
 
     if not borrow_requests.exists():
         return render(request, '404.html', status=404)
-    
-    # Collect all items, including duplicates, across all borrow requests handled by the user
+
+    # Collect all items, including duplicates, across all borrow requests (no filtering by handled_by)
     all_items = []
     for borrow_request in borrow_requests:
-        items = borrow_request.facultyitems.filter(handled_by=user_id)
+        items = borrow_request.facultyitems.all()  # No filter for handled_by
         all_items.extend(items)  # Append each item to the list, allowing duplicates
 
     context = {
@@ -1067,8 +1066,9 @@ def borrower_details_dashboard(request):
         'status': status,
         'all_items': all_items,  # Pass all items, including duplicates, to the template
     }
-    
+
     return render(request, 'admin-borrow-details-dashboard.html', context)
+
 
 
 

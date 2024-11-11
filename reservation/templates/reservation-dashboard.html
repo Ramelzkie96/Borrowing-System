@@ -589,13 +589,13 @@
                                                 </div>
                                             
                                                 <div class="mt-4">
-                                                    <label class="text-dark">Description</label>
-                                                    <textarea name="description" style="height: 50px; resize: vertical;" class="form-control" required></textarea>
+                                                    <label class="text-dark">Item Details (OPTIONAL) </label>
+                                                    <textarea name="description" style="height: 50px; resize: vertical;" class="form-control" placeholder=""></textarea>
                                                 </div>
                                             
                                                 <div class="mt-4">
                                                     <label class="text-dark">Quantity</label>
-                                                    <input type="number" name="quantityy" id="quantityy" class="form-control col-md-3" required style="border: 1px solid #bebebe;" value="1" min="1" oninput="if(this.value < 1) { this.value = 1; }">
+                                                    <input type="number" name="quantityy" id="quantityy" class="form-control col-md-3" required style="border: 1px solid #bebebe;" value="1" >
                                                     <div class="text-danger mt-2"></div> <!-- Error message container -->
                                                 </div>
                                             </div>
@@ -606,7 +606,7 @@
 
                                     
                                     <div class="form-group col-md-6">
-                                        <label class="text-dark">Purpose for borrow</label>
+                                        <label class="text-dark">Purpose</label>
                                         <textarea name="purpose" class="form-control" cols="1" rows="1" style="border: 1px solid #bebebe;"></textarea>
                                     </div>
                                 </div>
@@ -650,7 +650,7 @@ function populateItems() {
                     data.forEach(item => {
                         const option = document.createElement('option');
                         option.value = item.id; // Set the item's ID as the value
-                        option.textContent = `${item.name} (${item.quantity})`; // Set the display text
+                        option.textContent = `${item.name} (Quantity stock: ${item.quantity})`; // Set the display text
                         itemSelect.appendChild(option);
                         // Store the item's quantity for later validation
                         itemQuantities[item.id] = item.quantity;
@@ -674,9 +674,15 @@ function validateQuantity(selectElement, quantityInput) {
     quantityError.textContent = '';
     selectError.textContent = '';
 
-    // Check if quantity exceeds available stock
-    if (quantityValue > availableQuantity) {
-        quantityError.textContent = `You cannot borrow more than ${availableQuantity} of this item.`;
+    // Show an error if quantity is 2 or more and no item is selected
+    if (!selectedItemId && quantityValue >= 1) {
+        quantityError.textContent = 'Please select an item before adding a quantity.';
+    } else if (selectedItemId) {
+        // If an item is selected, check if quantity exceeds available stock
+        const availableQuantity = itemQuantities[selectedItemId] || 0; // Get available quantity
+        if (quantityValue > availableQuantity) {
+            quantityError.textContent = `You cannot borrow more than ${availableQuantity} of this item.`;
+        }
     }
 
     // Validate uniqueness of selected item across cards
@@ -689,6 +695,7 @@ function validateQuantity(selectElement, quantityInput) {
 
     updateSubmitButtonState(); // Check submit button state after validation
 }
+
 
 // Enable or disable the submit button based on validation
 function updateSubmitButtonState() {

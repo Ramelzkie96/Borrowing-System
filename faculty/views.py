@@ -149,6 +149,7 @@ def delete_item(request, item_id):
 
 
 
+
 @login_required
 def borrowers(request):
     if not request.user.faculty:

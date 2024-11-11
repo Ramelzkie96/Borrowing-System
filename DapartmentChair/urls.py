@@ -35,6 +35,7 @@ urlpatterns = [
     path('admin-borrow-record', views.borrow_record, name='admin-borrow-record'),
     path('admin-borrower-details/', views.borrower_details, name='admin-borrower-details'),
     path('admin-borrower-details-dash/', views.borrower_details_dashboard, name='admin-borrower-details-dashboard'),
+
     path('admin-update-borrower/', views.fetch_borrow_request, name='admin-update-borrower'),
     path('admin-save-borrower-update/', views.save_borrow_update, name='admin-save-borrower-update'),
     path('admin-get-unreturned-items/<int:borrow_id>/', views.get_unreturned_items, name='admin-get-unreturned-items'),
