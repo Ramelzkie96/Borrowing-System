@@ -74,6 +74,13 @@ class User(AbstractUser):
         verbose_name="user permissions",
     )
 
+    # Add related_name to avoid clash with the default User model
+    groups = models.ManyToManyField(
+        "auth.Group",
+        related_name="dapartmentchair_user_set",  # This avoids the conflict
+        blank=True,
+    )
+
     def save(self, *args, **kwargs):
         if self.pk:
             old_user = User.objects.get(pk=self.pk)
@@ -90,3 +97,5 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
+
+

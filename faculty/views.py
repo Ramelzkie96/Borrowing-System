@@ -1,28 +1,28 @@
-from django.core.paginator import Paginator 
-from django.shortcuts import render, redirect, get_object_or_404 
+from django.core.paginator import Paginator
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import facultyItem
-from django.contrib import messages 
-from django.http import JsonResponse  
+from django.contrib import messages
+from django.http import JsonResponse
 from .models import BorrowRequest, facultyItem, BorrowRequestItemFaculty
 from .forms import BorrowRequestMultimediaForm
-from django.views.decorators.http import require_POST  
-from django.core.mail import send_mail 
-from django.views.decorators.csrf import csrf_exempt  
+from django.views.decorators.http import require_POST
+from django.core.mail import send_mail
+from django.views.decorators.csrf import csrf_exempt
 from .forms import EmailNotificationForm
-from django.conf import settings 
-from django.contrib.contenttypes.models import ContentType  
+from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 from reservation.models import StudentReservation, ReservationItem
-from django.contrib.auth.decorators import login_required  
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
-from django.contrib.auth import update_session_auth_hash  
+from django.contrib.auth import update_session_auth_hash
 import os
 from django.templatetags.static import static
 from django.http import HttpResponseBadRequest, HttpResponseForbidden, HttpResponseNotFound
-from django.utils import timezone 
+from django.utils import timezone
 from datetime import datetime
 from django.utils.timezone import now
 import pdfkit
-from django.db.models import Q 
+from django.db.models import Q
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 import json
@@ -40,7 +40,7 @@ def add_item(request):
     # Restrict access to faculty users only
     if not request.user.faculty:
         return HttpResponseForbidden("You do not have permission to access this page.")
-    
+
     if request.method == 'POST':
         name = request.POST.get('name')
         property_id = request.POST.get('property_id')
@@ -53,7 +53,7 @@ def add_item(request):
                 quantity = int(quantity)
                 if quantity <= 0:
                     raise ValueError("Quantity must be a positive number.")
-                
+
                 # Create the new item and associate it with the current user
                 facultyItem.objects.create(
                     name=name,
@@ -63,7 +63,7 @@ def add_item(request):
                 )
                 messages.success(request, 'SUCCESS! Item has been added successfully.')
                 return redirect('item-record')  # Redirect to item_record after adding item
-            
+
             except ValueError as e:
                 messages.error(request, f'ERROR! {str(e)}')
         else:
@@ -81,7 +81,7 @@ def item_record(request):
     # Restrict access to faculty users only
     if not request.user.faculty:
         return HttpResponseForbidden("You do not have permission to access this page.")
-    
+
     # Get only items that belong to the logged-in user
     items = facultyItem.objects.filter(user_id=request.user.id).order_by('-id')
     total_items = items.count()
@@ -106,7 +106,7 @@ def update_item(request):
     # Restrict access to faculty users only
     if not request.user.faculty:
         return HttpResponseForbidden("You do not have permission to access this page.")
-    
+
     if request.method == 'POST':
         item_id = request.POST.get('item_id')
         name = request.POST.get('name')
@@ -137,7 +137,7 @@ def delete_item(request, item_id):
     # Restrict access to faculty users only
     if not request.user.faculty:
         return HttpResponseForbidden("You do not have permission to access this page.")
-    
+
     if request.method == 'POST':
         item = get_object_or_404(facultyItem, id=item_id)
         item.delete()
@@ -246,7 +246,7 @@ def borrowers(request):
                                 is_returned=False,
                                 handled_by=request.user  # Set handled_by to the current user here
                             )
-                            
+
                             borrow_request.status = 'Unreturned'
                             borrow_request.save()
 
@@ -331,14 +331,14 @@ def borrow_record(request):
 
 
 
-    
+
 
 # im taking rest not modify yet
 @login_required
 def borrower_details(request):
     if not request.user.faculty:
         return HttpResponseForbidden("You do not have permission to access this page.")
-    
+
     student_id = request.GET.get('student_id')
     name = request.GET.get('name')
     date_borrow = request.GET.get('date_borrow')
@@ -353,7 +353,7 @@ def borrower_details(request):
 
     if not borrow_requests.exists():
         return render(request, '404.html', status=404)
-    
+
     # Collect all items, including duplicates, across all borrow requests handled by the user
     all_items = []
     for borrow_request in borrow_requests:
@@ -367,7 +367,7 @@ def borrower_details(request):
         'status': status,
         'all_items': all_items,  # Pass all items, including duplicates, to the template
     }
-    
+
     return render(request, 'borrower-details.html', context)
 
 
@@ -377,7 +377,7 @@ def borrower_details(request):
 def fetch_borrow_request_items(request):
     if request.method == 'GET':
         request_id = request.GET.get('request_id')
-        
+
         items = BorrowRequestItemFaculty.objects.filter(
             borrow_request_id=request_id,
             is_returned=False
@@ -540,7 +540,7 @@ def update_borrower_status(request):
         try:
             # Fetch the BorrowRequest based on the ID provided
             borrow_request = BorrowRequest.objects.get(id=borrow_request_id)
-            
+
             # Fetch all items associated with this BorrowRequest
             facultyitems = borrow_request.facultyitems.all()
             total_items = facultyitems.count()
@@ -679,14 +679,14 @@ def send_email_notification(request):
     # Restrict access to faculty users only
     if not request.user.faculty:
         return HttpResponseForbidden("You do not have permission to access this page.")
-    
+
     if request.method == 'POST':
         form = EmailNotificationForm(request.POST)
         if form.is_valid():
             title = form.cleaned_data['title']
             email = form.cleaned_data['email']
             message_content = form.cleaned_data['message']
-            
+
             try:
                 send_mail(
                     title,
@@ -706,7 +706,7 @@ def send_email_notification(request):
             # Add an error message for invalid form data and redirect
             messages.error(request, 'Invalid form data.')
             return redirect('borrow-record')  # Use the direct URL
-    
+
     # Handle cases where the request method is not POST
     messages.error(request, 'Invalid request method.')
     return redirect('borrow-record')  # Use the direct URL
@@ -727,17 +727,17 @@ def get_unreturned_items(request, borrow_id):
         return JsonResponse({'success': True, 'items': items_list})
     except BorrowRequest.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Borrow request not found.'})
-    
-    
 
 
-    
+
+
+
 @login_required
 def change_profile(request):
     # Restrict access to faculty users only
     if not request.user.faculty:
         return HttpResponseForbidden("You do not have permission to access this page.")
-    
+
     user = request.user
 
     if request.method == 'POST':
@@ -770,14 +770,14 @@ def change_profile(request):
         'default_image_url': default_image_url,
     }
     return render(request, 'change-profile.html', context)
-    
-    
+
+
 @login_required
 def change_password(request):
     # Restrict access to faculty users only
     if not request.user.faculty:
         return HttpResponseForbidden("You do not have permission to access this page.")
-    
+
     if request.method == 'POST':
         form = PasswordChangeForm(user=request.user, data=request.POST)
         if form.is_valid():
@@ -795,7 +795,7 @@ def change_password(request):
                 messages.error(request, 'Please correct the error below.')
     else:
         form = PasswordChangeForm(user=request.user)
-    
+
     return render(request, 'change-password.html', {'form': form})
 
 
@@ -806,7 +806,7 @@ def student_reservation(request):
     # Restrict access to faculty users only
     if not request.user.faculty:
         return HttpResponseForbidden("You do not have permission to access this page.")
-    
+
     # Get the logged-in user's ID
     user_id = request.user.id  # Use request.user.id to directly get the logged-in user's ID
 
@@ -835,8 +835,8 @@ def student_reservation(request):
         'current_show': current_show,
         'reserved_request': reserved_request
     })
-    
-    
+
+
 
 
 
@@ -845,10 +845,10 @@ def status_update(request, reservation_id):
     # Restrict access to faculty users only
     if not request.user.faculty:
         return HttpResponseForbidden("You do not have permission to access this page.")
-    
+
     # Fetch the reservation
     reservation = get_object_or_404(StudentReservation, id=reservation_id)
-    
+
     # Fetch the items associated with the reservation that the logged-in user is handling
     items = reservation.items.filter(user_facultyItem=request.user)
 
@@ -927,13 +927,13 @@ def update_reservation_item_status(request):
         }
 
         # Send email notification
-        # subject = f"Reservation Item Status Updated: {item.item_name}"
-        # message = f"Dear {reservation.name},\n\nThe status of your reservation item '{item.item_name}' has been updated to '{new_status}'.\n\nNotification: {item.notification}\n\nBest regards,\nYour Reservation Team"
-        # from_email = settings.EMAIL_HOST_USER
-        # recipient_list = [reservation.email]
+        subject = f"Reservation Item Status Updated: {item.item_name}"
+        message = f"Dear {reservation.name},\n\nThe status of your reservation item '{item.item_name}' has been updated to '{new_status}'.\n\nNotification: {item.notification}\n\nBest regards,\nYour Reservation Team"
+        from_email = settings.EMAIL_HOST_USER
+        recipient_list = [reservation.email]
 
-        # Send the email
-        # send_mail(subject, message, from_email, recipient_list)
+        #Send the email
+        send_mail(subject, message, from_email, recipient_list)
 
         # Redirect to 'admin-student-reservation' if needed
         if redirect_needed:
@@ -958,34 +958,34 @@ def generate_report(request, id):
     # Ensure only allowed users can access the report
     if not request.user.faculty:
         return HttpResponseForbidden("You do not have permission to access this page.")
-    
+
     # Get the specific BorrowRequest by ID
     try:
         borrow_request = BorrowRequest.objects.get(id=id)
         items = borrow_request.items.select_related('item')  # Fetch related items with facultyItem details
     except BorrowRequest.DoesNotExist:
         return HttpResponseNotFound("BorrowRequest not found.")
-    
+
     # Structure data for the report
     context = {
         'borrow_request': borrow_request,
         'items': items,  # Ensure you pass the items to the context
         'image_url': request.build_absolute_uri(static('images/logo.png')),
     }
-    
+
     # Render the HTML template
     html_string = render_to_string('borrower-report.html', context)
 
     # Configure pdfkit for PDF generation
     config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
-    
+
     try:
         options = {
             'no-stop-slow-scripts': '',
             'disable-smart-shrinking': '',
             'enable-local-file-access': '',
         }
-        
+
         pdf = pdfkit.from_string(html_string, False, configuration=config, options=options)
         response = HttpResponse(pdf, content_type='application/pdf')
         response['Content-Disposition'] = 'inline; filename="borrow_report.pdf"'

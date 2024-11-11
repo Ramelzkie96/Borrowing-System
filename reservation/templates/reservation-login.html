@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block extra_css %} 
+{% block extra_css %}
 <!-- Google Font -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <!-- CSS -->
@@ -29,8 +29,8 @@
 {% endblock %}
 
 
-{% block extra_js %} 
-	
+{% block extra_js %}
+
 	<!-- Global site tag (gtag.js) - Google Analytics -->
 	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-119386393-1"></script>
 	<script>
@@ -57,39 +57,50 @@
 
 
 <div class="login-header box-shadow">
-    <div class="container-fluid d-flex justify-content-between align-items-center">
+    <div class="container-fluid d-flex justify-content-between align-items-center flex-wrap">
         <div class="brand-logo">
             <a href="javascript:void()">
                 <img src="{% static 'images/pit_logo.png' %}" alt="" class="logo-img">
                 <span class="text-primary header-text" style="font-weight: 800;">&nbsp; Student Reservation Item</span>
             </a>
         </div>
-        <div class="login-menu">
-            <ul>
-                <li><a href="{% url 'home_redirect' %}" class="login-link">Faculty Login</a></li>
-            </ul>
-        </div>
+
     </div>
 </div>
 
 <style>
-    /* Responsive styles */
+    /* Base styles */
     .logo-img {
         width: 65px;
-        height: 65px;
+        height: 20px;
     }
 
-    /* Smaller logo and text for tablets and smaller devices */
+    .login-header {
+        padding: 15px 0;
+    }
+
+    .login-menu ul {
+        padding: 0;
+        margin: 0;
+        list-style-type: none;
+    }
+
+    /* Responsive styles */
     @media (max-width: 768px) {
+        .container-fluid {
+            flex-direction: column; /* Stack items vertically */
+            align-items: center;
+            text-align: center;
+        }
         .logo-img {
             width: 50px;
             height: 50px;
         }
         .header-text {
-            font-size: 18px; /* Adjust font size as needed */
+            font-size: 14px; /* Adjust font size as needed */
         }
         .login-link {
-            font-size: 14px; /* Smaller font for Faculty Login link */
+            font-size: 8px; /* Smaller font for Faculty Login link */
         }
     }
 
@@ -103,11 +114,11 @@
             font-size: 16px;
         }
         .login-link {
-            font-size: 12px;
-			display: none;
+            font-size: 8px;
         }
     }
 </style>
+
 
 
 
@@ -145,11 +156,13 @@
 									</div>
 								</div>
 								<div class="input-group custom mb-3">
-									<input type="password" class="form-control form-control-lg" name="password" placeholder="**********" required>
-									<div class="input-group-append custom">
-										<span class="input-group-text"><i class="dw dw-padlock1"></i></span>
-									</div>
-								</div>
+                                    <input type="password" id="password" class="form-control form-control-lg" name="password" placeholder="**********" required>
+                                    <div class="input-group-append custom">
+                                        <span class="input-group-text" onclick="togglePasswordVisibility()" style="cursor: pointer;">
+                                            <i id="toggleIcon" class="fa fa-eye"></i>
+                                        </span>
+                                    </div>
+                                </div>
 								<div class="row pb-3">
 									<div class="col-6">
 										<div class="forgot-password" style="position: relative;">
@@ -163,9 +176,13 @@
 											<input class="btn btn-primary btn-lg btn-block" type="submit" value="Login">
 										</div>
 										<div class="font-16 weight-600 pt-2 pb-2 text-center" data-color="#707373">OR</div>
-										<div class="input-group mb-0">
+										<div class="input-group mb-2">
 											<a class="btn btn-outline-primary btn-lg btn-block" href="{% url 'reservation-register' %}">Register To Create Account</a>
 										</div>
+										<div class="input-group mb-0">
+											<p class="btn btn-outline-white btn-lg btn-block" data-color="#707373">Back to faculty <a href="{% url 'home_redirect' %}" class="text-primary">Login</a> </p>
+										</div>
+
 									</div>
 								</div>
 							</form>
@@ -174,7 +191,7 @@
 				</div>
 			</div>
 		</div>
-		
+
 
 
 	<!-- Add this script to hide the alerts after 5 seconds -->
@@ -184,13 +201,30 @@
 			alerts.forEach(function(alert) {
 				alert.classList.remove('show');  // Bootstrap class to hide it
 				alert.classList.add('hide-alert');  // Custom transition class
-				
+
 				// Set a delay to completely remove the alert after the fade-out
 				window.setTimeout(function() {
 					alert.style.display = 'none';  // Completely hide the element
 				}, 600);  // Matches the transition duration in CSS (0.6s)
 			});
 		}, 5000);
+
+
+		//password change icon
+		function togglePasswordVisibility() {
+        const passwordField = document.getElementById("password");
+        const toggleIcon = document.getElementById("toggleIcon");
+
+        if (passwordField.type === "password") {
+            passwordField.type = "text";
+            toggleIcon.classList.remove("fa-eye");
+            toggleIcon.classList.add("fa-eye-slash");
+        } else {
+            passwordField.type = "password";
+            toggleIcon.classList.remove("fa-eye-slash");
+            toggleIcon.classList.add("fa-eye");
+        }
+    }
 
 
 
@@ -209,7 +243,7 @@ document.addEventListener("DOMContentLoaded", function() {
         console.log(el);  // Add this for debugging
         var messageType = el.getAttribute('data-type');
         var messageContent = el.getAttribute('data-content');
-    
+
 
         // Display Toastr notification based on the message type
         if (messageType === 'success') {
@@ -224,5 +258,5 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 	</script>
-	
+
 	{% endblock content %}

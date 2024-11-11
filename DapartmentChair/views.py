@@ -1,30 +1,30 @@
-from django.shortcuts import render, redirect 
+from django.shortcuts import render, redirect
 from .forms import LoginForm
-from django.contrib.auth import authenticate, login, logout 
-from django.contrib.auth.decorators import login_required 
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from functools import wraps
 from faculty.models import BorrowRequest, facultyItem, BorrowRequestItemFaculty
-from django.contrib import messages 
+from django.contrib import messages
 from django.core.paginator import Paginator
 from .models import User
-from django.contrib.auth import get_user_model 
-from django.contrib.auth.views import PasswordResetView 
+from django.contrib.auth import get_user_model
+from django.contrib.auth.views import PasswordResetView
 from reservation.models import StudentReservation, ReservationItem
 from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponseBadRequest, HttpResponseForbidden, HttpResponseNotFound
-from django.utils import timezone 
-from django.views.decorators.http import require_POST 
-from django.core.mail import send_mail 
-from django.views.decorators.csrf import csrf_exempt  
-from django.conf import settings 
+from django.utils import timezone
+from django.views.decorators.http import require_POST
+from django.core.mail import send_mail
+from django.views.decorators.csrf import csrf_exempt
+from django.conf import settings
 from faculty.forms import EmailNotificationForm, BorrowRequestMultimediaForm
 from django.utils.timezone import now
-from django.contrib.contenttypes.models import ContentType  
+from django.contrib.contenttypes.models import ContentType
 from datetime import datetime
-from django.db.models import Q 
+from django.db.models import Q
 import json
 import os
 from django.templatetags.static import static
@@ -32,7 +32,7 @@ import pdfkit
 from django.template.loader import render_to_string
 from django.http import HttpResponse
 from django.contrib.auth.forms import PasswordChangeForm
-from django.contrib.auth import update_session_auth_hash 
+from django.contrib.auth import update_session_auth_hash
 from django.db.models import Max, Count
 from django.db import transaction
 from django.shortcuts import get_list_or_404
@@ -99,7 +99,7 @@ def faculty(request):
 
     # Count of total items belonging to the logged-in user
     faculty_item_count = facultyItem.objects.filter(user=user).count()
-    
+
     # Count of all StudentReservation items with status 'Pending' that match the user_type
     student_reservation_count = StudentReservation.objects.filter(
     id__in=ReservationItem.objects.filter(
@@ -108,7 +108,7 @@ def faculty(request):
     status__in=['Pending', 'Partially Process']
 ).count()
 
-    
+
     # Fetch latest borrow request per unique combination of student_id and date_borrow
     latest_ids = BorrowRequest.objects.order_by('-id')
 
@@ -153,8 +153,8 @@ class CustomPasswordResetView(PasswordResetView):
             form.add_error('email', 'No account found with that email.')
             return self.form_invalid(form)
         return super().form_valid(form)
-    
-    
+
+
 def custom_login_view(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -165,26 +165,26 @@ def custom_login_view(request):
             return redirect('admin-dashboard')  # Redirect to the admin dashboard after login
         else:
             messages.error(request, 'Invalid username or password')
-    
+
     return render(request, 'admin-login.html', {'is_login_page': True})
 
 
-@login_required 
+@login_required
 def admin_dashboard(request):
     if not request.user.is_superuser:
         return JsonResponse({'error': 'You do not have permission to access this page.'}, status=403)
     total_users = User.objects.count()  # Count all users
     current_user = request.user  # Get the logged-in user
-    
+
     borrow_request_count = (BorrowRequest.objects
                         .filter(user=current_user)
                         .filter(Q(status='Unreturned') | Q(status='Partial Item Returned'))
                         .values('student_id', 'date_borrow')
                         .distinct()
                         .count())
-    
-   
-    
+
+
+
     # Fetch latest borrow request per unique combination of student_id and date_borrow
     latest_ids = BorrowRequest.objects.order_by('-id')
 
@@ -197,15 +197,15 @@ def admin_dashboard(request):
 
 
 
-    
+
     # Count of total items belonging to the logged-in user
     faculty_item_count = facultyItem.objects.filter(user=current_user).count()
-    
+
     # Fetch all items from facultyItem model associated with the logged-in user
     user_items = facultyItem.objects.filter(user=request.user)
-    
-  
-    
+
+
+
     # Count of all StudentReservation items with status 'Pending' that match the user_type
     # Filter StudentReservation with status 'Pending' or 'Partially Process' and related items with user_type matching request.user.id
     student_reservation_count = StudentReservation.objects.filter(
@@ -216,7 +216,7 @@ def admin_dashboard(request):
 ).count()
 
 
-    
+
     # Pagination setup based on "show" parameter from the request
     show_entries = request.GET.get('show', 'all')  # Default to 'all' if 'show' is not provided
     if show_entries == 'all':
@@ -233,7 +233,7 @@ def admin_dashboard(request):
     # Get the current page number
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
-    
+
     context = {
         'total_users': total_users,
         'page_obj': page_obj,
@@ -253,7 +253,7 @@ def admin_users(request):
         return JsonResponse({'error': 'You do not have permission to access this page.'}, status=403)
     # Fetch all users
     users = User.objects.all().order_by('-id')
-    
+
     # Pagination setup based on "show" parameter from the request
     show_entries = request.GET.get('show', 'all')  # Default to 'all' if 'show' is not provided
     if show_entries == 'all':
@@ -270,7 +270,7 @@ def admin_users(request):
     # Get the current page number
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
-    
+
 
     context = {
         'page_obj': page_obj,
@@ -299,7 +299,7 @@ def create_user(request):
         # Username existence check
         if User.objects.filter(username=username).exists():
             errors['username_error'] = "Username already exists. Please choose a different username."
-        
+
         # Email existence check
         if User.objects.filter(email=email).exists():
             errors['email_error'] = "Email already exists. Please choose a different email."
@@ -419,12 +419,12 @@ def update_user_status(request):
             return JsonResponse({'success': False, 'error': 'User not found'})
 
     return JsonResponse({'success': False, 'error': 'Invalid request method'})
-        
-        
-        
- 
- 
-#logic for borrower details in check button    
+
+
+
+
+
+#logic for borrower details in check button
 @csrf_exempt
 def return_item(request):
     if request.method == "POST":
@@ -468,7 +468,7 @@ def update_borrower_status(request):
         try:
             # Fetch the BorrowRequest based on the ID provided
             borrow_request = BorrowRequest.objects.get(id=borrow_request_id)
-            
+
             # Fetch all items associated with this BorrowRequest
             items = borrow_request.facultyitems.all()
             total_items = items.count()
@@ -515,7 +515,7 @@ def update_borrower_status_dashboard(request):
         try:
             # Fetch the BorrowRequest based on the ID provided
             borrow_request = BorrowRequest.objects.get(id=borrow_request_id)
-            
+
             # Fetch all items associated with this BorrowRequest
             items = borrow_request.facultyitems.all()
             total_items = items.count()
@@ -557,14 +557,14 @@ def send_email_notification(request):
     # Restrict access to faculty users only
     if not request.user.is_superuser:
         return HttpResponseForbidden("You do not have permission to access this page.")
-    
+
     if request.method == 'POST':
         form = EmailNotificationForm(request.POST)
         if form.is_valid():
             title = form.cleaned_data['title']
             email = form.cleaned_data['email']
             message_content = form.cleaned_data['message']
-            
+
             try:
                 send_mail(
                     title,
@@ -584,7 +584,7 @@ def send_email_notification(request):
             # Add an error message for invalid form data and redirect
             messages.error(request, 'Invalid form data.')
             return redirect('admin-dashboard')  # Use the direct URL
-    
+
     # Handle cases where the request method is not POST
     messages.error(request, 'Invalid request method.')
     return redirect('admin-dashboard')  # Use the direct URL
@@ -614,7 +614,7 @@ def add_item(request):
     # Restrict access to faculty users only
     if not request.user.is_superuser:
         return HttpResponseForbidden("You do not have permission to access this page.")
-    
+
     if request.method == 'POST':
         name = request.POST.get('name')
         property_id = request.POST.get('property_id')
@@ -627,7 +627,7 @@ def add_item(request):
                 quantity = int(quantity)
                 if quantity <= 0:
                     raise ValueError("Quantity must be a positive number.")
-                
+
                 # Create the new item and associate it with the current user
                 facultyItem.objects.create(
                     name=name,
@@ -637,7 +637,7 @@ def add_item(request):
                 )
                 messages.success(request, 'SUCCESS! Item has been added successfully.')
                 return redirect('admin-item-record')  # Redirect to item_record after adding item
-            
+
             except ValueError as e:
                 messages.error(request, f'ERROR! {str(e)}')
         else:
@@ -673,7 +673,7 @@ def item_record(request):
     # Restrict access to faculty users only
     if not request.user.is_superuser:
         return HttpResponseForbidden("You do not have permission to access this page.")
-    
+
     # Get only items that belong to the logged-in user
     items = facultyItem.objects.filter(user_id=request.user.id).order_by('-id')
     total_items = items.count()
@@ -700,7 +700,7 @@ def update_item(request):
     # Restrict access to faculty users only
     if not request.user.is_superuser:
         return HttpResponseForbidden("You do not have permission to access this page.")
-    
+
     if request.method == 'POST':
         item_id = request.POST.get('item_id')
         name = request.POST.get('name')
@@ -732,7 +732,7 @@ def delete_item(request, item_id):
     # Restrict access to faculty users only
     if not request.user.is_superuser:
         return HttpResponseForbidden("You do not have permission to access this page.")
-    
+
     if request.method == 'POST':
         item = get_object_or_404(facultyItem, id=item_id)
         item.delete()
@@ -839,7 +839,7 @@ def borrowers(request):
                                 is_returned=False,
                                 handled_by=request.user  # Set handled_by to the current user here
                             )
-                            
+
                             borrow_request.status = 'Unreturned'
                             borrow_request.save()
 
@@ -893,14 +893,14 @@ def get_available_quantity(request, item_id):
 
 
 
-    
-    
+
+
 def search_borrow_request(request):
     student_id = request.GET.get('student_id')
 
     if student_id:
         # Query the BorrowRequest model for the student_id
-        
+
         borrow_request = BorrowRequest.objects.filter(student_id=student_id).last()  # Get the first matching record
 
         if borrow_request:
@@ -919,7 +919,7 @@ def search_borrow_request(request):
     # Return a response indicating no record was found
     return JsonResponse({'success': False, 'error': 'No record found.'}, status=404)
 
-    
+
 
 
 
@@ -986,14 +986,14 @@ def borrow_record(request):
 
 
 
-    
-    
+
+
 # im taking rest not modify yet
 @login_required
 def borrower_details(request):
     if not request.user.is_superuser:
         return HttpResponseForbidden("You do not have permission to access this page.")
-    
+
     student_id = request.GET.get('student_id')
     name = request.GET.get('name')
     date_borrow = request.GET.get('date_borrow')
@@ -1008,7 +1008,7 @@ def borrower_details(request):
 
     if not borrow_requests.exists():
         return render(request, '404.html', status=404)
-    
+
     # Collect all items, including duplicates, across all borrow requests handled by the user
     all_items = []
     for borrow_request in borrow_requests:
@@ -1022,7 +1022,7 @@ def borrower_details(request):
         'status': status,
         'all_items': all_items,  # Pass all items, including duplicates, to the template
     }
-    
+
     return render(request, 'admin-borrow-details.html', context)
 
 
@@ -1036,28 +1036,27 @@ def borrower_details(request):
 
 @login_required
 def borrower_details_dashboard(request):
-    if not request.user.is_superuser:
+    if not (request.user.is_superuser or request.user.faculty):
         return HttpResponseForbidden("You do not have permission to access this page.")
-    
+
     student_id = request.GET.get('student_id')
     name = request.GET.get('name')
     date_borrow = request.GET.get('date_borrow')
     status = request.GET.get('status')
     user_id = request.user.id
 
-    # Filter BorrowRequest based on the user handling the items and borrow request date
+    # Filter BorrowRequest based on the borrow request date (no filtering by handled_by)
     borrow_requests = BorrowRequest.objects.filter(
-        facultyitems__handled_by=user_id,
         date_borrow=date_borrow,
     ).distinct()
 
     if not borrow_requests.exists():
         return render(request, '404.html', status=404)
-    
-    # Collect all items, including duplicates, across all borrow requests handled by the user
+
+    # Collect all items, including duplicates, across all borrow requests (no filtering by handled_by)
     all_items = []
     for borrow_request in borrow_requests:
-        items = borrow_request.facultyitems.filter(handled_by=user_id)
+        items = borrow_request.facultyitems.all()  # No filter for handled_by
         all_items.extend(items)  # Append each item to the list, allowing duplicates
 
     context = {
@@ -1067,12 +1066,12 @@ def borrower_details_dashboard(request):
         'status': status,
         'all_items': all_items,  # Pass all items, including duplicates, to the template
     }
-    
+
     return render(request, 'admin-borrow-details-dashboard.html', context)
 
 
 
-    
+
 
 
 
@@ -1179,34 +1178,34 @@ def generate_report(request, id):
     # Ensure only allowed users can access the report
     if not request.user.is_superuser:
         return HttpResponseForbidden("You do not have permission to access this page.")
-    
+
     # Get the specific BorrowRequest by ID
     try:
         borrow_request = BorrowRequest.objects.get(id=id)
         items = borrow_request.items.select_related('item')  # Fetch related items with facultyItem details
     except BorrowRequest.DoesNotExist:
         return HttpResponseNotFound("BorrowRequest not found.")
-    
+
     # Structure data for the report
     context = {
         'borrow_request': borrow_request,
         'items': items,  # Ensure you pass the items to the context
         'image_url': request.build_absolute_uri(static('images/logo.png')),
     }
-    
+
     # Render the HTML template
     html_string = render_to_string('admin-borrower-report.html', context)
 
     # Configure pdfkit for PDF generation
     config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
-    
+
     try:
         options = {
             'no-stop-slow-scripts': '',
             'disable-smart-shrinking': '',
             'enable-local-file-access': '',
         }
-        
+
         pdf = pdfkit.from_string(html_string, False, configuration=config, options=options)
         response = HttpResponse(pdf, content_type='application/pdf')
         response['Content-Disposition'] = 'inline; filename="borrow_report.pdf"'
@@ -1216,12 +1215,12 @@ def generate_report(request, id):
 
 
 
-    
-    
 
 
-    
-    
+
+
+
+
 
 
 
@@ -1252,14 +1251,14 @@ def fetch_borrow_request_items(request):
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
-    
-    
+
+
 @login_required
 def admin_student_reservation(request):
     # Restrict access to faculty users only
     if not request.user.is_superuser:
         return HttpResponseForbidden("You do not have permission to access this page.")
-    
+
     # Get the logged-in user's ID
     user_id = request.user.id  # Use request.user.id to directly get the logged-in user's ID
 
@@ -1288,17 +1287,17 @@ def admin_student_reservation(request):
         'current_show': current_show,
         'reserved_request': reserved_request
     })
-    
-    
+
+
 @login_required
 def status_update(request, reservation_id):
     # Restrict access to faculty users only
     if not request.user.is_superuser:
         return HttpResponseForbidden("You do not have permission to access this page.")
-    
+
     # Fetch the reservation
     reservation = get_object_or_404(StudentReservation, id=reservation_id)
-    
+
     # Fetch the items associated with the reservation that the logged-in user is handling
     items = reservation.items.filter(user_facultyItem=request.user)
 
@@ -1378,13 +1377,13 @@ def update_reservation_item_status(request):
         }
 
         # Send email notification
-        # subject = f"Reservation Item Status Updated: {item.item_name}"
-        # message = f"Dear {reservation.name},\n\nThe status of your reservation item '{item.item_name}' has been updated to '{new_status}'.\n\nNotification: {item.notification}\n\nBest regards,\nYour Reservation Team"
-        # from_email = settings.EMAIL_HOST_USER
-        # recipient_list = [reservation.email]
+        subject = f"Reservation Item Status Updated: {item.item_name}"
+        message = f"Dear {reservation.name},\n\nThe status of your reservation item '{item.item_name}' has been updated to '{new_status}'.\n\nNotification: {item.notification}\n\nBest regards,\nYour Reservation Team"
+        from_email = settings.EMAIL_HOST_USER
+        recipient_list = [reservation.email]
 
-        # # Send the email
-        # send_mail(subject, message, from_email, recipient_list)
+        # Send the email
+        send_mail(subject, message, from_email, recipient_list)
 
         # Redirect to 'admin-student-reservation' if needed
         if redirect_needed:
@@ -1394,9 +1393,9 @@ def update_reservation_item_status(request):
 
     except ReservationItem.DoesNotExist:
         return JsonResponse({'success': False, 'message': 'Item not found.'})
-          
 
-    
+
+
 
 
 @login_required
@@ -1404,7 +1403,7 @@ def change_profile(request):
     # Restrict access to faculty users only
     if not request.user.is_superuser:
         return HttpResponseForbidden("You do not have permission to access this page.")
-    
+
     user = request.user
 
     if request.method == 'POST':
@@ -1444,7 +1443,7 @@ def change_password(request):
     # Restrict access to faculty users only
     if not request.user.is_superuser:
         return HttpResponseForbidden("You do not have permission to access this page.")
-    
+
     if request.method == 'POST':
         form = PasswordChangeForm(user=request.user, data=request.POST)
         if form.is_valid():
@@ -1462,7 +1461,7 @@ def change_password(request):
                 messages.error(request, 'Please correct the error below.')
     else:
         form = PasswordChangeForm(user=request.user)
-    
+
     return render(request, 'admin-change-password.html', {'form': form})
 
 

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block extra_css %} 
+{% block extra_css %}
 <!-- Google Font -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <!-- CSS -->
@@ -67,7 +67,7 @@
         height: 20px;
         position: relative;
     }
-    
+
     /* Style the radio button when it is checked */
     input[type="radio"]:checked::before {
         content: '';
@@ -80,7 +80,7 @@
         border-radius: 50%;
         transform: translate(-50%, -50%);
     }
-    
+
     /* Style the label to align with the custom radio button */
     label {
         display: flex;
@@ -88,7 +88,7 @@
         margin-bottom: 0;
         cursor: pointer;
     }
-    
+
     /* Optional: Style the label when the radio button is focused */
     input[type="radio"]:focus + label {
         outline: 1px solid #007bff; /* Focus outline color */
@@ -103,15 +103,15 @@
         top: 10px; /* Adjust as needed */
         right: 10px; /* Adjust as needed */
     }
-    
+
     .notification-close:hover {
         color: #f00; /* Change color on hover */
     }
-    
+
     .notification-list {
         position: relative;
     }
-    
+
     .notification-content {
         padding-right: 30px; /* Space for the close icon */
     }
@@ -120,13 +120,13 @@
         display: inline-block;
         width: 100%;
     }
-    
+
     .form-control {
         width: 100%;
         padding: 10px;
         box-sizing: border-box;
     }
-    
+
     .dropdown-items {
         display: none; /* Hidden by default */
         position: absolute;
@@ -137,12 +137,12 @@
         border: 1px solid #ddd;
         z-index: 1;
     }
-    
+
     .dropdown-item {
         padding: 10px;
         cursor: pointer;
     }
-    
+
     .dropdown-item:hover {
         background-color: #f1f1f1;
     }
@@ -156,7 +156,7 @@
         font-size: 1.5rem; /* Adjust font size for visibility */
         z-index: 10; /* Ensure the icon is above other content */
     }
-    
+
     /* Media Query for smaller screens */
     @media (max-width: 576px) {
         .plus-icon {
@@ -165,17 +165,17 @@
             right: 5px; /* Adjust position for smaller screens */
         }
     }
-    
 
-    
-    
-    
+
+
+
+
 </style>
-    
+
 {% endblock %}
 
 
-{% block extra_js %} 
+{% block extra_js %}
 <script src="{%static 'vendorss/scripts/core.js'%}"></script>
 <script src="{%static 'vendorss/scripts/script.min.js'%}"></script>
 <script src="{%static 'vendorss/scripts/process.js'%}"></script>
@@ -195,7 +195,7 @@
         let filter = input.value.toLowerCase();
         let dropdown = document.getElementById('dropdownItems');
         let items = dropdown.getElementsByClassName('dropdown-item');
-    
+
         for (let i = 0; i < items.length; i++) {
             let txtValue = items[i].textContent || items[i].innerText;
             if (txtValue.toLowerCase().indexOf(filter) > -1) {
@@ -205,37 +205,37 @@
             }
         }
     }
-    
+
     // Show the dropdown when focusing on the search input
     document.getElementById('searchInput').addEventListener('focus', function() {
         document.getElementById('dropdownItems').style.display = 'block';
     });
-    
+
     // Close the dropdown when clicking outside
     document.addEventListener('click', function(e) {
         if (!e.target.matches('#searchInput') && !e.target.matches('.dropdown-item')) {
             document.getElementById('dropdownItems').style.display = 'none';
         }
     });
-    
+
     // Handle item selection
     let dropdownItems = document.getElementsByClassName('dropdown-item');
     for (let i = 0; i < dropdownItems.length; i++) {
         dropdownItems[i].addEventListener('click', function() {
             let selectedValue = this.getAttribute('data-value');
             let selectedText = this.textContent;
-    
+
             // Set the hidden input value
             document.getElementById('selectedItem').value = selectedValue;
-    
+
             // Set the search input to the selected item
             document.getElementById('searchInput').value = selectedText;
-    
+
             // Hide the dropdown
             document.getElementById('dropdownItems').style.display = 'none';
         });
     }
-    
+
 </script>
 {% endblock %}
 
@@ -248,9 +248,9 @@
         <div class="header-search">
             <form>
                 <div class="form-group mb-0">
-                    
+
                     <div class="dropdown">
-                        
+
                         <div class="dropdown-menu dropdown-menu-right">
                             <div class="form-group row">
                                 <label class="col-sm-12 col-md-2 col-form-label">From</label>
@@ -287,7 +287,7 @@
                 </a>
             </div>
         </div>
-        
+
 
         <div class="user-notification">
             <div class="dropdown">
@@ -322,23 +322,23 @@
                 </div>
             </div>
         </div>
-        
-        
 
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
         <div class="user-info-dropdown">
             <div class="dropdown">
                 <a class="dropdown-toggle" href="#" role="button" data-toggle="dropdown">
                     <span class="user-icon" style="display: inline-block; width: 50px; height: 50px; overflow: hidden; border-radius: 50%;">
                         <img src="{{ user.profile_image.url }}" alt="Profile Image" style="width: 100%; height: 100%; object-fit: cover;">
                     </span>
-                    
+
                     <span class="user-name">{{ user.name }}</span>
                 </a>
                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
@@ -348,7 +348,7 @@
                 </div>
             </div>
         </div>
-        
+
     </div>
 </div>
 
@@ -445,18 +445,18 @@
                         <span class="micon fa-solid fa-gauge" style="font-size: 25px;"></span><span class="mtext">Home</span>
                     </a>
                 </li>
-                
-                
+
+
                 <li>
                     <a href="{% url 'reservation-status' %}" class="dropdown-toggle no-arrow">
                         <span class="micon fa-solid fa-spinner"></span><span class="mtext">Status</span>
                     </a>
                 </li>
-                
+
                 <li>
                     <div class="dropdown-divider"></div>
                 </li>
-                
+
                 <li class="dropdown">
                     <a href="javascript:;" class="dropdown-toggle">
                         <img src="{% static 'images/manage-account.png' %}" width="15" height="15" class="micon" alt=""><span class="mtext"> Manage Account </span>
@@ -515,8 +515,8 @@
                 </div>
             </div>
         </div>
-        
-        
+
+
         <div class="modal fade" id="reservationModal" tabindex="-1" role="dialog" aria-labelledby="reservationModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-lg" style="overflow: hidden;">
                 <div class="modal-content">
@@ -576,7 +576,7 @@
                                             <div class="plus-icon" style="position: absolute; top: 10px; right: 10px; cursor: pointer;">
                                                 <i class="fa fa-plus text-primary"></i>
                                             </div>
-                                        
+
                                             <div class="card-bodyd">
                                                 <div class="mt-4">
                                                     <h4 class="card-title">Items</h4>
@@ -587,31 +587,31 @@
                                                     </select>
                                                     <div class="text-danger mt-2"></div>
                                                 </div>
-                                            
+
                                                 <div class="mt-4">
-                                                    <label class="text-dark">Description</label>
-                                                    <textarea name="description" style="height: 50px; resize: vertical;" class="form-control" required></textarea>
+                                                    <label class="text-dark">Item Details (OPTIONAL) </label>
+                                                    <textarea name="description" style="height: 50px; resize: vertical;" class="form-control" placeholder=""></textarea>
                                                 </div>
-                                            
+
                                                 <div class="mt-4">
                                                     <label class="text-dark">Quantity</label>
-                                                    <input type="number" name="quantityy" id="quantityy" class="form-control col-md-3" required style="border: 1px solid #bebebe;" value="1" min="1" oninput="if(this.value < 1) { this.value = 1; }">
+                                                    <input type="number" name="quantityy" id="quantityy" class="form-control col-md-3" required style="border: 1px solid #bebebe;" value="1" >
                                                     <div class="text-danger mt-2"></div> <!-- Error message container -->
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    
-                                    
 
-                                    
+
+
+
                                     <div class="form-group col-md-6">
-                                        <label class="text-dark">Purpose for borrow</label>
+                                        <label class="text-dark">Purpose</label>
                                         <textarea name="purpose" class="form-control" cols="1" rows="1" style="border: 1px solid #bebebe;"></textarea>
                                     </div>
                                 </div>
 
-                                
+
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
                                     <button type="submit" class="btn btn-primary" onclick="validateForm()">Submit</button>
@@ -622,10 +622,10 @@
                 </div>
             </div>
         </div>
-        
 
-        
-    
+
+
+
         <div class="footer-wrap pd-20 mb-20 card-box">
             Borrowing System By: <a href="https://github.com/dropways" target="_blank">Run Time Terror</a>
         </div>
@@ -636,7 +636,7 @@
 
 <!-- Add this script to hide the alerts after 5 seconds -->
 <script>
-    
+
     let itemQuantities = {}; // Object to store quantities of each item
 
 function populateItems() {
@@ -650,7 +650,7 @@ function populateItems() {
                     data.forEach(item => {
                         const option = document.createElement('option');
                         option.value = item.id; // Set the item's ID as the value
-                        option.textContent = `${item.name} (${item.quantity})`; // Set the display text
+                        option.textContent = `${item.name} (Available: ${item.quantity})`; // Set the display text
                         itemSelect.appendChild(option);
                         // Store the item's quantity for later validation
                         itemQuantities[item.id] = item.quantity;
@@ -674,9 +674,15 @@ function validateQuantity(selectElement, quantityInput) {
     quantityError.textContent = '';
     selectError.textContent = '';
 
-    // Check if quantity exceeds available stock
-    if (quantityValue > availableQuantity) {
-        quantityError.textContent = `You cannot borrow more than ${availableQuantity} of this item.`;
+    // Show an error if quantity is 2 or more and no item is selected
+    if (!selectedItemId && quantityValue >= 1) {
+        quantityError.textContent = 'Please select an item before adding a quantity.';
+    } else if (selectedItemId) {
+        // If an item is selected, check if quantity exceeds available stock
+        const availableQuantity = itemQuantities[selectedItemId] || 0; // Get available quantity
+        if (quantityValue > availableQuantity) {
+            quantityError.textContent = `You cannot borrow more than ${availableQuantity} of this item.`;
+        }
     }
 
     // Validate uniqueness of selected item across cards
@@ -690,12 +696,13 @@ function validateQuantity(selectElement, quantityInput) {
     updateSubmitButtonState(); // Check submit button state after validation
 }
 
+
 // Enable or disable the submit button based on validation
 function updateSubmitButtonState() {
     const errorMessages = document.querySelectorAll('.text-danger'); // Select all error messages
     const submitButton = document.querySelector('button[type="submit"]');
     const hasErrors = Array.from(errorMessages).some(message => message.textContent.trim() !== '');
-    
+
     submitButton.disabled = hasErrors; // Disable button if there are any error messages
 }
 
@@ -782,13 +789,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
-    
 
-        
-        
-        
-        
-        
+
+
+
+
+
+
 
 
 
@@ -818,12 +825,12 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .catch(error => console.error('Error:', error));
         });
-    
+
         // Function to close individual notifications
         document.querySelectorAll('.notification-close').forEach(button => {
             button.addEventListener('click', function() {
                 const reservationId = this.getAttribute('data-id');
-    
+
                 fetch(`/mark-as-read/${reservationId}/`, {
                     method: 'POST',
                     headers: {
@@ -840,7 +847,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             });
         });
-    
+
         // CSRF token helper function
         function getCookie(name) {
             let cookieValue = null;
@@ -859,20 +866,20 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
 
-    
+
 
     document.addEventListener('DOMContentLoaded', function() {
         // Get all delete buttons
         const deleteButtons = document.querySelectorAll('.notification-close');
         const notificationCountElement = document.querySelector('.notification-active');
-    
+
         deleteButtons.forEach(function(button) {
             button.addEventListener('click', function(e) {
                 e.preventDefault();
-                
+
                 // Get the item id from the button's data-id attribute
                 const itemId = this.getAttribute('data-id');
-    
+
                 // Send an AJAX request to delete the notification and reset is_handled to false
                 fetch('/delete-notification/', {
                     method: 'POST',
@@ -890,7 +897,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         if (notificationItem) {
                             notificationItem.remove();  // Remove the entire notification
                         }
-    
+
                         // Update the notification count in real time
                         let currentCount = parseInt(notificationCountElement.getAttribute('data-count'));
                         currentCount = currentCount > 0 ? currentCount - 1 : 0;
@@ -906,14 +913,14 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     });
-    
-    
 
 
 
 
-  
-    
+
+
+
+
 
 
 
@@ -934,7 +941,7 @@ document.addEventListener("DOMContentLoaded", function() {
         console.log(el);  // Add this for debugging
         var messageType = el.getAttribute('data-type');
         var messageContent = el.getAttribute('data-content');
-    
+
 
         // Display Toastr notification based on the message type
         if (messageType === 'success') {
@@ -948,17 +955,17 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 });
-    
 
 
 
-    
+
+
 </script>
 
 
 
 
 
-    
+
 
 {% endblock content %}

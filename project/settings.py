@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-c63_y5b*7_!!6mh%=orff-g@o95(nrm^st&!x%b9r1$i0nty-$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['borrowingitem.pythonanywhere.com']
 
 
 # Application definition
@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 ]
+
+AUTH_USER_MODEL = 'DapartmentChair.User'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -62,7 +64,7 @@ ROOT_URLCONF = 'project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [os.path.join(BASE_DIR, '/home/borrowingitem/FinalCapstoneProject/templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -93,11 +95,14 @@ WSGI_APPLICATION = 'project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'aaabbbcccdddeeefff',
-        'USER': 'root',
-        'PASSWORD': 'Password0012',
+        'NAME': 'borrowingitem$default',
+        'USER': 'borrowingitem',
+        'PASSWORD': 'Ramelzkie12345',
         'PORT': 3306,
-        'HOST': '127.0.0.1',
+        'HOST': 'borrowingitem.mysql.pythonanywhere-services.com',
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+        },
     }
 }
 
