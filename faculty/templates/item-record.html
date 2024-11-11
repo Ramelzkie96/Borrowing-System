@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block extra_css %} 
+{% block extra_css %}
     <link href="{% static 'vendor/pg-calendar/css/pignose.calendar.min.css'%}" rel="stylesheet">
     <link href="{% static 'vendor/chartist/css/chartist.min.css'%}" rel="stylesheet">
     <link href="{% static 'css/style.css'%}" rel="stylesheet">
@@ -25,15 +25,13 @@
 {% endblock %}
 
 
-{% block extra_js %} 
+{% block extra_js %}
     <script src="{% static 'vendor/global/global.min.js' %}"></script>
     <script src="{% static 'js/quixnav-init.js' %}"></script>
     <script src="{% static 'js/custom.min.js' %}"></script>
     <script src="{% static 'vendor/moment/moment.min.js'%}"></script>
     <script src="{% static 'js/dashboard/dashboard-2.js'%}"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-    <!-- SweetAlert2 CDN -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 {% endblock %}
 
 
@@ -86,11 +84,11 @@
                 <nav class="navbar navbar-expand">
                     <div class="collapse navbar-collapse justify-content-between">
                         <div class="header-left">
-                           
+
                         </div>
 
                         <ul class="navbar-nav header-right">
-                            
+
                             <li class="nav-item dropdown header-profile">
                                 <a class="nav-link" href="#" role="button" data-toggle="dropdown">
                                     <a class="nav-link" href="#" role="button" data-toggle="dropdown">
@@ -138,12 +136,12 @@
                     <li><a  href="{% url 'dashboard'%}" aria-expanded="false">
                         <img src="{% static 'images/dashboard.png'%}" width="30" height="30" alt="">
                         <span class="nav-text" style="color: white;">Dashboard</span></a>
-                       
+
                     </li>
 
                     <li class="nav-label">ITEMS</li>
                     <li><a class="has-arrow" href="javascript:void()" aria-expanded="false">
-                        <img src="{% static 'images/item.png'%}" width="30" height="30" alt=""> 
+                        <img src="{% static 'images/item.png'%}" width="30" height="30" alt="">
                         <span class="nav-text" >Manage Items</span></a>
                         <ul aria-expanded="false">
                             <li><a href="{%url 'add-item'%}">Add Item</a></li>
@@ -158,7 +156,7 @@
                         <img src="{% static 'images/search.png'%}" width="30" height="30" alt="">
                         <span class="nav-text">Borrow Record</span></a>
                     </li>
-          
+
                     <li class="nav-label">Borrower's Reservation</li>
                     <li><a  href="{% url 'student-reservation' %}" aria-expanded="false">
                         <img src="{% static 'images/reservation.png'%}" width="30" height="30" alt="">
@@ -201,14 +199,14 @@
                     <form method="POST" action="{% url 'update_item' %}" id="edit-item-form">
                         {% csrf_token %}
                         <input type="hidden" name="item_id" value="">
-  
+
                         <div class="form-group row mb-4">
                             <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Property ID</label>
                             <div class="col-sm-12 col-md-7">
                                 <input type="text" name="property_id" style="border: 1px solid #bebebe;" class="form-control">
                             </div>
                         </div>
-  
+
                         <div class="form-group row mb-4">
                             <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Name</label>
                             <div class="col-sm-12 col-md-7">
@@ -216,14 +214,14 @@
                                 <div id="name-validation-error" class="text-danger" style="display: none;">This item name already exists.</div>
                             </div>
                         </div>
-  
+
                         <div class="form-group row mb-4">
                             <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Quantity</label>
                             <div class="col-sm-12 col-md-7">
                                 <input type="number" style="width: 100px; border: 1px solid #bebebe;" class="form-control" name="quantity" min="1" max="100" required>
                             </div>
                         </div>
-  
+
                         <div class="form-group row mb-4">
                             <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3"></label>
                             <div class="col-sm-12 col-md-7">
@@ -248,7 +246,7 @@
             <!-- Dynamic messages end -->
 
             <div class="container-fluid">
-                <div class="row">  
+                <div class="row">
                     <div class="col-lg-12">
                         <div class="card" style="border-top: 4px solid #593bdb; box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 4px;">
                             <div class="card-header">
@@ -264,7 +262,7 @@
                                         </div>
                                     </div>
                                     <div class="dataTables_length" id="example_length" style="color: #333; width: 140px;">
-                                        <label>Show entries 
+                                        <label>Show entries
                                             <select name="example_length" aria-controls="example" class="form-control" onchange="updateShowEntries(this.value)">
                                                 <option value="all" {% if current_show == 'all' %}selected{% endif %}>All</option>
                                                 <option value="5" {% if current_show == 5 %}selected{% endif %}>5</option>
@@ -275,7 +273,7 @@
                                             </select>
                                         </label>
                                     </div>
-                
+
                                     <table id="itemTable" class="table table-bordered table-striped table-responsive-sm" style="color: #333;">
                                         <thead class="thead-primary">
                                             <tr>
@@ -293,12 +291,12 @@
                                                         <td>{{ item.name }}</td>
                                                         <td>{{ item.quantity }}</td>
                                                         <td>
-                                                            <button type="button" class="btn btn-secondary edit-item-btn" 
-                                                                data-id="{{ item.id }}" 
+                                                            <button type="button" class="btn btn-secondary edit-item-btn"
+                                                                data-id="{{ item.id }}"
                                                                 data-name="{{ item.name }}"
                                                                 date-property-id="{{ item.property_id }}"
-                                                                data-quantity="{{ item.quantity }}" 
-                                                                data-toggle="modal" 
+                                                                data-quantity="{{ item.quantity }}"
+                                                                data-toggle="modal"
                                                                 data-target="#exampleModalCenter">
                                                                 <i class="fas fa-edit"></i>
                                                             </button>
@@ -313,8 +311,8 @@
                                             {% endif %}
                                         </tbody>
                                     </table>
-                                    
-                
+
+
                                     <nav>
                                         <ul class="pagination pagination-gutter">
                                             {% if page_obj.has_previous %}
@@ -361,7 +359,7 @@
                         </div>
                     </div>
                 </div>
-                
+
             </div>
         </div>
         <!--**********************************
@@ -385,14 +383,14 @@
             //edit
     document.addEventListener('DOMContentLoaded', function() {
         var editButtons = document.querySelectorAll('.edit-item-btn');
-        
+
         editButtons.forEach(function(button) {
             button.addEventListener('click', function() {
                 var itemId = this.getAttribute('data-id');
                 var itemName = this.getAttribute('data-name');
                 var itemQuantity = this.getAttribute('data-quantity');
                 var propertyId = this.getAttribute('date-property-id');
-    
+
                 // Set the modal input values
                 document.querySelector('#exampleModalCenter input[name="item_id"]').value = itemId;
                 document.querySelector('#exampleModalCenter input[name="name"]').value = itemName;
@@ -401,14 +399,14 @@
             });
         });
     });
-  
-  
+
+
     document.getElementById('item-name').addEventListener('input', function () {
       const nameField = this;
       const errorDiv = document.getElementById('name-validation-error');
       const submitButton = document.getElementById('submit-button');
       const nameValue = nameField.value;
-  
+
       if (nameValue.trim().length > 0) {
           fetch(`/admin-validate-item-name/?name=${encodeURIComponent(nameValue)}`)
               .then(response => response.json())
@@ -625,6 +623,6 @@ document.addEventListener("DOMContentLoaded", function() {
 </script>
 
 
-    
+
 
 {% endblock content %}

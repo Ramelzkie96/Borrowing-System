@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block extra_css %} 
+{% block extra_css %}
   <link rel="stylesheet" type="text/css" href="{% static 'css/login.css' %}">
 {% endblock %}
 
-{% block extra_js %} 
+{% block extra_js %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <script>
   function showToast(message, type) {
       const toastContainer = document.getElementById('toast-container');
-      
+
       // Create a new toast element
       const toast = document.createElement('div');
       toast.className = `toast ${type}`;
@@ -36,7 +36,7 @@
 
       // Add loader to the toast
       toast.innerHTML = `${icon} ${message}<div class="loader" style="width: 100%;"></div>`; // Icon + message + loader
-      
+
       // Append to the container
       toastContainer.appendChild(toast);
 
@@ -44,7 +44,7 @@
       setTimeout(() => {
         toast.querySelector('.loader').style.width = '0'; // Start loader animation
     }, 0);
-      
+
       // Automatically remove the toast after a timeout
       setTimeout(() => {
           toast.remove();
@@ -65,7 +65,7 @@
 
 {% block content %}
 <div class="logo" style="position: relative; top: 20px;">
-  
+
 </div>
 <div class="container">
   <div id="toast-container" class="toast-container"></div> <!-- Toast container added here -->
