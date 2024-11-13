@@ -591,7 +591,7 @@
                                                                     <img src="{% static 'images/mores.png' %}" alt="" width="30" height="30">
                                                                 </a>
                                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
-                                                                  <button onclick="redirectToBorrowerDetailsdashboard('{{ request.student_id }}', '{{ request.name }}', '{{ request.date_borrow }}', '{{ request.id }}', '{{ request.status }}')" class="dropdown-item">
+                                                                  <button onclick="redirectToBorrowerDetails('{{ request.student_id }}', '{{ request.name }}', '{{ request.date_borrow }}', '{{ request.id }}', '{{ request.status }}', '{{ request.status }}')" class="dropdown-item">
                                                                     <i class="fas fa-eye"></i>&nbsp; Borrower Details
                                                                 </button>
                                                     
@@ -716,8 +716,8 @@
     window.location.search = urlParams.toString();
 }
 
-function redirectToBorrowerDetailsdashboard(studentId, name, dateBorrow, borrowRequestId, status) {
-  const url = `{% url 'admin-borrower-details-dashboard' %}?student_id=${studentId}&name=${encodeURIComponent(name)}&date_borrow=${encodeURIComponent(dateBorrow)}&borrow_request_id=${borrowRequestId}&status=${encodeURIComponent(status)}`;
+function redirectToBorrowerDetails(studentId, name, dateBorrow, borrowRequestId, status) {
+  const url = `{% url 'admin-borrower-details-dashboard' %}?student_id=${studentId}&name=${encodeURIComponent(name)}&date_borrow=${dateBorrow}&borrow_request_id=${borrowRequestId}&status=${status}`;
   window.location.href = url;
 }
 

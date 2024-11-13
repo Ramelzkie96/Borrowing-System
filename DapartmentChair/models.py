@@ -73,13 +73,6 @@ class User(AbstractUser):
         help_text="Specific permissions for this user.",
         verbose_name="user permissions",
     )
-    
-    # Add related_name to avoid clash with the default User model
-    groups = models.ManyToManyField(
-        "auth.Group",
-        related_name="dapartmentchair_user_set",  # This avoids the conflict
-        blank=True,
-    )
 
     # Add related_name to avoid clash with the default User model
     groups = models.ManyToManyField(

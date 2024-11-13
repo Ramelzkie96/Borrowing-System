@@ -126,23 +126,133 @@
         padding-right: 30px; /* Space for the close icon */
     }
 
-    @media (max-width: 768px) {
-        .modal-body p {
-            font-size: 12px !important; /* Adjust font size for smaller screens */
-        }
+
+  /* Default Modal Dialog Styling */
+.modal-dialog {
+    max-width: 1000px;
+    width: 100%;
+}
+
+/* Modal Dialog Responsiveness for Smaller Screens */
+@media (max-width: 768px) {
+    .modal-dialog {
+        max-width: 70%; /* Use smaller width on mobile */
+        width: 100%;
     }
+}
+
+/* Ensure content inside the modal scales well */
+.modal-content {
+    padding: 20px; /* Add some padding inside the modal */
+}
+
+/* Adjust font sizes inside the modal */
+@media (max-width: 768px) {
+    .modal-title {
+        font-size: 18px; /* Smaller title on mobile */
+    }
+
+    .modal-body {
+        padding: 10px; /* Reduced padding inside the modal */
+    }
+
+    .modal-body .row {
+        font-size: 12px; /* Smaller text in the modal body */
+    }
+}
+
     
 
+
+    /* General Badge Styling */
+#badge-status {
+    font-size: 10px; 
+    padding: 4px 8px;
+    line-height: 1;
+}
+
+/*#badge-status Size Adjustment on Smaller Screens */
+@media (max-width: 768px) {
+    #badge-status {
+        font-size: 8px; /* Smaller font size for mobile */
+        padding: 3px 6px; /* Adjust padding */
+    }
+}
+
+/* For Screens with width 390px or less */
+@media (max-width: 390px) {
+    #badge-status {
+        font-size: 7px;  /* Make the font size smaller */
+        padding: 2px 6px; /* Reduce padding to fit smaller screens */
+    }
+
+    .modal-title {
+        font-size: 16px; /* Smaller title for smaller screens */
+    }
+
+    .modal-body {
+        font-size: 12px; /* Smaller body text */
+    }
+
+    /* Adjust all the modal labels */
+    .modal-body .row {
+        font-size: 10px; /* Smaller text inside modal body */
+    }
+
+    /* Adjust the responsive-text class for text in general */
     .responsive-text {
-        font-size: 15px;
+        font-size: 12px; /* Smaller text for general content */
     }
     
-    @media (max-width: 768px) {
-        .responsive-text {
-            font-size: 12px;
-        }
+    /* Make adjustments to the modal dialog to ensure it fits */
+    .modal-dialog {
+        max-width: 80%; /* Ensure modal fits on smaller screens */
     }
 
+    /* Adjust other elements if needed */
+    .col-2, .col-3 {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+}
+
+
+/* For Screens with width 360px or less */
+@media (max-width: 360px) {
+    #badge-status {
+        font-size: 6px;  /* Further reduce font size */
+        padding: 2px 5px; /* Decrease padding for small screens */
+    }
+
+    .modal-title {
+        font-size: 14px; /* Smaller title for very small screens */
+    }
+
+    .modal-body {
+        font-size: 10px; /* Smaller body text */
+    }
+
+    /* Adjust all modal labels for smaller screens */
+    .modal-body .row {
+        font-size: 9px; /* Smaller text inside modal body */
+    }
+
+    /* Make the responsive-text class even smaller */
+    .responsive-text {
+        font-size: 10px; /* Further reduce text size for all elements */
+    }
+    
+    /* Adjust modal dialog to fit small screens */
+    .modal-dialog {
+        max-width: 75%; /* Ensure the modal fits well on narrow screens */
+    }
+
+    /* Adjust column padding to save space */
+    .col-2, .col-3 {
+        padding-left: 4px;
+        padding-right: 4px;
+    }
+}
 
 
     
@@ -573,7 +683,7 @@
     <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 1000px; width: 100%;">
         <div class="modal-content">
             <div class="modal-header" style="border-bottom: 2px solid #593bdb;">
-                <h5 class="modal-title" id="exampleModalCenterTitle" style="font-size: 25px; font-weight: 700;">View Reservation Details</h5>
+                <h5 class="modal-title" id="exampleModalCenterTitle">View Reservation Details</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -581,31 +691,34 @@
             <div class="modal-body">
                 <div class="row mb-1">
                     <div class="col-12 col-sm-4">
-                        <label class="font-weight-bold text-dark" style="font-size: 15px;">Student ID:</label>
-                        <p id="modal-student-id" style="font-size: 15px; color: #474747;"></p>
+                        <label class="font-weight-bold text-dark" >Student ID:</label>
+                        <p id="modal-student-id" ></p>
                     </div>
                     <div class="col-12 col-sm-4">
-                        <label class="font-weight-bold text-dark" style="font-size: 15px;">Name:</label>
-                        <p id="modal-name" style="font-size: 15px; color: #474747;"></p>
+                        <label class="font-weight-bold text-dark" >Name:</label>
+                        <p id="modal-name" ></p>
                     </div>
                     <div class="col-12 col-sm-4">
-                        <label class="font-weight-bold text-dark" style="font-size: 15px;">Date Reserve:</label>
-                        <p id="modal-date-borrow" style="font-size: 15px; color: #474747;"></p>
+                        <label class="font-weight-bold text-dark" >Date Reserve:</label>
+                        <p id="modal-date-borrow" ></p>
                     </div>
                 </div>
 
                 <div class="row mb-1">
                     <div class="col-3">
-                        <p class="text-dark font-weight-bold" style="font-size: 15px;">Items:</p>
+                        <p class="text-dark responsive-text font-weight-bold" >Items:</p>
                     </div>
                     <div class="col-3">
-                        <p class="text-dark font-weight-bold" style="font-size: 15px;">Description:</p>
+                        <p class="text-dark responsive-text font-weight-bold" >Description:</p>
                     </div>
-                    <div class="col-3">
-                        <p class="text-dark font-weight-bold" style="font-size: 15px;">Quantity:</p>
+                    <div class="col-2">
+                        <p class="text-dark responsive-text font-weight-bold" >Quantity:</p>
                     </div>
-                    <div class="col-3">
-                        <p class="text-dark font-weight-bold" style="font-size: 15px;">Status:</p>
+                    <div class="col-2">
+                        <p class="text-dark responsive-text font-weight-bold" >Status:</p>
+                    </div>
+                    <div class="col-2">
+                        <p class="text-dark responsive-text font-weight-bold" >Handle Item:</p>
                     </div>
                 </div>
 
@@ -796,22 +909,43 @@
                 data.forEach((item, index) => {
                     const itemRow = document.createElement('div');
                     itemRow.classList.add('row', 'mb-1');
+
+                    // Determine badge class based on status
+                let badgeClass = '';
+                switch (item.status) {
+                    case 'Approved':
+                    case 'Completed':
+                        badgeClass = 'badge badge-success';
+                        break;
+                    case 'Partially Processed':
+                        badgeClass = 'badge badge-primary';
+                        break;
+                    case 'Denied':
+                        badgeClass = 'badge badge-danger';
+                        break;
+                    default:
+                        badgeClass = 'badge badge-secondary';
+                }
     
-                    itemRow.innerHTML = `
-                        <div class="col-3">
-                            <p class="responsive-text" style="color: #474747;">${index + 1}. ${item.item_name}</p>
-                        </div>
-                        <div class="col-3">
-                            <p class="responsive-text" style="color: #474747;">${item.description}</p>
-                        </div>
-                        <div class="col-3">
-                            <p class="responsive-text" style="color: #474747;">${item.quantity}</p>
-                        </div>
-                        <div class="col-3">
-                            <p class="responsive-text" style="color: #474747;">${item.status}</p>
-                        </div>
-                    `;
-                    itemsList.appendChild(itemRow);
+                itemRow.innerHTML = `
+                <div class="col-3">
+                    <p class="responsive-text" style="color: #474747;">${index + 1}. ${item.item_name}</p>
+                </div>
+                <div class="col-3">
+                    <p class="responsive-text" style="color: #474747;">${item.description}</p>
+                </div>
+                <div class="col-2">
+                    <p class="responsive-text" style="color: #474747;">${item.quantity}</p>
+                </div>
+                <div class="col-2">
+                    <p class="${badgeClass} responsive-text text-white"  id="badge-status">${item.status}</p>
+                </div>
+                <div class="col-2">
+                    <p class="responsive-text" style="color: #474747;">${item.user_facultyItem_username || 'N/A'}</p>
+                </div>
+            `;
+            itemsList.appendChild(itemRow);
+            
                 });
             })
             .catch(error => {

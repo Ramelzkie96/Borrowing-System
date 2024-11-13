@@ -179,11 +179,46 @@ body {
 
   .wrapper form .pass a,
   .wrapper form .signup-link a {
-    font-size: 14px;
+    font-size: 12px; /* Reduced font size for mobile */
   }
 
   .wrapper form .signup-link {
+    font-size: 12px; /* Smaller font for the signup text */
+    text-align: center; /* Center-align for better mobile readability */
+    margin-top: 10px; /* Adjust margin for better spacing */
+  }
+}
+
+
+/* Specific adjustments for very small screens like 320x568 */
+@media (max-width: 320px) {
+  .wrapper .title {
+    font-size: 18px;
+  }
+
+  .wrapper img {
+    width: 15px;
+    height: 15px;
+  }
+
+  .wrapper form .row input {
+    font-size: 12px;
+    padding-left: 40px;
+  }
+
+  .wrapper form .button input {
     font-size: 14px;
+  }
+
+  .wrapper form .pass a,
+  .wrapper form .signup-link a {
+    font-size: 10px; /* Smaller font size for very small screens */
+  }
+
+  .wrapper form .signup-link {
+    font-size: 10px; /* Smaller font for the signup text */
+    line-height: 1.2; /* Reduce line height for compact appearance */
+    margin-top: 8px; /* Adjust margin for smaller screen */
   }
 }
 

@@ -81,13 +81,15 @@ class StudentReservation(models.Model):
             return f"{int(diff.total_seconds() // 2592000)} months ago"
         else:
             return f"{int(diff.total_seconds() // 31536000)} years ago"
+        
+        
     
     
 class ReservationItem(models.Model):
     reservation = models.ForeignKey(StudentReservation, on_delete=models.CASCADE, related_name='items')
     user = models.ForeignKey(ReservationUser, on_delete=models.CASCADE)  # Link to ReservationUser
     item_name = models.CharField(max_length=100)
-    description = models.TextField()
+    description = models.TextField(default='N/A')
     quantity = models.PositiveIntegerField()
     status = models.CharField(max_length=50, null=True)
     notification = models.CharField(max_length=500, null=True)
@@ -99,6 +101,7 @@ class ReservationItem(models.Model):
     is_update = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     user_facultyItem = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)  # Modified to store the user
+    handle_status = models.CharField(max_length=15, default='Pending')  # Set default to "Pending"
 
     def __str__(self):
         return f"{self.item_name} (Qty: {self.quantity}) for {self.reservation.name}"

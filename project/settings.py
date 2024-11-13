@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-c63_y5b*7_!!6mh%=orff-g@o95(nrm^st&!x%b9r1$i0nty-$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['borrowingitem.pythonanywhere.com']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -64,7 +64,7 @@ ROOT_URLCONF = 'project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, '/home/borrowingitem/FinalCapstoneProject/templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -95,11 +95,14 @@ WSGI_APPLICATION = 'project.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'aaabbbcccdddeeefff',
+        'NAME': 'aabbbcccddramel',
         'USER': 'root',
         'PASSWORD': 'Password0012',
         'PORT': 3306,
         'HOST': '127.0.0.1',
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+        },
     }
 }
 
@@ -128,8 +131,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'pitad21.gulaneramel@gmail.com'
-EMAIL_HOST_PASSWORD = 'dtswsdbspwteihbh'
+EMAIL_HOST_USER = 'borrowingsystem2024@gmail.com'
+EMAIL_HOST_PASSWORD = 'xzsjygkuyjqqmdtb'
 
 
 

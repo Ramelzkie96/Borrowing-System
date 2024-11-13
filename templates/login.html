@@ -68,13 +68,13 @@
 
 </div>
 <div class="container">
-  <div id="toast-container" class="toast-container"></div> <!-- Toast container added here -->
-  <div id="django-messages">
-      {% for message in messages %}
-          <div class="message" data-type="{{ message.tags }}" data-content="{{ message|escapejs }}"></div>
-      {% endfor %}
-  </div>
-
+    <div id="toast-container" class="toast-container"></div>
+    <div id="django-messages">
+        {% for message in messages %}
+            <div class="message" data-type="{{ message.tags }}" data-content="{{ message|escapejs }}"></div>
+        {% endfor %}
+    </div>
+  
     <div class="wrapper">
         <div class="title" style="display: flex; justify-content: space-around;">
             <img class="img1" src="{% static 'images/pit_logo.png' %}" height="20" alt="">
@@ -86,7 +86,7 @@
                 {% if msg %}
                     {{ msg | safe }}
                 {% else %}
-                    Login page
+                    Faculty Login
                 {% endif %}
             </span>
             {% csrf_token %}
@@ -103,11 +103,12 @@
                 <input type="submit" id="toastr-success-bottom-left" value="Login">
             </div>
             <div class="signup-link">
-                <span class="text-center">For student reservation item &nbsp; <a href="{% url 'reservation-login' %}" style="text-decoration: underline; font-weight: 600;">Login</a></span>
+                <span class="text-center">For student reservation item &nbsp; <a href="{% url 'reservation-login' %}" style="text-decoration: underline; font-weight: 600;">Click Here</a></span>
             </div>
         </form>
     </div>
-</div>
+  </div>
+  
 
 
 

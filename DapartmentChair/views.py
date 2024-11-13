@@ -1034,7 +1034,7 @@ def borrower_details(request):
 
 
 
-@login_required 
+@login_required
 def borrower_details_dashboard(request):
     if not (request.user.is_superuser or request.user.faculty):
         return HttpResponseForbidden("You do not have permission to access this page.")
@@ -1053,25 +1053,21 @@ def borrower_details_dashboard(request):
     if not borrow_requests.exists():
         return render(request, '404.html', status=404)
 
-    # Collect all items, including duplicates, across all borrow requests (no filtering by handled_by)
+    # Collect items that are not marked as returned across all borrow requests
     all_items = []
     for borrow_request in borrow_requests:
-        items = borrow_request.facultyitems.all()  # No filter for handled_by
-        all_items.extend(items)  # Append each item to the list, allowing duplicates
+        items = borrow_request.facultyitems.filter(is_returned=False)  # Filter by is_returned=False
+        all_items.extend(items)  # Append each item to the list
 
     context = {
         'student_id': student_id,
         'name': name,
         'date_borrow': date_borrow,
         'status': status,
-        'all_items': all_items,  # Pass all items, including duplicates, to the template
+        'all_items': all_items,  # Pass filtered items to the template
     }
 
     return render(request, 'admin-borrow-details-dashboard.html', context)
-
-
-
-
 
 
 
@@ -1183,7 +1179,7 @@ def generate_report(request, id):
     # Get the specific BorrowRequest by ID
     try:
         borrow_request = BorrowRequest.objects.get(id=id)
-        items = borrow_request.items.select_related('item')  # Fetch related items with facultyItem details
+        items = borrow_request.facultyitems.select_related('item')  # Fetch related items with facultyItem details
     except BorrowRequest.DoesNotExist:
         return HttpResponseNotFound("BorrowRequest not found.")
 
@@ -1205,6 +1201,15 @@ def generate_report(request, id):
             'no-stop-slow-scripts': '',
             'disable-smart-shrinking': '',
             'enable-local-file-access': '',
+            'page-width': '8.5in',          # Set width to 8.5 inches
+            'page-height': '13in',          # Set height to 13 inches (Legal size)
+            'orientation': 'Portrait',      # Portrait orientation
+            'margin-top': '0.5in',          # Adjusted margins for better readability
+            'margin-right': '0.5in',
+            'margin-bottom': '0.5in',
+            'margin-left': '0.5in',
+            'dpi': 300,                     # Higher DPI for better print quality
+            'zoom': 1.0,                    # Ensure zoom is 1.0 to maintain original size
         }
 
         pdf = pdfkit.from_string(html_string, False, configuration=config, options=options)
@@ -1254,21 +1259,27 @@ def fetch_borrow_request_items(request):
 
 
 
+from django.db.models import OuterRef, Subquery
+
 @login_required
 def admin_student_reservation(request):
-    # Restrict access to faculty users only
     if not request.user.is_superuser:
         return HttpResponseForbidden("You do not have permission to access this page.")
 
     # Get the logged-in user's ID
-    user_id = request.user.id  # Use request.user.id to directly get the logged-in user's ID
+    user_id = request.user.id
 
-    # Filter ReservationItems based on user_facultyItem
+    # Filter ReservationItems based on user_facultyItem and fetch a single handle_status per reservation
     reservation_items = ReservationItem.objects.filter(user_facultyItem=user_id)
-
-    # Get the associated StudentReservations from the filtered ReservationItems
     reserved_request = StudentReservation.objects.filter(
         id__in=reservation_items.values('reservation')
+    ).annotate(
+        single_handle_status=Subquery(
+            ReservationItem.objects.filter(
+                reservation=OuterRef('id'),
+                user_facultyItem=user_id  # Filter by the current user's faculty item
+            ).values('handle_status')[:1]  # Fetch only the first handle_status
+        )
     ).order_by('-id')
 
     # Pagination logic
@@ -1288,6 +1299,7 @@ def admin_student_reservation(request):
         'current_show': current_show,
         'reserved_request': reserved_request
     })
+
 
 
 @login_required
@@ -1346,25 +1358,32 @@ def update_reservation_item_status(request):
 
         time_ago = item.time_ago()
 
-        # Check the statuses of all items in the reservation
-        items = reservation.items.all()
-        all_approved = all(item.status == 'Approved' for item in items)
-        all_denied = all(item.status == 'Denied' for item in items)
-        any_pending = any(item.status == 'Pending' for item in items)
+        # Check statuses of items handled by the current user
+        user_items = reservation.items.filter(user_facultyItem=request.user)
+        all_approved_or_denied = all(i.status in ['Approved', 'Denied'] for i in user_items)
+        any_pending = any(i.status == 'Pending' for i in user_items)
 
-        # Update the status of the StudentReservation based on item statuses
-        if all_approved:
+        # Update the handle_status of the ReservationItem based on the current user’s items
+        if all_approved_or_denied and not any_pending:
+            # All items handled by the current user are either approved or denied
+            user_items.update(handle_status='Completed')
+        else:
+            # If any items handled by the current user are still pending
+            user_items.update(handle_status='Pending')
+
+        # Update the overall reservation status based on all items in the reservation
+        all_items_approved = all(i.status == 'Approved' for i in reservation.items.all())
+        all_items_denied = all(i.status == 'Denied' for i in reservation.items.all())
+        any_item_pending = any(i.status == 'Pending' for i in reservation.items.all())
+
+        if all_items_approved:
             reservation.status = 'Approved'
-            redirect_needed = True  # Set flag to redirect
-        elif all_denied:
+        elif all_items_denied:
             reservation.status = 'Denied'
-            redirect_needed = True  # Set flag to redirect
-        elif any_pending:
+        elif any_item_pending:
             reservation.status = 'Partially Processed'
-            redirect_needed = False
         else:
             reservation.status = 'Completed'
-            redirect_needed = True  # Redirect when all items are processed but not all the same status
 
         reservation.save()
 
@@ -1387,13 +1406,14 @@ def update_reservation_item_status(request):
         send_mail(subject, message, from_email, recipient_list)
 
         # Redirect to 'admin-student-reservation' if needed
-        if redirect_needed:
+        if reservation.status in ['Approved', 'Denied', 'Completed']:
             response_data['redirect_url'] = reverse('admin-student-reservation')
 
         return JsonResponse(response_data)
 
     except ReservationItem.DoesNotExist:
         return JsonResponse({'success': False, 'message': 'Item not found.'})
+
 
 
 

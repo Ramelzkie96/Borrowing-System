@@ -650,7 +650,7 @@ function populateItems() {
                     data.forEach(item => {
                         const option = document.createElement('option');
                         option.value = item.id; // Set the item's ID as the value
-                        option.textContent = `${item.name} (${item.quantity})`; // Set the display text
+                        option.textContent = `${item.name} (Available: ${item.quantity})`; // Set the display text
                         itemSelect.appendChild(option);
                         // Store the item's quantity for later validation
                         itemQuantities[item.id] = item.quantity;

@@ -368,6 +368,7 @@
                                         <th scope="col">Year</th>
                                         <th scope="col">Phone Number</th>
                                         <th scope="col">Date Reserve</th>
+                                        <th scope="col">Item</th>
                                         <th scope="col">Time Span</th>
                                         <th scope="col" style="width: 80px;">Action</th>
                                     </tr>
@@ -382,6 +383,20 @@
                                                 <td>{{ request.year_level }}</td>
                                                 <td>{{ request.phone_number }}</td>
                                                 <td>{{ request.reserve_date}}</td>
+                                                <td>
+                                                    {% if request.single_handle_status == "Approved" %}
+                                                        <div class="badge badge-success">{{ request.single_handle_status }}</div>
+                                                    {% elif request.single_handle_status == "Pending" %}
+                                                        <div class="badge badge-info">{{ request.single_handle_status }}</div>
+                                                    {% elif request.single_handle_status == "Completed" %}
+                                                        <div class="badge badge-success">{{ request.single_handle_status }}</div>
+                                                    {% elif request.single_handle_status == "Partially Processed" %}
+                                                        <div class="badge badge-primary">{{ request.single_handle_status }}</div>
+                                                    {% else %}
+                                                        <div class="badge badge-danger">{{ request.single_handle_status }}</div>
+                                                    {% endif %}
+                                                </td>
+                                
                                                 <td>{{ request.time_ago }}</td>
                                                 <td style="text-align: center; vertical-align: middle;">
                                                     <a href="{% url 'admin-update-reservation-status' reservation_id=request.id %}">

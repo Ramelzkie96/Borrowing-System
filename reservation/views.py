@@ -47,7 +47,8 @@ def reservation_dashboard(request):
         user = ReservationUser.objects.get(id=user_id)
         
         # Get the total number of reservations for this user
-        total_reservations = StudentReservation.objects.filter(user_id=user_id, status='Pending').count()
+        total_reservations = StudentReservation.objects.filter(user_id=user_id, status__in=['Pending', 'Partially Processed']).count()
+
 
         # Fetch only unread notifications for the badge count
         reservation_items = ReservationItem.objects.filter(
@@ -224,6 +225,9 @@ def logout(request):
 
 
 
+from datetime import datetime
+from django.utils.timezone import make_aware
+
 def submit_reservation(request):
     if request.method == 'POST':
         # Retrieve form data
@@ -253,12 +257,28 @@ def submit_reservation(request):
             messages.error(request, "Please select a reservation date.")
             return redirect('reservation-dashboard')  # Redirect back to the reservation form
 
+        # Convert the reserve_date to a datetime object (format: '6 November, 2024')
+        try:
+            reserve_date = datetime.strptime(reserve_date, '%d %B, %Y')  # '%d %B, %Y' matches the format '6 November, 2024'
+            reserve_date = make_aware(reserve_date)  # Ensure it is timezone-aware if necessary
+        except ValueError:
+            messages.error(request, "Invalid date format. Please select a valid date.")
+            return redirect('reservation-dashboard')
+
+        # Make current time aware before comparison
+        current_time = make_aware(datetime.now())
+
+        # Check if the reserve_date is in the past
+        if reserve_date < current_time:
+            messages.error(request, "The reservation date cannot be in the past.")
+            return redirect('reservation-dashboard')  # Redirect back to the reservation form
+
         try:
             with transaction.atomic():
                 # Check if a reservation already exists for this student_id and reserve_date
                 reservation, created = StudentReservation.objects.get_or_create(
                     student_id=student_id,
-                    reserve_date=reserve_date,
+                    reserve_date=reserve_date.strftime('%d %B, %Y'),  # Store date in the same format in the model
                     defaults={
                         'name': name,
                         'course': course,
@@ -275,6 +295,10 @@ def submit_reservation(request):
                 for item_id, quantity, description in zip(item_ids, quantities, descriptions):
                     quantity = int(quantity)
                     item = facultyItem.objects.get(id=item_id)
+                    
+                    # Default to 'N/A' if description is empty
+                    if not description:
+                        description = 'N/A'
 
                     # Check if the requested quantity exceeds available quantity
                     if quantity > item.quantity:
@@ -313,6 +337,8 @@ def submit_reservation(request):
             return redirect('reservation-dashboard')
 
     return redirect('reservation-dashboard')
+
+
 
 
 
@@ -373,11 +399,14 @@ def reservation_status(request):
         # Handle case where the user is not found
         return redirect('reservation-login')  # Redirect to login if the user does not exist
     
+
+from django.db.models import F
     
 def reservation_items(request, reservation_id): 
-    # Get ReservationItem entries for the selected reservation
-    items = ReservationItem.objects.filter(reservation__id=reservation_id).values(
-        'item_name', 'description', 'quantity', 'status'
+    # Get ReservationItem entries for the selected reservation, including the username of user_facultyItem
+    items = ReservationItem.objects.filter(reservation__id=reservation_id).select_related('user_facultyItem').values(
+        'item_name', 'description', 'quantity', 'status',
+        user_facultyItem_username=F('user_facultyItem__username')  # Include the username of user_facultyItem
     )
     return JsonResponse(list(items), safe=False)
 

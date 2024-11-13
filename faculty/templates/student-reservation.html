@@ -266,7 +266,8 @@
                             <div class="card-body">
                                 <div class="table-responsive">
                                     <div style="display: flex; justify-content: space-between;">
-                                        <a href="{% url 'borrowers' %}" class="btn btn-whatsapp mb-3" style="box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;">Add New Item <span class="btn-icon-right"><img src="{% static 'images/plus.png' %}" alt="" width="30" height="30"></span></a>
+                                        <a href="{% url 'borrowers' %}" class="btn btn-whatsapp mb-3" style="box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px; visibility: hidden;">Add New Item <span class="btn-icon-right"><img src="{% static 'images/plus.png' %}" alt="" width="30" height="30"></span></a>
+
                                         <div class="sea" style="margin-right: 40px">
                                             <i class='bx bx-search-alt-2' style="color: #593bdb; position: absolute; font-size: 20px; right: 250px; top: 83px;"></i>
                                             <input type="search" id="searchInput" placeholder="Search" class="form-control intp" onkeyup="searchTable()">
@@ -302,6 +303,7 @@
                                                 <th scope="col">Year</th>
                                                 <th scope="col">Phone</th>
                                                 <th scope="col">Date Reserve</th>
+                                                <th scope="col">Status</th>
                                                 <th scope="col">Time Span</th>
                                                 <th scope="col" style="width: 80px;">Action</th>
                                             </tr>
@@ -316,6 +318,20 @@
                                                         <td>{{ request.year_level }}</td>
                                                         <td>{{ request.phone_number }}</td>
                                                         <td>{{ request.reserve_date }}</td>
+                                                        <td>
+                                                            {% if request.single_handle_status == "Approved" %}
+                                                                <div class="badge badge-success">{{ request.single_handle_status }}</div>
+                                                            {% elif request.single_handle_status == "Pending" %}
+                                                                <div class="badge badge-info">{{ request.single_handle_status }}</div>
+                                                            {% elif request.single_handle_status == "Completed" %}
+                                                                <div class="badge badge-success">{{ request.single_handle_status }}</div>
+                                                            {% elif request.single_handle_status == "Partially Processed" %}
+                                                                <div class="badge badge-primary">{{ request.single_handle_status }}</div>
+                                                            {% else %}
+                                                                <div class="badge badge-danger">{{ request.single_handle_status }}</div>
+                                                            {% endif %}
+                                                        </td>
+                                        
                                                         <td>{{ request.time_ago }}</td>
                                                         <td style="text-align: center; vertical-align: middle;">
                                                             <a href="{% url 'update-reservation-status' reservation_id=request.id %}">

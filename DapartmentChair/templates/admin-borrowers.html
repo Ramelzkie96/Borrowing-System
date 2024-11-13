@@ -357,22 +357,7 @@
                             <form method="post" enctype="multipart/form-data">
                                 {% csrf_token %}
                                 <div class="form-row">
-                                  <div class="form-group col-md-6">
-                                    <label>Date Borrow</label>
-                                          <div class="input-group">
-                                            <div class="input-group date" id="reservationdate" data-target-input="nearest">
-                                              <input type="text" class="form-control datetimepicker-input" id="date_borrow" placeholder="Select Date" name="date_borrow" data-target="#reservationdate"/>
-                                              <div class="input-group-append" data-target="#reservationdate" data-toggle="datetimepicker">
-                                                  <div class="input-group-text" id="set-today"><i class="fa fa-calendar"></i></div>
-                                              </div>
-                                          </div>
-                                          </div>
-                                          {% if form.date_borrow.errors %}
-                                              <script>
-                                                  document.querySelector('#datepicker').classList.add('error-border');
-                                              </script>
-                                          {% endif %} 
-                                  </div>
+                                  
                                   <div class="form-group col-md-3">
                                     <label>Student ID</label>
                                     <div class="input-group">
@@ -383,6 +368,23 @@
                                     <div class="form-group col-md-3">
                                         <label>Name</label>
                                         {{ form.name }}
+                                    </div>
+
+                                    <div class="form-group col-md-6">
+                                      <label>Date Borrow</label>
+                                            <div class="input-group">
+                                              <div class="input-group date" id="reservationdate" data-target-input="nearest">
+                                                <input type="text" class="form-control datetimepicker-input" id="date_borrow" placeholder="Select Date" name="date_borrow" data-target="#reservationdate"/>
+                                                <div class="input-group-append" data-target="#reservationdate" data-toggle="datetimepicker">
+                                                    <div class="input-group-text" id="set-today"><i class="fa fa-calendar"></i></div>
+                                                </div>
+                                            </div>
+                                            </div>
+                                            {% if form.date_borrow.errors %}
+                                                <script>
+                                                    document.querySelector('#datepicker').classList.add('error-border');
+                                                </script>
+                                            {% endif %} 
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label>Course</label>

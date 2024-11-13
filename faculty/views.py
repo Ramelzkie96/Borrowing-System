@@ -149,7 +149,6 @@ def delete_item(request, item_id):
 
 
 
-
 @login_required
 def borrowers(request):
     if not request.user.faculty:
@@ -802,21 +801,27 @@ def change_password(request):
 
 
 
+from django.db.models import OuterRef, Subquery
+
 @login_required
 def student_reservation(request):
-    # Restrict access to faculty users only
     if not request.user.faculty:
         return HttpResponseForbidden("You do not have permission to access this page.")
 
     # Get the logged-in user's ID
-    user_id = request.user.id  # Use request.user.id to directly get the logged-in user's ID
+    user_id = request.user.id
 
-    # Filter ReservationItems based on user_facultyItem
+    # Filter ReservationItems based on user_facultyItem and fetch a single handle_status per reservation
     reservation_items = ReservationItem.objects.filter(user_facultyItem=user_id)
-
-    # Get the associated StudentReservations from the filtered ReservationItems
     reserved_request = StudentReservation.objects.filter(
         id__in=reservation_items.values('reservation')
+    ).annotate(
+        single_handle_status=Subquery(
+            ReservationItem.objects.filter(
+                reservation=OuterRef('id'),
+                user_facultyItem=user_id  # Filter by the current user's faculty item
+            ).values('handle_status')[:1]  # Fetch only the first handle_status
+        )
     ).order_by('-id')
 
     # Pagination logic
@@ -896,25 +901,32 @@ def update_reservation_item_status(request):
 
         time_ago = item.time_ago()
 
-        # Check the statuses of all items in the reservation
-        items = reservation.items.all()
-        all_approved = all(item.status == 'Approved' for item in items)
-        all_denied = all(item.status == 'Denied' for item in items)
-        any_pending = any(item.status == 'Pending' for item in items)
+        # Check statuses of items handled by the current user
+        user_items = reservation.items.filter(user_facultyItem=request.user)
+        all_approved_or_denied = all(i.status in ['Approved', 'Denied'] for i in user_items)
+        any_pending = any(i.status == 'Pending' for i in user_items)
 
-        # Update the status of the StudentReservation based on item statuses
-        if all_approved:
+        # Update the handle_status of the ReservationItem based on the current user’s items
+        if all_approved_or_denied and not any_pending:
+            # All items handled by the current user are either approved or denied
+            user_items.update(handle_status='Completed')
+        else:
+            # If any items handled by the current user are still pending
+            user_items.update(handle_status='Pending')
+
+        # Update the overall reservation status based on all items in the reservation
+        all_items_approved = all(i.status == 'Approved' for i in reservation.items.all())
+        all_items_denied = all(i.status == 'Denied' for i in reservation.items.all())
+        any_item_pending = any(i.status == 'Pending' for i in reservation.items.all())
+
+        if all_items_approved:
             reservation.status = 'Approved'
-            redirect_needed = True  # Set flag to redirect
-        elif all_denied:
+        elif all_items_denied:
             reservation.status = 'Denied'
-            redirect_needed = True  # Set flag to redirect
-        elif any_pending:
+        elif any_item_pending:
             reservation.status = 'Partially Processed'
-            redirect_needed = False
         else:
             reservation.status = 'Completed'
-            redirect_needed = True  # Redirect when all items are processed but not all the same status
 
         reservation.save()
 
@@ -933,11 +945,11 @@ def update_reservation_item_status(request):
         from_email = settings.EMAIL_HOST_USER
         recipient_list = [reservation.email]
 
-        #Send the email
+        # Send the email
         send_mail(subject, message, from_email, recipient_list)
 
         # Redirect to 'admin-student-reservation' if needed
-        if redirect_needed:
+        if reservation.status in ['Approved', 'Denied', 'Completed']:
             response_data['redirect_url'] = reverse('student-reservation')
 
         return JsonResponse(response_data)
@@ -963,7 +975,7 @@ def generate_report(request, id):
     # Get the specific BorrowRequest by ID
     try:
         borrow_request = BorrowRequest.objects.get(id=id)
-        items = borrow_request.items.select_related('item')  # Fetch related items with facultyItem details
+        items = borrow_request.facultyitems.select_related('item')  # Fetch related items with facultyItem details
     except BorrowRequest.DoesNotExist:
         return HttpResponseNotFound("BorrowRequest not found.")
 

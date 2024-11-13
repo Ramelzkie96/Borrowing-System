@@ -190,20 +190,13 @@
         <!-- Teacher -->
         <p style="position:absolute;top:525px;left:380px;white-space:nowrap" class="ft12">
             {% if borrow_request.borrower_type == 'Teacher' %} 
-                [/] &nbsp; Teacher
+                [/] &nbsp; Faculty/Employee
             {% else %} 
-                [ ] &nbsp; Teacher
+                [ ] &nbsp; Faculty/Employee
             {% endif %}
         </p>
     
-        <!-- Others -->
-        <p style="position:absolute;top:525px;left:490px;white-space:nowrap" class="ft12">
-            {% if borrow_request.borrower_type != 'Student' and borrow_request.borrower_type != 'Teacher' %} 
-                [/] &nbsp; Others: {{ borrow_request.borrower_type }}
-            {% else %} 
-                [ ] &nbsp; Others:
-            {% endif %}
-        </p>
+       
     {% endfor %}
     
 

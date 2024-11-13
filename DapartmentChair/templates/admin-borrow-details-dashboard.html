@@ -106,7 +106,7 @@
                     data-accordion="false">
                     <li class="nav-header">Main Menu</li>
                     <li class="nav-item">
-                        <a href="{% url 'admin-dashboard' %}" class="nav-link active">
+                        <a href="{% url 'admin-dashboard' %}" class="nav-link">
                             <i class="nav-icon fas fa-tachometer-alt"></i>
                             <p>
                                 Dashboard
@@ -155,7 +155,7 @@
                         </a>
                     </li>
                     <li class="nav-item ">
-                        <a href="{% url 'admin-borrow-record' %}" class="nav-link ">
+                        <a href="{% url 'admin-borrow-record' %}" class="nav-link active">
                             <i class="nav-icon fas fa-clipboard"></i>
                             <p>
                                 Borrowed Records
@@ -275,7 +275,7 @@
                                         </div>
                                     </div>
                                 
-                                                                        <!-- Items List -->
+                                                           <!-- Items List -->
 <div id="borrow-items-list">
     {% for item in all_items %}
         <input type="hidden" name="borrow_request_id" value="{{ item.borrow_request.id }}">
