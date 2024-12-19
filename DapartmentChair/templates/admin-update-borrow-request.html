@@ -84,58 +84,55 @@
 
 
 
-  /* Styling for a smaller image preview container */
-  .image-preview {
-    width: 180px;
-    /* Smaller width */
-    height: 110px;
-    /* Smaller height */
-    border: 2px solid #ddd;
-    border-radius: 10px;
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    background-color: #f7f7f7;
-  }
+/* Styling for a smaller image preview container */
+.image-preview {
+  width: 180px; /* Smaller width */
+  height: 110px; /* Smaller height */
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  background-color: #f7f7f7;
+}
 
-  /* Hidden file input */
-  #image-upload {
-    display: none;
-  }
+/* Hidden file input */
+#image-upload {
+  display: none;
+}
 
-  /* Style for the label that acts as the button */
-  #image-label {
-    position: absolute;
-    width: 100%;
-    height: 100%;
+/* Style for the label that acts as the button */
+#image-label {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  
+  color: #333; /* Default dark text */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  opacity: 1;
+  transition: opacity 0.3s ease, color 0.3s ease;
+  font-size: 14px;
+  font-weight: bold;
+}
 
-    color: #333;
-    /* Default dark text */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    opacity: 1;
-    transition: opacity 0.3s ease, color 0.3s ease;
-    font-size: 14px;
-    font-weight: bold;
-  }
+/* Hover effect: show overlay and change text color to white */
+.image-preview:hover #image-label {
+  opacity: 1;
+  color: #0f2f67;
+}
 
-  /* Hover effect: show overlay and change text color to white */
-  .image-preview:hover #image-label {
-    opacity: 1;
-    color: #2e7bff;
-  }
-
-  /* Style for the uploaded image */
-  .image-preview img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 10px;
-  }
+/* Style for the uploaded image */
+.image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+}
 </style>
 
 {% endblock %}
@@ -166,27 +163,36 @@
 <!-- date picker -->
 <script>
   $(function () {
-    $('#reservationdate').datetimepicker({
-        format: 'D MMMM, YYYY' // Custom format: 1 November, 2024
-    });
-
-    // Optional: Open the date picker when the input is focused
-    $('.datetimepicker-input').on('focus', function() {
-        $(this).siblings('.input-group-append').click();
-    });
-
-    // Set today's date when the calendar icon is clicked
-    $('#set-today').on('click', function() {
-        const today = moment().format('D MMMM, YYYY'); // Use moment.js for the custom format
-        $('#date_borrow').val(today);
-    });
-});
+      // Initialize date pickers
+      $('#reservationdate').datetimepicker({
+          format: 'D MMMM, YYYY' // Custom format
+      });
+      $('#returndate').datetimepicker({
+          format: 'D MMMM, YYYY' // Custom format
+      });
+  
+      // Open date picker on input focus
+      $('.datetimepicker-input').on('focus', function() {
+          $(this).siblings('.input-group-append').click();
+      });
+  
+      // Set today's date for Date Borrow
+      $('#set-today-borrow').on('click', function() {
+          const today = moment().format('D MMMM, YYYY'); // Use moment.js for the custom format
+          $('#date_borrow').val(today);
+      });
+  
+      // Set today's date for Date Return
+      $('#set-today-return').on('click', function() {
+          const today = moment().format('D MMMM, YYYY'); // Use moment.js for the custom format
+          $('#date_return').val(today);
+      });
+  });
 
 
 </script>
 
 
-</script>
 
 
 
@@ -375,28 +381,13 @@
                 <div class="basic-form">
 
 
-                  <form id="editBorrowerForm" method="post" action="{% url 'admin-save-borrower-update' %}">
+                  <form id="editBorrowerForm" method="post" enctype="multipart/form-data" action="{% url 'admin-save-borrower-update' %}">
                     {% csrf_token %}
                     <input type="hidden" name="id" value="{{ borrow_request_id }}">
                     
                     <div class="form-row">
                      
-                    <div class="form-group col-md-6">
-                      <label>Date Borrow</label>
-                            <div class="input-group">
-                              <div class="input-group date" id="reservationdate" data-target-input="nearest">
-                                <input type="text" class="form-control datetimepicker-input" id="date_borrow" value="{{ date_borrow }}" placeholder="Select Date" name="datepicker" data-target="#reservationdate"/>
-                                <div class="input-group-append" data-target="#reservationdate" data-toggle="datetimepicker">
-                                    <div class="input-group-text" id="set-today"><i class="fa fa-calendar"></i></div>
-                                </div>
-                            </div>
-                            </div>
-                            {% if form.date_borrow.errors %}
-                                <script>
-                                    document.querySelector('#datepicker').classList.add('error-border');
-                                </script>
-                            {% endif %} 
-                    </div>
+                    
 
 
                         <div class="form-group col-md-3">
@@ -407,10 +398,52 @@
                             <label>Name</label>
                             <input type="text" name="name" class="form-control" value="{{ name }}">
                         </div>
-                        <div class="form-group col-md-6">
-                            <label>Course</label>
-                            <input type="text" name="course" class="form-control" value="{{ course }}">
-                        </div>
+
+                        <div class="form-group col-md-3">
+                          <label>Date Borrow</label>
+                          <div class="input-group">
+                              <div class="input-group date" id="reservationdate" data-target-input="nearest">
+                                  <input type="text" class="form-control datetimepicker-input" id="date_borrow" value="{{ date_borrow }}" placeholder="Select Date" name="date_borrow" data-target="#reservationdate"/>
+                                  <div class="input-group-append" data-target="#reservationdate" data-toggle="datetimepicker">
+                                      <div class="input-group-text" id="set-today-borrow"><i class="fa fa-calendar"></i></div>
+                                  </div>
+                              </div>
+                          </div>
+                          {% if form.date_borrow.errors %}
+                                    <script>
+                                        document.querySelector('#datepicker').classList.add('error-border');
+                                    </script>
+                                {% endif %} 
+                      </div>
+                      
+                      <div class="form-group col-md-3">
+                          <label>Expected Date Return</label>
+                          <div class="input-group">
+                              <div class="input-group date" id="returndate" data-target-input="nearest">
+                                  <input type="text" class="form-control datetimepicker-input" id="date_return" value="{{ date_return }}" placeholder="Select Date" name="date_return" data-target="#returndate"/>
+                                  <div class="input-group-append" data-target="#returndate" data-toggle="datetimepicker">
+                                      <div class="input-group-text" id="set-today-return"><i class="fa fa-calendar"></i></div>
+                                  </div>
+                              </div>
+                          </div>
+                          {% if form.date_borrow.errors %}
+                                    <script>
+                                        document.querySelector('#datepicker').classList.add('error-border');
+                                    </script>
+                                {% endif %} 
+                      </div>
+
+                        
+                      <div class="form-group col-md-6">
+                        <label>Course</label>
+                        <select class="form-control" name="course" style="border: 1px solid #bebebe" required>
+                            <option value="">Select ---</option>
+                            <option value="BS INFORMATION TECHNOLOGY" {% if course == "BS INFORMATION TECHNOLOGY" %}selected{% endif %}>BS INFORMATION TECHNOLOGY</option>
+                            <option value="BS INDUSTRIAL TECHNOLOGY" {% if course == "BS INDUSTRIAL TECHNOLOGY" %}selected{% endif %}>BS INDUSTRIAL TECHNOLOGY</option>
+                            <option value="BS ELECTRICAL ENGINEERING" {% if course == "BS ELECTRICAL ENGINEERING" %}selected{% endif %}>BS ELECTRICAL ENGINEERING</option>
+                            <option value="BS MECHANICAL ENGINEERING" {% if course == "BS MECHANICAL ENGINEERING" %}selected{% endif %}>BS MECHANICAL ENGINEERING</option>
+                        </select>
+                    </div>
                         <div class="form-group col-md-6">
                             <label>Year</label>
                             <select class="form-select form-control" name="year" style="border:1px solid rgba(0, 0, 0, 0.2);" aria-label="Default select example">
@@ -436,12 +469,22 @@
                     </div>
                 
                     <div class="form-row">
-                        <div class="form-group col-md-2">
+                      <div class="form-group col-md-6">
+                        <label>Student ID image (Optional)</label>
+                        <div class="image-preview" id="image-preview">
+                            {% if upload_image_url %}
+                                <img src="{{ upload_image_url }}" class="preview-image" style="width: 100%; height: auto;">
+                            {% endif %}
+                            <label for="image-upload" id="image-label">Click to Upload Image</label>
+                        </div>
+                        <input type="file" name="upload_image" id="image-upload" accept="image/*" onchange="previewImage(event)">
+                    </div>
+                        <div class="form-group col-md-3">
                             <label>
                                 <input type="radio" name="borrower_type" value="Student" id="student_radio" style="width: 20px; height: 20px;" {% if borrower_type == "Student" %}checked{% endif %}>&nbsp; Student
                             </label>
                         </div>
-                        <div class="form-group col-md-2">
+                        <div class="form-group col-md-3">
                             <label>
                                 <input type="radio" name="borrower_type" value="Teacher" id="teacher_radio" style="width: 20px; height: 20px;" {% if borrower_type == "Teacher" %}checked{% endif %}>&nbsp; Faculty/Employee
                             </label>
@@ -590,6 +633,39 @@
       // Initial check to disable the button if there are errors on page load
       checkErrors();
   });
+  </script>
+
+
+  <script>
+    function previewImage(event) {
+      const previewContainer = document.getElementById('image-preview');
+      const label = document.getElementById('image-label');
+      
+      // Remove any existing images except the label
+      while (previewContainer.firstChild) {
+          if (previewContainer.firstChild !== label) {
+              previewContainer.removeChild(previewContainer.firstChild);
+          } else {
+              break;
+          }
+      }
+  
+      const file = event.target.files[0]; // Get the selected file
+      
+      if (file) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+              const img = document.createElement('img');
+              img.src = e.target.result;
+              img.classList.add('preview-image');
+              img.style.width = '100%'; // Adjust the size as needed
+              img.style.height = 'auto'; // Maintain aspect ratio
+              previewContainer.appendChild(img); // Append the new image
+          };
+          reader.readAsDataURL(file); // Read the image file as data URL
+      }
+  }
+  
   </script>
   
   

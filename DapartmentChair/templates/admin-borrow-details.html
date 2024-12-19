@@ -234,7 +234,7 @@
                             style="border-top: 4px solid #593bdb; box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 4px;">
                             <div class="card-header">
 
-                                <h4 class="card-title" style="font-size: 30px; font-weight: 700;">Borrower Details</h4>
+                                <h4 class="card-title" style="font-size: 30px; font-weight: 700;">Return Item</h4>
                             </div>
                             <div class="card-body">
                                 <form id="editBorrowerForm" method="post" action="{% url 'admin-update_borrower_status' %}">
@@ -242,19 +242,41 @@
                                     <input type="hidden" name="status" value="{{ borrow_request.status }}">
 
                                     <div class="row mb-1">
-                                        <div class="col-3">
+                                        <div class="col-2">
                                             <label class="font-weight-bold" style="font-size: 15px;">Student ID:</label>
                                             <p id="modal-student-id" style="font-size: 15px;">{{ student_id }}</p>
                                         </div>
-                                        <div class="col-3">
+                                        <div class="col-2">
                                             <label class="font-weight-bold" style="font-size: 15px;">Name:</label>
                                             <p id="modal-name" style="font-size: 15px;">{{ name }}</p>
                                         </div>
-                                        <div class="col-3">
+                                        <div class="col-2">
                                             <label class="font-weight-bold" style="font-size: 15px;">Date Borrow:</label>
                                             <p id="modal-date-borrow" style="font-size: 15px;">{{ date_borrow }}</p>
                                         </div>
+                                        <div class="col-3">
+                                            <label style="font-size: 15px;" class="font-weight-bold">Expected Date Return:</label><br>
+                                            {{ date_return }}
+                                        </div>
+                                        <div class="col-3">
+                                            <label class="font-weight-bold" style="font-size: 15px;">Purpose:</label>
+                                            <p id="modal-date-borrow" style="font-size: 15px;">{{ purpose }}</p>
+                                        </div>
                                     </div>
+
+                                    
+                                    <div class="row mb-5">
+                                        {% if upload_image %}
+                                        <div class="col-3">
+                                            <label class="font-weight-bold" style="font-size: 15px;">Student ID Image:</label><br>
+                                            <a href="{{ upload_image }}" target="_blank">
+                                                <img src="{{ upload_image }}" alt="Borrowed Item Image" style="max-width: 100px; max-height: 100px; cursor: pointer;">
+                                            </a>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    
+
                                 
                                     <div class="row mb-1">
                                         <div class="col-2">

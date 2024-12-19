@@ -593,14 +593,16 @@
         <table class="table table-bordered table-striped" id="itemTable">
             <thead style="background-color: #031e23; color: white;">
                 <tr>
-                    <th scope="col">STUDENT ID</th>
-                    <th scope="col">NAME</th>
-                    <th scope="col">COURSE</th>
-                    <th scope="col">YEAR</th>
-                    <th scope="col">PHONE</th>
-                    <th scope="col">DATE RESERVE</th>
-                    <th scope="col">STATUS</th>
-                    <th scope="col">ACTION</th>
+                    <th scope="col">Student ID</th>
+                    <th scope="col">Student ID Image</th>
+                    <th scope="col">Name</th>
+                    <th scope="col" style="width: 170px;">Course</th>
+                    <th scope="col">Year</th>
+                    <th scope="col">Phone</th>
+                    <th scope="col">Date Reserve</th>
+                    <th scope="col">Return Date</th>
+                    <th scope="col">Status</th>
+                    <th scope="col">Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -608,11 +610,25 @@
                     {% for reservation in student_reservations %}
                         <tr>
                             <td>{{ reservation.student_id }}</td>
+                            <td style="text-align: center; vertical-align: middle; display: flex; justify-content: center;">
+                                {% if reservation.upload_image %}
+                                  <a href="{{ reservation.upload_image.url }}" target="_blank">
+                                    <img src="{{ reservation.upload_image.url }}" alt="Borrowed Item" style="width: 55px; height: auto;">
+                                  </a>
+                                {% else %}
+                                  <a href="{% static 'images/sample.jpg' %}" target="_blank">
+                                    <img src="{% static 'images/sample.jpg' %}" alt="Default Item" style="width: 55px; height: auto;">
+                                  </a>
+                                {% endif %}
+                              </td>
+                              
+                              
                             <td>{{ reservation.name }}</td>
                             <td>{{ reservation.course }}</td>
                             <td>{{ reservation.year_level }}</td>
                             <td>{{ reservation.phone_number }}</td> <!-- Assuming content_object refers to the item -->
                             <td>{{ reservation.reserve_date }}</td>
+                            <td>{{ reservation.date_return }}</td>
                             <td>
                                 {% if reservation.status == "Approved" %}
                                     <div class="badge badge-success">{{ reservation.status }}</div>
@@ -626,7 +642,7 @@
                                     <div class="badge badge-danger">{{ reservation.status }}</div>
                                 {% endif %}
                             </td>
-                            <td style="text-align: center; vertical-align: middle; display: flex; justify-content: center;">
+                            <td >
                                 {% if reservation.status == "Approved" or reservation.status == "Denied" or reservation.status == "Completed"%}
                                     <!-- If Approved or Denied, show the View button outside the dropdown -->
                                     <button class="btn btn-secondary btn-sm view-item-btn" data-toggle="modal" data-target="#exampleModalCenter"
@@ -634,7 +650,9 @@
                                         data-name="{{ reservation.name }}"
                                         data-user-id="{{ request.user.id }}"
                                         data-reservation-id="{{ reservation.id }}"
-                                        data-date="{{ reservation.reserve_date }}">
+                                        data-date="{{ reservation.reserve_date }}"
+                                        data-return="{{ reservation.date_return }}">
+                                        
                                         <i class="fas fa-eye" style="font-size: 15px;"></i>
                                     </button>
                                 {% else %}
@@ -649,10 +667,11 @@
                                                 data-name="{{ reservation.name }}"
                                                 data-user-id="{{ request.user.id }}"
                                                 data-date="{{ reservation.reserve_date }}"
+                                                data-return="{{ reservation.date_return }}"
                                                 data-reservation-id="{{ reservation.id }}">
                                                 <i class="fas fa-eye" style="font-size: 15px;"></i>&nbsp;View Reservation
                                             </button>
-                                            <button class="dropdown-item btn-primary btn-sm" onclick="redirectToEditForm('{{ reservation.id }}', '{{ reservation.student_id }}', '{{ reservation.name }}', '{{ reservation.year_level }}', '{{ reservation.email }}', '{{ reservation.phone_number }}', '{{ reservation.reserve_date }}', '{{ reservation.purpose }}')" class="dropdown-item edit-item-btn">
+                                            <button class="dropdown-item btn-primary btn-sm" onclick="redirectToEditForm('{{ reservation.id }}', '{{ reservation.student_id }}', '{{ reservation.name }}', '{{ reservation.year_level }}', '{{ reservation.email }}', '{{ reservation.phone_number }}', '{{ reservation.reserve_date }}', '{{ reservation.date_return }}', '{{ reservation.purpose }}')" class="dropdown-item edit-item-btn">
                                                 <i class="fas fa-edit"></i>&nbsp; Edit Reservation
                                             </button>
                                         </div>
@@ -690,17 +709,21 @@
             </div>
             <div class="modal-body">
                 <div class="row mb-1">
-                    <div class="col-12 col-sm-4">
+                    <div class="col-12 col-sm-3">
                         <label class="font-weight-bold text-dark" >Student ID:</label>
                         <p id="modal-student-id" ></p>
                     </div>
-                    <div class="col-12 col-sm-4">
+                    <div class="col-12 col-sm-3">
                         <label class="font-weight-bold text-dark" >Name:</label>
                         <p id="modal-name" ></p>
                     </div>
-                    <div class="col-12 col-sm-4">
+                    <div class="col-12 col-sm-3">
                         <label class="font-weight-bold text-dark" >Date Reserve:</label>
                         <p id="modal-date-borrow" ></p>
+                    </div>
+                    <div class="col-12 col-sm-3">
+                        <label class="font-weight-bold text-dark" >Date Return:</label>
+                        <p id="modal-date-return" ></p>
                     </div>
                 </div>
 
@@ -871,8 +894,8 @@
 
 
 
-    function redirectToEditForm(id, studentId, name, yearLevel, email, phone, reserveDate, purpose) {
-        const queryString = `?id=${id}&student_id=${encodeURIComponent(studentId)}&name=${encodeURIComponent(name)}&year_level=${encodeURIComponent(yearLevel)}&email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}&reserve_date=${encodeURIComponent(reserveDate)}&purpose=${encodeURIComponent(purpose)}`;
+    function redirectToEditForm(id, studentId, name, yearLevel, email, phone, reserveDate, dateReturn, purpose) {
+        const queryString = `?id=${id}&student_id=${encodeURIComponent(studentId)}&name=${encodeURIComponent(name)}&year_level=${encodeURIComponent(yearLevel)}&email=${encodeURIComponent(email)}&phone=${encodeURIComponent(phone)}&reserve_date=${encodeURIComponent(reserveDate)}&date_return=${encodeURIComponent(dateReturn)}&purpose=${encodeURIComponent(purpose)}`;
         window.location.href = `/reservation-edit/${id}${queryString}`;
     }
 
@@ -886,11 +909,13 @@
                 const studentId = button.getAttribute('data-student-id');
                 const name = button.getAttribute('data-name');
                 const date = button.getAttribute('data-date');
+                const dateReturn = button.getAttribute('data-return');
                 const reservationId = button.getAttribute('data-reservation-id'); // Get reservation ID
     
                 document.getElementById('modal-student-id').innerText = studentId;
                 document.getElementById('modal-name').innerText = name;
                 document.getElementById('modal-date-borrow').innerText = date;
+                document.getElementById('modal-date-return').innerText = dateReturn;
     
                 // Fetch borrow items based on reservation ID
                 fetchBorrowItems(reservationId);

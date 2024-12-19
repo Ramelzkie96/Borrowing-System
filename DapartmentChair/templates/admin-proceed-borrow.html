@@ -1,0 +1,693 @@
+{% extends "admin-base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+<!-- Include Pickadate CSS from CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pickadate.js/3.6.2/compressed/themes/default.css">
+<link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/pickadate.js/3.6.2/compressed/themes/default.date.css">
+
+<link rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/css/tempusdominus-bootstrap-4.min.css">
+
+<style>
+  .pagination-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+    padding-right: 20px;
+  }
+
+  .pagination {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+  }
+
+  .page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+  }
+
+  .page-item .page-link {
+    color: #007bff;
+  }
+
+  .page-link:hover {
+    background-color: #f1f1f1;
+  }
+
+  .page-item.disabled .page-link {
+    color: #6c757d;
+  }
+
+  .custom-modal .modal-dialog {
+    overflow: hidden;
+  }
+
+  .custom-modal .modal-content {
+    overflow: hidden;
+  }
+
+  .custom-modal .modal-body {
+    overflow-y: auto;
+    max-height: calc(100vh - 200px);
+    /* Adjust this value as needed */
+  }
+
+  .error-border.form-control {
+    border-color: red !important;
+    border-width: 1px !important;
+    /* Adjust as needed */
+  }
+
+
+  .input-group .form-control {
+    padding-right: 3rem;
+    /* Add padding to prevent overlap with button */
+  }
+
+  .input-group-append .btn {
+    border-left: none;
+    /* Optional: Remove border between input and button */
+    padding: 0.3rem;
+    /* Adjust padding for the button */
+  }
+
+  .input-group-append .btn i {
+    font-size: 1rem;
+    /* Adjust icon size if needed */
+  }
+
+
+  .input-group-appendreturn .btn {
+    border-left: none;
+    /* Optional: Remove border between input and button */
+    padding: 0.3rem;
+    /* Adjust padding for the button */
+  }
+
+  .input-group-appendreturn .btn i {
+    font-size: 1rem;
+    /* Adjust icon size if needed */
+  }
+
+
+
+
+
+  /* Styling for a smaller image preview container */
+  .image-preview {
+    width: 180px;
+    /* Smaller width */
+    height: 110px;
+    /* Smaller height */
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background-color: #f7f7f7;
+  }
+
+  /* Hidden file input */
+  #image-upload {
+    display: none;
+  }
+
+  /* Style for the label that acts as the button */
+  #image-label {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+
+    color: #333;
+    /* Default dark text */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    opacity: 1;
+    transition: opacity 0.3s ease, color 0.3s ease;
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  /* Hover effect: show overlay and change text color to white */
+  .image-preview:hover #image-label {
+    opacity: 1;
+    color: #2e7bff;
+  }
+
+  /* Style for the uploaded image */
+  .image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+</style>
+
+{% endblock %}
+
+
+{% block extra_js %}
+<!-- jQuery -->
+<script src="{% static 'plugins/jquery/jquery.min.js' %}"></script>
+
+
+<!-- Bootstrap -->
+<script src="{% static 'plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+<!-- overlayScrollbars -->
+<script src="{% static 'plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js' %}"></script>
+<!-- AdminLTE App -->
+<script src="{% static 'dist/js/adminlte.js' %}"></script>
+<!-- PAGE PLUGINS -->
+<!-- jQuery Mapael -->
+<script src="{% static 'plugins/jquery-mousewheel/jquery.mousewheel.js' %}"></script>
+<!-- AdminLTE dashboard demo (This is only for demo purposes) -->
+<script src="dist/js/pages/dashboard2.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/moment/min/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/js/tempusdominus-bootstrap-4.min.js"></script>
+<!-- date picker -->
+<script>
+  $(function () {
+      // Initialize date pickers
+      $('#reservationdate').datetimepicker({
+          format: 'D MMMM, YYYY' // Custom format
+      });
+      $('#returndate').datetimepicker({
+          format: 'D MMMM, YYYY' // Custom format
+      });
+  
+      // Open date picker on input focus
+      $('.datetimepicker-input').on('focus', function() {
+          $(this).siblings('.input-group-append').click();
+      });
+  
+      // Set today's date for Date Borrow
+      $('#set-today-borrow').on('click', function() {
+          const today = moment().format('D MMMM, YYYY'); // Use moment.js for the custom format
+          $('#date_borrow').val(today);
+      });
+  
+      // Set today's date for Date Return
+      $('#set-today-return').on('click', function() {
+          const today = moment().format('D MMMM, YYYY'); // Use moment.js for the custom format
+          $('#date_return').val(today);
+      });
+  });
+  </script>
+  
+
+
+{% endblock %}
+
+
+
+{% block content %}
+
+<div class="wrapper">
+
+  <!-- Preloader -->
+  <div class="preloader flex-column justify-content-center align-items-center">
+    <img class="animation__wobble" src="{% static 'dist/img/pit_logo.png' %}" alt="AdminLTELogo" height="60" width="60">
+  </div>
+
+
+
+  <!-- Main Sidebar Container -->
+  <aside class="main-sidebar sidebar-dark-primary elevation-4">
+    <!-- Brand Logo -->
+    <a href="index3.html" class="brand-link">
+      <img src="{% static 'dist/img/pit_logo.png' %}" alt="AdminLTE Logo" class="brand-image img-circle elevation-3"
+        style="opacity: .8">
+      <span class="brand-text font-weight-light">IT CHAIRMAN</span>
+    </a>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <!-- Sidebar user panel (optional) -->
+      <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+        <div class="image">
+          {% if request.user.profile_picture %}
+          <img src="{{ request.user.profile_picture.url }}" class="img-circle elevation-2"
+            alt="{{ request.user.username }}'s profile picture">
+          {% else %}
+          <img src="{% static 'images/users.jpg' %}" class="img-circle elevation-2" alt="Default profile picture">
+          {% endif %}
+        </div>
+        <div class="info">
+          <a href="{% url 'admin-dashboard' %}" class="d-block">{{ request.user.username }}</a>
+        </div>
+      </div>
+
+
+
+
+
+
+
+      <!-- Sidebar Menu -->
+      <nav class="mt-2">
+        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+          <li class="nav-header">Main Menu</li>
+          <li class="nav-item">
+            <a href="{% url 'admin-dashboard' %}" class="nav-link">
+              <i class="nav-icon fas fa-tachometer-alt"></i>
+              <p>
+                Dashboard
+              </p>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="{% url 'admin-users' %}" class="nav-link">
+              <i class="nav-icon fas fa-users"></i>
+              <p>
+                Users
+              </p>
+            </a>
+          </li>
+          <li class="nav-header">Items</li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-box"></i>
+              <p>
+                Manage Items
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{% url 'admin-add-item' %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Add Item</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'admin-item-record' %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Item Records</p>
+                </a>
+              </li>
+
+            </ul>
+          </li>
+          <li class="nav-item "> <!--pang hover menu-open-->
+            <a href="{% url 'admin-borrowers' %}" class="nav-link ">
+              <i class="nav-icon fas fa-plus"></i>
+              <p>
+                Add Borrow Item
+              </p>
+            </a>
+          </li>
+          <li class="nav-item ">
+            <a href="{% url 'admin-borrow-record' %}" class="nav-link">
+              <i class="nav-icon fas fa-clipboard"></i>
+              <p>
+                Borrowed Records
+              </p>
+            </a>
+          </li>
+
+
+          <li class="nav-header">Borrowers Reservation</li>
+          <li class="nav-item">
+            <a href="{% url 'admin-student-reservation' %}" class="nav-link active">
+              <i class="nav-icon fas fa-list"></i>
+              <p>
+                Reservation List
+              </p>
+            </a>
+          </li>
+
+
+          <li class="nav-header">Accounts</li>
+          <li class="nav-item">
+            <a href="#" class="nav-link">
+              <i class="nav-icon fas fa-users-gear"></i>
+              <p>
+                Manage accounts
+                <i class="right fas fa-angle-left"></i>
+              </p>
+            </a>
+            <ul class="nav nav-treeview">
+              <li class="nav-item">
+                <a href="{% url 'admin-change-profile' %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Change Profile</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="{% url 'admin-change-password' %}" class="nav-link">
+                  <i class="far fa-circle nav-icon"></i>
+                  <p>Change Password</p>
+                </a>
+              </li>
+            </ul>
+          <li class="nav-item">
+            <a href="{% url 'admin-logout' %}" class="nav-link">
+              <i class="nav-icon fa-solid fa-right-from-bracket"></i>
+              <p>
+                Logout
+              </p>
+            </a>
+          </li>
+
+          </li>
+        </ul>
+      </nav>
+      <!-- /.sidebar-menu -->
+    </div>
+    <!-- /.sidebar -->
+  </aside>
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+
+    <!-- /.content-header -->
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+
+        <!-- /.row -->
+
+        <div class="row">
+          <div class="container-fluid">
+
+            <div class="card mt-3" style="border-top: 4px solid #593bdb; box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 4px;">
+              <div class="card-header">
+                <h4 class="card-title" style="font-size: 30px; font-weight: 700;">Proceed to Borrow</h4>
+              </div>
+              <div class="card-body">
+                <div class="basic-form">
+
+
+                  <form id="proceedBorrowerForm" enctype="multipart/form-data" method="post" action="{% url 'admin-save_reservation_request' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="id" value="{{ reserve_request_id }}">
+                    
+                    <div class="form-row">
+
+                        <div class="form-group col-md-3">
+                            <label>Student ID</label>
+                            <input type="text" name="student_id" class="form-control" value="{{ student_id }}">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label>Name</label>
+                            <input type="text" name="name" class="form-control" value="{{ name }}">
+                        </div>
+                     
+                        <div class="form-group col-md-3">
+                          <label>Date Reserve</label>
+                          <div class="input-group">
+                              <div class="input-group date" id="reservationdate" data-target-input="nearest">
+                                  <input type="text" class="form-control datetimepicker-input" id="date_borrow" value="{{ date_reserve }}" placeholder="Select Date" name="date_reserve" data-target="#reservationdate"/>
+                                  <div class="input-group-append" data-target="#reservationdate" data-toggle="datetimepicker">
+                                      <div class="input-group-text" id="set-today-borrow"><i class="fa fa-calendar"></i></div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                      
+                      <div class="form-group col-md-3">
+                          <label>Expected Date Return</label>
+                          <div class="input-group">
+                              <div class="input-group date" id="returndate" data-target-input="nearest">
+                                  <input type="text" class="form-control datetimepicker-input" id="date_return" value="{{ date_return }}" placeholder="Select Date" name="date_return" data-target="#returndate"/>
+                                  <div class="input-group-append" data-target="#returndate" data-toggle="datetimepicker">
+                                      <div class="input-group-text" id="set-today-return"><i class="fa fa-calendar"></i></div>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                      
+                        
+
+
+                       
+                        <div class="form-group col-md-6">
+                            <label>Course</label>
+                            <select class="form-control" name="course" style="border: 1px solid #bebebe" required>
+                                <option value="">Select ---</option>
+                                <option value="BS INFORMATION TECHNOLOGY" {% if course == "BS INFORMATION TECHNOLOGY" %}selected{% endif %}>BS INFORMATION TECHNOLOGY</option>
+                                <option value="BS INDUSTRIAL TECHNOLOGY" {% if course == "BS INDUSTRIAL TECHNOLOGY" %}selected{% endif %}>BS INDUSTRIAL TECHNOLOGY</option>
+                                <option value="BS ELECTRICAL ENGINEERING" {% if course == "BS ELECTRICAL ENGINEERING" %}selected{% endif %}>BS ELECTRICAL ENGINEERING</option>
+                                <option value="BS MECHANICAL ENGINEERING" {% if course == "BS MECHANICAL ENGINEERING" %}selected{% endif %}>BS MECHANICAL ENGINEERING</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>Year</label>
+                            <select class="form-select form-control" name="year" style="border:1px solid rgba(0, 0, 0, 0.2);" aria-label="Default select example">
+                                <option value="">----</option>
+                                <option value="1st Year" {% if year == "1st Year" %}selected{% endif %}>1st Year</option>
+                                <option value="2nd Year" {% if year == "2nd Year" %}selected{% endif %}>2nd Year</option>
+                                <option value="3rd Year" {% if year == "3rd Year" %}selected{% endif %}>3rd Year</option>
+                                <option value="4th Year" {% if year == "4th Year" %}selected{% endif %}>4th Year</option>
+                            </select>
+                        </div>
+                    </div>
+                
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label>Email</label>
+                            <input type="text" name="email" class="form-control" value="{{ email }}">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label>Phone</label>
+                            <input type="text" name="phone" class="form-control" value="{{ phone }}">
+                        </div>
+                        
+                    </div>
+                
+                    <div class="form-row">
+                      <div class="form-group col-md-6">
+                        <label>Student ID Image (Optional)</label>
+                        <div class="image-preview" id="image-preview">
+                            {% if upload_image_url %}
+                                <img src="{{ upload_image_url }}" class="preview-image" style="width: 100%; height: auto;">
+                            {% endif %}
+                            <label for="image-upload" id="image-label">Click to Upload Image</label>
+                        </div>
+                        <input type="file" name="upload_image" id="image-upload" accept="image/*" onchange="previewImage(event)">
+                        <input type="hidden" name="hidden_upload_image" id="hidden-upload-image" value="{{ upload_image_url }}">
+                    </div>
+                    
+                        <div class="form-group col-md-2">
+                            <label>
+                                <input type="radio" name="borrower_type" value="Student" id="student_radio" style="width: 20px; height: 20px;" {% if borrower_type == "Student" %}checked{% endif %}>&nbsp; Student
+                            </label>
+                        </div>
+                        <div class="form-group col-md-2">
+                            <label>
+                                <input type="radio" name="borrower_type" value="Teacher" id="teacher_radio" style="width: 20px; height: 20px;" {% if borrower_type == "Teacher" %}checked{% endif %}>&nbsp; Faculty/Employee
+                            </label>
+                        </div>
+                    </div>
+                
+                    <div class="form-row">
+
+                      <!-- Loop through col-xl-6 for multiple items with status Approved -->
+                      <!-- Loop through col-xl-6 for multiple items with status Approved -->
+                      {% for borrow_item in items %}
+                      <div class="col-xl-6">
+                        <div class="card mb-3">
+                          <div class="card-body">
+                            <h4 class="card-title">Item</h4>
+                            <br>
+                            <select name="itemm_{{ forloop.counter }}" id="itemSelect_{{ forloop.counter }}" class="form-control item-select" >
+                              <option value="">Select an item</option>
+                              {% for faculty_item in faculty_items %}
+                                <option value="{{ faculty_item.id }}" {% if faculty_item.name == borrow_item.item_name %}selected{% endif %}>
+                                  {{ faculty_item.name }} ({{ faculty_item.quantity }})
+                                </option>
+                              {% endfor %}
+                            </select>
+                            <div class="error-message" id="error-message-{{ forloop.counter }}" style="color: red; display: none;"></div>
+                            <input type="hidden" name="borrow_item_id_{{ forloop.counter }}" value="{{ borrow_item.id }}">
+                            <div class="mt-4">
+                              <label class="text-dark">Item Details</label>
+                              <textarea name="description_{{ forloop.counter }}" class="form-control">{{ borrow_item.description }}</textarea>
+                            </div>
+
+                            <div class="mt-4">
+                              <label class="text-dark">Quantity</label>
+                              <input type="number" name="quantity_{{ forloop.counter }}" class="form-control quantity-input" data-index="{{ forloop.counter }}" value="{{ borrow_item.quantity }}" style="width: 200px;" data-available-quantity="{{ faculty_item.quantity }}">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      {% endfor %}
+
+
+
+
+                      
+
+
+                      <div class="form-group col-md-6">
+                          <label class="text-dark">Purpose for borrow</label>
+                          <textarea name="purpose" class="form-control" style="border: 1px solid #bebebe;">{{ purpose }}</textarea>
+                      </div>
+                  </div>
+                  
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="window.history.back();">Back</button>
+                        <button id="updateButton" class="btn btn-primary" disabled>Save</button>
+                    </div>
+                </form>
+
+                </div>
+              </div>
+
+            </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          </div>
+        </div>
+        <!-- /.row -->
+
+
+        <!-- /.row -->
+      </div><!--/. container-fluid -->
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+  </aside>
+  <!-- /.control-sidebar -->
+
+  <!-- Main Footer -->
+  <!-- <footer class="main-footer">
+      <strong>Copyright &copy; 2014-2021 <a href="https://adminlte.io">AdminLTE.io</a>.</strong>
+      All rights reserved.
+      <div class="float-right d-none d-sm-inline-block">
+        <b>Version</b> 3.1.0
+      </div>
+    </footer> -->
+</div>
+
+
+
+
+
+
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+      const quantityInputs = document.querySelectorAll('.quantity-input');
+      const updateButton = document.getElementById('updateButton');
+  
+      // Function to check all quantity inputs for errors
+      function checkErrors() {
+          let hasError = false;
+  
+          quantityInputs.forEach(input => {
+              const index = input.getAttribute('data-index');
+              const availableQuantity = parseInt(input.getAttribute('data-available-quantity'), 10);
+              const enteredQuantity = parseInt(input.value, 10);
+              const initialQuantity = parseInt(input.getAttribute('data-initial-quantity'), 10);
+  
+              const addedQuantity = enteredQuantity - initialQuantity; // Calculate added quantity
+              const errorMessageDiv = document.querySelector(`#error-message-${index}`);
+  
+              // Show error message if added quantity exceeds available stock
+              if (addedQuantity > availableQuantity) {
+                  errorMessageDiv.textContent = `You cannot borrow more than ${availableQuantity} items available.`;
+                  errorMessageDiv.style.display = 'block';  // Show the error message
+                  hasError = true;
+              } else {
+                  // Clear the error message if added quantity is valid (0 or less than available)
+                  errorMessageDiv.style.display = 'none';
+              }
+          });
+  
+          // Enable or disable the update button based on error state
+          updateButton.disabled = hasError;
+      }
+  
+      quantityInputs.forEach(input => {
+          input.addEventListener('focus', function() {
+              // Capture the initial quantity value when the input gains focus
+              input.setAttribute('data-initial-quantity', input.value);
+          });
+  
+          input.addEventListener('input', checkErrors); // Call checkErrors on input change
+      });
+  
+      // Initial check to disable the button if there are errors on page load
+      checkErrors();
+  });
+  </script>
+  
+  
+  <script>
+    function previewImage(event) {
+        const previewContainer = document.getElementById('image-preview');
+        const label = document.getElementById('image-label');
+        const hiddenInput = document.getElementById('hidden-upload-image');
+        
+        // Remove any existing images except the label
+        while (previewContainer.firstChild) {
+            if (previewContainer.firstChild !== label) {
+                previewContainer.removeChild(previewContainer.firstChild);
+            } else {
+                break;
+            }
+        }
+        
+        const file = event.target.files[0]; // Get the selected file
+        
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                // Update the preview image
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.classList.add('preview-image');
+                img.style.width = '100%'; // Adjust the size as needed
+                img.style.height = 'auto'; // Maintain aspect ratio
+                previewContainer.appendChild(img); // Append the new image
+                
+                // Update the hidden input with the base64 data
+                hiddenInput.value = e.target.result;
+            };
+            reader.readAsDataURL(file); // Read the image file as data URL
+        } else {
+            // Clear the hidden input if no file is selected
+            hiddenInput.value = '';
+        }
+    }
+</script>
+
+  
+
+{% endblock content %}

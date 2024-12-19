@@ -3,7 +3,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import facultyItem
 from django.contrib import messages
 from django.http import JsonResponse
-from .models import BorrowRequest, facultyItem, BorrowRequestItemFaculty
+from .models import BorrowRequest, facultyItem, BorrowRequestItemFaculty, PropertyID
 from .forms import BorrowRequestMultimediaForm
 from django.views.decorators.http import require_POST
 from django.core.mail import send_mail
@@ -37,42 +37,80 @@ from django.urls import reverse
 
 @login_required
 def add_item(request):
-    # Restrict access to faculty users only
+    # Restrict access to superusers only
     if not request.user.faculty:
         return HttpResponseForbidden("You do not have permission to access this page.")
 
     if request.method == 'POST':
-        name = request.POST.get('name')
-        property_id = request.POST.get('property_id')
-        quantity = request.POST.get('quantity')
+        name = request.POST.get('name', '').strip()
+        property_ids = request.POST.get('property_id', '').strip()  # Multiple IDs comma-separated
+        total_quantity = request.POST.get('total_quantity')
 
         # Ensure required fields are filled
-        if name and quantity:
+        if name and total_quantity:
             try:
-                # Ensure quantity is a valid integer
-                quantity = int(quantity)
-                if quantity <= 0:
+                total_quantity = int(total_quantity)
+                if total_quantity <= 0:
                     raise ValueError("Quantity must be a positive number.")
 
-                # Create the new item and associate it with the current user
-                facultyItem.objects.create(
-                    name=name,
-                    property_id=property_id if property_id else None,  # Set property_id if provided
-                    quantity=quantity,
-                    user_id=request.user.id  # Associate the item with the current user's ID
-                )
-                messages.success(request, 'SUCCESS! Item has been added successfully.')
-                return redirect('item-record')  # Redirect to item_record after adding item
+                # Split and clean property IDs
+                property_id_list = [pid.strip() for pid in property_ids.split(',') if pid.strip()]
+
+                # Check if the item already exists for the current user (case-insensitive)
+                existing_item = facultyItem.objects.filter(
+                    name__iexact=name,
+                    user=request.user
+                ).first()
+
+                if existing_item:
+                    # Update the existing item's quantities
+                    existing_item.total_quantity += total_quantity
+                    existing_item.quantity += total_quantity
+                    if name:
+                        existing_item.name = name
+                    existing_item.save()
+
+                    # Add new property IDs to the existing item
+                    for pid in property_id_list:
+                        PropertyID.objects.create(faculty_item=existing_item, property_id=pid)
+
+                    messages.success(request, 'SUCCESS! Item updated successfully.')
+                else:
+                    # Create a new item
+                    new_item = facultyItem.objects.create(
+                        name=name,
+                        total_quantity=total_quantity,
+                        quantity=total_quantity,
+                        user=request.user
+                    )
+
+                    # Add property IDs for the new item
+                    for pid in property_id_list:
+                        PropertyID.objects.create(faculty_item=new_item, property_id=pid)
+
+                    messages.success(request, 'SUCCESS! New item added successfully.')
+
+                return redirect('item-record')  # Redirect to item record
 
             except ValueError as e:
                 messages.error(request, f'ERROR! {str(e)}')
+
         else:
-            messages.error(request, 'ERROR! Please fill out all required fields.')
+            # Provide specific error messages for missing fields
+            if not name:
+                messages.error(request, 'ERROR! Please provide a name.')
+            if not total_quantity:
+                messages.error(request, 'ERROR! Please provide a valid quantity.')
 
         # Pass the submitted data back to the template in case of an error
-        return render(request, 'add-item.html', {'name': name, 'property_id': property_id, 'quantity': quantity})
+        return render(request, 'add-item.html', {
+            'name': name,
+            'property_id': property_ids,
+            'total_quantity': total_quantity
+        })
 
     return render(request, 'add-item.html')
+
 
 
 
@@ -101,6 +139,8 @@ def item_record(request):
 
     return render(request, 'item-record.html', {'page_obj': page_obj, 'total_items': total_items, 'current_show': current_show})
 
+
+
 @login_required
 def update_item(request):
     # Restrict access to faculty users only
@@ -111,6 +151,7 @@ def update_item(request):
         item_id = request.POST.get('item_id')
         name = request.POST.get('name')
         property_id = request.POST.get('property_id')
+        total_quantity = request.POST.get('total_quantity')
         quantity = request.POST.get('quantity')
 
         # Retrieve the item and ensure it belongs to the current user
@@ -123,6 +164,7 @@ def update_item(request):
         # Update item details
         item.name = name
         item.property_id = property_id  # Update property ID if provided
+        item.total_quantity = total_quantity
         item.quantity = quantity
         item.save()
 
@@ -155,9 +197,8 @@ def borrowers(request):
         return HttpResponseForbidden("You do not have permission to access this page.")
 
     multimedia_items = facultyItem.objects.filter(user=request.user)
-    items = list(multimedia_items)
-
-    has_available_items = any(item.quantity > 0 for item in items)
+    faculty_items = facultyItem.objects.filter(user=request.user)
+    has_available_items = any(item.quantity > 0 for item in multimedia_items)
 
     form = BorrowRequestMultimediaForm(user=request.user)
 
@@ -165,102 +206,141 @@ def borrowers(request):
         content_type = ContentType.objects.get_for_model(facultyItem)
         student_id = request.POST.get('student_id')
         date_borrow = request.POST.get('date_borrow')
+        date_return_value = request.POST.get('date_return')  # Use raw input
+
+        # Validate required fields
+        if not date_borrow and not date_return_value:
+            messages.error(request, 'ERROR! Both Date Borrow and Date Return are required.')
+            return redirect('borrowers')
+        elif not date_borrow:
+            messages.error(request, 'ERROR! Date Borrow is required.')
+            return redirect('borrowers')
+        elif not date_return_value:
+            messages.error(request, 'ERROR! Date Return is required.')
+            return redirect('borrowers')
 
         try:
+            # Parse and validate dates
             date_borrow_parsed = datetime.strptime(date_borrow, "%d %B, %Y").date()
+            date_return_parsed = datetime.strptime(date_return_value, "%d %B, %Y").date()
 
+            # Ensure date_borrow is not in the past
             if date_borrow_parsed < timezone.now().date():
                 messages.error(request, 'ERROR! Date Borrow cannot be set to a past date.')
+                return redirect('borrowers')
+
+            # Ensure date_return is not before date_borrow
+            if date_return_parsed < date_borrow_parsed:
+                messages.error(request, 'ERROR! Date Return cannot be before Date Borrow.')
+                return redirect('borrowers')
+
+            borrower_type = request.POST.get('borrower_type')
+            if borrower_type not in ['Student', 'Teacher']:
+                other_borrower_type = request.POST.get('other_borrower_type')
+                if other_borrower_type:
+                    borrower_type = other_borrower_type
+                    
+                    
+            
+            # Handle the upload_image field
+            uploaded_image = request.FILES.get('upload_image')
+            hidden_image = request.POST.get('hidden_upload_image')
+
+            if uploaded_image:
+                upload_image = uploaded_image
+            elif hidden_image:
+                # Remove '/media/' from the beginning if it exists
+                if hidden_image.startswith('/media/'):
+                    hidden_image = hidden_image[len('/media/'):]
+                upload_image = hidden_image
             else:
-                borrower_type = request.POST.get('borrower_type')
-                if borrower_type not in ['Student', 'Teacher']:
-                    other_borrower_type = request.POST.get('other_borrower_type')
-                    if other_borrower_type:
-                        borrower_type = other_borrower_type
+                upload_image = None
+                
 
-                # Check if there is an existing BorrowRequest with the same student_id, date_borrow, and user
-                borrow_request = BorrowRequest.objects.filter(
+            borrow_request = BorrowRequest.objects.filter(
+                student_id=student_id,
+                date_borrow=date_borrow,
+                user=request.user
+            ).first()
+
+            if not borrow_request:
+                borrow_request = BorrowRequest(
                     student_id=student_id,
+                    name=request.POST.get('name'),
+                    course=request.POST.get('course'),
+                    year=request.POST.get('year'),
+                    email=request.POST.get('email'),
+                    phone=request.POST.get('phone'),
                     date_borrow=date_borrow,
-                    user=request.user
-                ).first()
+                    date_return=date_return_value,  # Save raw input as-is
+                    status='Unreturned',
+                    note=request.POST.get('note', ''),
+                    user=request.user,
+                    purpose=request.POST.get('purpose'),
+                    borrower_type=borrower_type,
+                    content_type=content_type,
+                    object_id=0,
+                    upload_image=upload_image
+                )
+                borrow_request.save()
 
-                # If no such BorrowRequest exists, create a new one
-                if not borrow_request:
-                    borrow_request = BorrowRequest(
-                        student_id=student_id,
-                        name=request.POST.get('name'),
-                        course=request.POST.get('course'),
-                        year=request.POST.get('year'),
-                        email=request.POST.get('email'),
-                        phone=request.POST.get('phone'),
-                        date_borrow=date_borrow,
-                        date_return=None,
-                        status='Unreturned',
-                        note=request.POST.get('note', ''),
-                        user=request.user,
-                        borrower_type=borrower_type,
-                        content_type=content_type,
-                        object_id=0,
-                        upload_image=request.FILES.get('upload_image')
-                    )
-                    borrow_request.save()
+            items_borrowed = request.POST.getlist('item')
+            quantities_borrowed = request.POST.getlist('quantities[]')
+            descriptions = request.POST.getlist('description')
 
-                items_borrowed = request.POST.getlist('item')
-                quantities_borrowed = request.POST.getlist('quantities[]')
-                descriptions = request.POST.getlist('description')
+            if not items_borrowed:
+                messages.error(request, 'ERROR! No items selected for borrowing.')
+                return redirect('borrowers')
 
-                # Begin transaction
-                with transaction.atomic():
-                    for item_id, quantity, description in zip(items_borrowed, quantities_borrowed, descriptions):
-                        selected_item = facultyItem.objects.get(id=item_id)
-                        requested_quantity = int(quantity)
+            with transaction.atomic():
+                for item_id, quantity, description in zip(items_borrowed, quantities_borrowed, descriptions):
+                    selected_item = facultyItem.objects.get(id=item_id)
+                    requested_quantity = int(quantity)
 
-                        # Backend quantity validation
-                        if requested_quantity > selected_item.quantity:
-                            messages.error(
-                                request,
-                                f"ERROR! Not enough '{selected_item.name}' available. Requested: {requested_quantity}, Available: {selected_item.quantity}."
-                            )
-                            return redirect('borrowers')  # Redirect back to form
+                    if requested_quantity > selected_item.quantity:
+                        messages.error(
+                            request,
+                            f"ERROR! Not enough '{selected_item.name}' available. "
+                            f"Requested: {requested_quantity}, Available: {selected_item.quantity}."
+                        )
+                        return redirect('borrowers')
 
-                        # Check if an item entry exists for this BorrowRequest
-                        borrow_request_item = BorrowRequestItemFaculty.objects.filter(
+                    borrow_request_item = BorrowRequestItemFaculty.objects.filter(
+                        borrow_request=borrow_request,
+                        item=selected_item,
+                        is_returned=False
+                    ).first()
+
+                    if borrow_request_item:
+                        borrow_request_item.quantityy += requested_quantity
+                        borrow_request_item.description = description
+                        borrow_request_item.save()
+                    else:
+                        BorrowRequestItemFaculty.objects.create(
                             borrow_request=borrow_request,
                             item=selected_item,
-                            is_returned=False
-                        ).first()
+                            quantityy=requested_quantity,
+                            description=description,
+                            is_returned=False,
+                            handled_by=request.user
+                        )
 
-                        if borrow_request_item:
-                            # Update quantity and description for the existing item
-                            borrow_request_item.quantityy += requested_quantity
-                            borrow_request_item.description = description  # Update the description if needed
-                            borrow_request_item.save()
-                        else:
-                            # Create a new item entry for this BorrowRequest
-                            BorrowRequestItemFaculty.objects.create(
-                                borrow_request=borrow_request,
-                                item=selected_item,
-                                quantityy=requested_quantity,
-                                description=description,  # Set the description for the new entry
-                                is_returned=False,
-                                handled_by=request.user  # Set handled_by to the current user here
-                            )
+                    borrow_request.status = 'Unreturned'
+                    borrow_request.date_return = date_return_value
+                    borrow_request.created_at = timezone.now()
+                    borrow_request.save()
 
-                            borrow_request.status = 'Unreturned'
-                            borrow_request.save()
+                    selected_item.quantity -= requested_quantity
+                    selected_item.save()
 
-                        # Decrease item quantity in stock
-                        selected_item.quantity -= requested_quantity
-                        selected_item.save()
-
-                messages.success(request, 'SUCCESS! Borrow requests have been submitted.')
-                return redirect('borrow-record')
+            messages.success(request, 'SUCCESS! Borrow requests have been submitted.')
+            return redirect('borrow-record')
 
         except ValueError:
-            messages.error(request, 'ERROR! Invalid date format. Please use DD MMMM, YYYY format (e.g., 29 October, 2024).')
+            messages.error(request, 'ERROR! Invalid date format. Please use DD MMMM, YYYY format (e.g., 25 November, 2024).')
 
     return render(request, 'borrowers.html', {
+        'faculty_items': faculty_items,
         'form': form,
         'multimedia_items': multimedia_items,
         'has_available_items': has_available_items,
@@ -334,6 +414,7 @@ def borrow_record(request):
 
 
 # im taking rest not modify yet
+# im taking rest not modify yet
 @login_required
 def borrower_details(request):
     if not request.user.faculty:
@@ -343,12 +424,14 @@ def borrower_details(request):
     name = request.GET.get('name')
     date_borrow = request.GET.get('date_borrow')
     status = request.GET.get('status')
+    purpose = request.GET.get('purpose')
     user_id = request.user.id
 
     # Filter BorrowRequest based on the user handling the items and borrow request date
     borrow_requests = BorrowRequest.objects.filter(
         facultyitems__handled_by=user_id,
         date_borrow=date_borrow,
+        student_id=student_id
     ).distinct()
 
     if not borrow_requests.exists():
@@ -356,16 +439,24 @@ def borrower_details(request):
 
     # Collect all items, including duplicates, across all borrow requests handled by the user
     all_items = []
+    upload_image = None  # Initialize as None in case no image is found
+
     for borrow_request in borrow_requests:
         items = borrow_request.facultyitems.filter(handled_by=user_id)
         all_items.extend(items)  # Append each item to the list, allowing duplicates
+        # Fetch the first image if available
+        if borrow_request.upload_image:
+            upload_image = borrow_request.upload_image.url
 
     context = {
         'student_id': student_id,
         'name': name,
         'date_borrow': date_borrow,
         'status': status,
+        'purpose': purpose,
         'all_items': all_items,  # Pass all items, including duplicates, to the template
+        'upload_image': upload_image,  # Add upload_image to the context
+        'date_return': borrow_request.date_return,
     }
 
     return render(request, 'borrower-details.html', context)
@@ -431,52 +522,15 @@ def fetch_borrow_request_items_record(request):
 
 
 
-
-
-
-
-@login_required
-def fetch_borrow_request(request):
-    if not request.user.faculty:
-        return HttpResponseForbidden("You do not have permission to access this page.")
-
-    # Get the BorrowRequest instance
-    borrow_request_id = request.GET.get('id')
-    borrow_request = get_object_or_404(BorrowRequest, id=borrow_request_id)
-
-    # Fetch the related BorrowRequestItems
-    borrow_request_items = borrow_request.facultyitems.all()  # Get all related items
-
-    # Fetch items from facultyItem that are handled by the current user
-    items = facultyItem.objects.filter(user=request.user)
-
-    # Prepare context for displaying in the template
-    context = {
-        'borrow_request_id': borrow_request_id,
-        'borrow_request_items': borrow_request_items,
-        'items': items,
-        'purpose': borrow_request.purpose,
-        'student_id': borrow_request.student_id,
-        'name': borrow_request.name,
-        'course': borrow_request.course,
-        'year': borrow_request.year,
-        'email': borrow_request.email,
-        'phone': borrow_request.phone,
-        'date_borrow': borrow_request.date_borrow,
-        'borrower_type': borrow_request.borrower_type,
-        # Other context variables if needed...
-    }
-
-    return render(request, 'update-borrow-request.html', context)
-
-
-
 def search_borrow_request(request):
-    student_id = request.GET.get('student_id')
+    student_id = request.GET.get('student_id', '').replace('-', '')  # Cleaned ID
+    original_id = request.GET.get('original_id', '')  # Original ID with hyphens
 
     if student_id:
-        # Query the BorrowRequest model for the student_id
-        borrow_request = BorrowRequest.objects.filter(student_id=student_id).last()  # Get the first matching record
+        # Query the BorrowRequest model using both versions of the ID
+        borrow_request = BorrowRequest.objects.filter(
+            Q(student_id=student_id) | Q(student_id=original_id)
+        ).last()
 
         if borrow_request:
             data = {
@@ -487,12 +541,19 @@ def search_borrow_request(request):
                 'email': borrow_request.email,
                 'phone': borrow_request.phone,
                 'borrower_type': borrow_request.borrower_type,
-                'date_borrow': borrow_request.date_borrow,  # Add this line to return the date
+                'date_borrow': borrow_request.date_borrow,
+                'date_return': borrow_request.date_return,
+                'purpose': borrow_request.purpose,
+                'upload_image': f"{settings.MEDIA_URL}{borrow_request.upload_image}" if borrow_request.upload_image else None,
             }
             return JsonResponse(data)
 
     # Return a response indicating no record was found
     return JsonResponse({'success': False, 'error': 'No record found.'}, status=404)
+
+
+
+
 
 
 
@@ -524,11 +585,18 @@ def fetch_borrow_request(request):
         'email': borrow_request.email,
         'phone': borrow_request.phone,
         'date_borrow': borrow_request.date_borrow,
+        'date_return': borrow_request.date_return,
         'borrower_type': borrow_request.borrower_type,
+        'upload_image_url': borrow_request.upload_image.url if borrow_request.upload_image else None,  # Add this
         # Other context variables if needed...
     }
 
     return render(request, 'update-borrow-request.html', context)
+
+
+
+
+
 
 
 @csrf_exempt  # Optional, remove if not necessary for production
@@ -549,12 +617,14 @@ def update_borrower_status(request):
             # Set the BorrowRequest status based on the count of returned items
             if status == "Fully Returned":
                 borrow_request.status = "Fully Returned"  # Set status to Fully Returned
+                borrow_request.created_at = timezone.now()
                 borrow_request.save()
                 messages.success(request, f"Borrower status updated to {borrow_request.status}.")
                 return redirect('borrow-record')  # Redirect after Fully Returned status update
 
             elif status == "Partial Item Returned" and returned_items > 0:
                 borrow_request.status = "Partial Item Returned"  # Set status to Partial Item Returned
+                borrow_request.created_at = timezone.now()
                 borrow_request.save()
                 messages.success(request, "Item returned successfully!")
                 return redirect(request.META.get('HTTP_REFERER'))  # Reload the page when status is Partial Item Returned
@@ -626,9 +696,14 @@ def save_borrow_update(request):
         borrow_request.year = request.POST.get('year')
         borrow_request.email = request.POST.get('email')
         borrow_request.phone = request.POST.get('phone')
-        borrow_request.date_borrow = request.POST.get('datepicker')
+        borrow_request.date_borrow = request.POST.get('date_borrow')
+        borrow_request.date_return = request.POST.get('date_return')
         borrow_request.borrower_type = request.POST.get('borrower_type')
         borrow_request.purpose = request.POST.get('purpose')
+        
+        # Handle image upload
+        if 'upload_image' in request.FILES:  # Check if a file is uploaded
+            borrow_request.upload_image = request.FILES['upload_image']  # Update the image field
         borrow_request.save()  # Save changes to BorrowRequest
 
         # Update each BorrowRequestItem based on the form data
@@ -715,11 +790,13 @@ def send_email_notification(request):
 def get_unreturned_items(request, borrow_id):
     try:
         borrow_request = BorrowRequest.objects.get(id=borrow_id)
-        unreturned_items = borrow_request.items.filter(is_returned=False)
+        unreturned_items = borrow_request.facultyitems.filter(is_returned=False)
         items_list = [
             {
                 'name': item.item.name,
-                'quantity': item.quantityy
+                'quantity': item.quantityy,
+                'date_borrow': borrow_request.date_borrow,
+                'time_ago': borrow_request.time_ago(),
             }
             for item in unreturned_items
         ]
@@ -727,6 +804,7 @@ def get_unreturned_items(request, borrow_id):
         return JsonResponse({'success': True, 'items': items_list})
     except BorrowRequest.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Borrow request not found.'})
+
 
 
 
@@ -801,7 +879,7 @@ def change_password(request):
 
 
 
-from django.db.models import OuterRef, Subquery
+from django.db.models import BooleanField, Case, When, Subquery, OuterRef
 
 @login_required
 def student_reservation(request):
@@ -811,7 +889,7 @@ def student_reservation(request):
     # Get the logged-in user's ID
     user_id = request.user.id
 
-    # Filter ReservationItems based on user_facultyItem and fetch a single handle_status per reservation
+    # Filter ReservationItems and annotate reservations
     reservation_items = ReservationItem.objects.filter(user_facultyItem=user_id)
     reserved_request = StudentReservation.objects.filter(
         id__in=reservation_items.values('reservation')
@@ -819,15 +897,26 @@ def student_reservation(request):
         single_handle_status=Subquery(
             ReservationItem.objects.filter(
                 reservation=OuterRef('id'),
-                user_facultyItem=user_id  # Filter by the current user's faculty item
-            ).values('handle_status')[:1]  # Fetch only the first handle_status
+                user_facultyItem=user_id
+            ).values('handle_status')[:1]
+        ),
+        has_approved=Case(
+            When(
+                id__in=ReservationItem.objects.filter(
+                    reservation=OuterRef('id'),
+                    status="Approved"
+                ).values('reservation'),
+                then=True
+            ),
+            default=False,
+            output_field=BooleanField()
         )
     ).order_by('-id')
 
     # Pagination logic
     show_entries = request.GET.get('show', 'all')
     if show_entries == 'all':
-        paginator = Paginator(reserved_request, 1000000)  # Large number to ensure all items are on one page
+        paginator = Paginator(reserved_request, 1000000)
         current_show = 'all'
     else:
         paginator = Paginator(reserved_request, int(show_entries))
@@ -961,6 +1050,164 @@ def update_reservation_item_status(request):
 
 
 
+@login_required
+def proceed_borrow(request, reservation_id):
+    if not request.user.faculty:
+        return HttpResponseForbidden("You do not have permission to access this page.")
+
+    try:
+        # Retrieve the reservation
+        reservation = StudentReservation.objects.get(id=reservation_id)
+        
+        # Filter approved items linked to the reservation and current user
+        approved_items = ReservationItem.objects.filter(
+            reservation=reservation,
+            status='Approved',
+            user_facultyItem=request.user
+        )
+
+        # Filter faculty items handled by the current user
+        faculty_items = facultyItem.objects.filter(user=request.user)
+        
+        # Default the borrower type to "Student"
+        borrower_type = "Student"
+
+        context = {
+            'reserve_request_id': reservation.id,
+            'student_id': reservation.student_id,
+            'name': reservation.name,
+            'course': reservation.course,
+            'year': reservation.year_level,
+            'email': reservation.email,
+            'phone': reservation.phone_number,
+            'date_reserve': reservation.reserve_date,
+            'date_return': reservation.date_return,
+            'purpose': reservation.purpose,
+            'items': approved_items,
+            'faculty_items': faculty_items,  # Pass faculty items to contex
+            'borrower_type': borrower_type,  # Pass default borrower typet
+            'upload_image_url': reservation.upload_image.url if reservation.upload_image else None,  # Add this
+        }
+        return render(request, 'proceed-borrow.html', context)
+
+    except StudentReservation.DoesNotExist:
+        return HttpResponseNotFound("Reservation not found.")
+    
+    
+
+
+@transaction.atomic
+def save_reservation_request(request):
+    if request.method == 'POST':
+        # Extract main BorrowRequest fields
+        student_id = request.POST.get('student_id')
+        name = request.POST.get('name')
+        course = request.POST.get('course')
+        year = request.POST.get('year')
+        email = request.POST.get('email')
+        phone = request.POST.get('phone')
+        purpose = request.POST.get('purpose')
+        borrower_type = request.POST.get('borrower_type')
+        date_borrow = request.POST.get('date_reserve')
+        date_return = request.POST.get('date_return')
+
+        # Handle the upload_image field
+        uploaded_image = request.FILES.get('upload_image')
+        hidden_image = request.POST.get('hidden_upload_image')
+        if uploaded_image:
+            upload_image = uploaded_image
+        elif hidden_image and hidden_image.startswith('/media/'):
+            upload_image = hidden_image[len('/media/'):]
+        else:
+            upload_image = None
+
+        # Check if BorrowRequest already exists for the same student_id and date_borrow
+        borrow_request, created = BorrowRequest.objects.get_or_create(
+            student_id=student_id,
+            date_borrow=date_borrow,
+            defaults={
+                'name': name,
+                'course': course,
+                'year': year,
+                'email': email,
+                'phone': phone,
+                'purpose': purpose,
+                'status': "Unreturned",
+                'borrower_type': borrower_type,
+                'date_return': date_return,
+                'user': request.user,
+                'upload_image': upload_image,
+            }
+        )
+
+        # Initialize a flag to check if any BorrowRequestItemFaculty is created
+        item_created = False
+        counter = 1
+
+        while f'itemm_{counter}' in request.POST:
+            item_id = request.POST.get(f'itemm_{counter}')
+            description = request.POST.get(f'description_{counter}')
+            quantity = int(request.POST.get(f'quantity_{counter}', 0))
+
+            if item_id:
+                faculty_item = get_object_or_404(facultyItem, id=item_id)
+
+                # Validate quantity
+                if quantity > faculty_item.quantity:
+                    transaction.set_rollback(True)
+                    messages.error(request, f"Insufficient quantity for {faculty_item.name}.")
+                    return redirect('student-reservation')
+
+                # Check if the item already exists in BorrowRequestItemFaculty
+                borrow_request_item = BorrowRequestItemFaculty.objects.filter(
+                    borrow_request=borrow_request,
+                    item=faculty_item
+                ).first()
+
+                if borrow_request_item:
+                    # Update existing item's quantity
+                    borrow_request_item.quantityy += quantity
+                    borrow_request_item.description = description  # Update description if needed
+                    borrow_request_item.save()
+                else:
+                    # Create a new BorrowRequestItemFaculty
+                    BorrowRequestItemFaculty.objects.create(
+                        borrow_request=borrow_request,
+                        item=faculty_item,
+                        item_name=faculty_item.name,
+                        quantityy=quantity,
+                        description=description,
+                        handled_by=request.user,
+                    )
+
+                # Update facultyItem quantity
+                faculty_item.quantity -= quantity
+                faculty_item.save()
+
+                # Set item_created flag to True as we've added or updated an item
+                item_created = True
+
+            counter += 1
+
+        # If no items were created or updated, roll back and show an error
+        if not item_created:
+            transaction.set_rollback(True)
+            messages.error(request, "You must select at least one item.")
+            return redirect('student-reservation')
+
+        # Display a success message
+        if created:
+            messages.success(request, "New borrow request created successfully!")
+        else:
+            messages.success(request, "Borrow request updated successfully!")
+
+        return redirect('borrow-record')
+
+    return redirect('student-reservation')
+
+
+
+
 
 
 
@@ -1005,3 +1252,8 @@ def generate_report(request, id):
         return response
     except Exception as e:
         return HttpResponse(f"An error occurred: {str(e)}")
+
+
+
+
+

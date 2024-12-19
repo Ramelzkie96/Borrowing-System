@@ -172,6 +172,58 @@
 
 </style>
 
+<style>
+/* Styling for a smaller image preview container */
+.image-preview {
+    width: 180px; /* Smaller width */
+    height: 110px; /* Smaller height */
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background-color: #f7f7f7;
+  }
+  
+  /* Hidden file input */
+  #image-upload {
+    display: none;
+  }
+  
+  /* Style for the label that acts as the button */
+  #image-label {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    
+    color: #333; /* Default dark text */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    opacity: 1;
+    transition: opacity 0.3s ease, color 0.3s ease;
+    font-size: 14px;
+    font-weight: bold;
+  }
+  
+  /* Hover effect: show overlay and change text color to white */
+  .image-preview:hover #image-label {
+    opacity: 1;
+    color: #0f2f67;
+  }
+  
+  /* Style for the uploaded image */
+  .image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+  }
+</style>
+
 {% endblock %}
 
 
@@ -236,6 +288,29 @@
         });
     }
 
+
+</script>
+
+<script>
+    document.getElementById('studentIdUpload').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        const previewImage = document.getElementById('previewImage');
+        const placeholderText = document.querySelector('.placeholder-text');
+    
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                previewImage.classList.remove('hidden');
+                placeholderText.classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        } else {
+            previewImage.src = '';
+            previewImage.classList.add('hidden');
+            placeholderText.classList.remove('hidden');
+        }
+    });
 </script>
 {% endblock %}
 
@@ -526,7 +601,7 @@
                     </div>
                     <div class="card-body">
                         <div class="basic-form">
-                            <form id="editBorrowerForm" method="post" action="{% url 'submit_reservation' %}">
+                            <form id="editBorrowerForm" enctype="multipart/form-data" method="post" action="{% url 'submit_reservation' %}">
                                 {% csrf_token %}
                                 <input type="hidden" name="id" value="{{ user.id }}">
                                 <div class="form-row">
@@ -540,7 +615,12 @@
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label class="text-dark">Course</label>
-                                        <input type="text" name="course" value="{{ user.course }}" class="form-control" value="" style="border: 1px solid #bebebe;">
+                                        <select class="form-select form-control" name="course" style="border:1px solid rgba(0, 0, 0, 0.2);" aria-label="Default select example" required>
+                                            <option value="BS INFORMATION TECHNOLOGY" {% if user.course == 'BS INFORMATION TECHNOLOGY' %}selected{% endif %}>BS INFORMATION TECHNOLOGY</option>
+                                            <option value="BS INDUSTRIAL TECHNOLOGY" {% if user.course == 'BS INDUSTRIAL TECHNOLOGY' %}selected{% endif %}>BS INDUSTRIAL TECHNOLOGY</option>
+                                            <option value="BS ELECTRICAL ENGINEERING" {% if user.course == 'BS ELECTRICAL ENGINEERING' %}selected{% endif %}>BS ELECTRICAL ENGINEERING</option>
+                                            <option value="BS MACHANICAL ENGINEERING" {% if user.course == 'BS MACHANICAL ENGINEERING' %}selected{% endif %}>BS MACHANICAL ENGINEERING</option>
+                                        </select>
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label class="text-dark">Year</label>
@@ -557,17 +637,36 @@
                                         <label class="text-dark">Email</label>
                                         <input type="text" name="email" class="form-control" value="{{ user.email }}" style="border: 1px solid #bebebe;">
                                     </div>
-                                    <div class="form-group col-md-3">
+                                    <div class="form-group col-md-6">
                                         <label class="text-dark">Phone</label>
                                         <input type="text" name="phone" class="form-control" value="{{ user.phone_number }}" style="border: 1px solid #bebebe;">
                                     </div>
-                                    <div class="form-group col-md-3">
+                                    
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
                                         <label class="text-dark">Date Reserve</label>
                                         <div class="input-with-icon">
                                             <input name="datepicker" id="dateBorrow" class="datepicker-default form-control" style="border: 1px solid #bebebe; background: white; font-size: 14px" required>
                                             <i class="fas fa-calendar-alt" style="position: absolute; top: 38px; right: -50px;"></i>
                                         </div>
                                     </div>
+                                    <div class="form-group col-md-6">
+                                        <label class="text-dark">Date Return</label>
+                                        <div class="input-with-icon">
+                                            <input name="date_return" id="dateBorrow" class="datepicker-default form-control" style="border: 1px solid #bebebe; background: white; font-size: 14px" required>
+                                            <i class="fas fa-calendar-alt" style="position: absolute; top: 38px; right: -50px;"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label>Student ID Image (required)</label>
+                                        <div class="image-preview" id="image-preview">
+                                          <label for="image-upload" id="image-label">Click to Upload Image</label>
+                                        </div>
+                                        <input type="file" name="upload_image" id="image-upload" accept="image/*" onchange="previewImage(event)">
+                                      </div>
                                 </div>
                                 <div class="form-row">
                                     <div class="col-xl-6">
@@ -588,6 +687,10 @@
                                                     <div class="text-danger mt-2"></div>
                                                 </div>
 
+                                                <p>
+                                                    <!-- show here who handle the item -->
+                                                </p>
+
                                                 <div class="mt-4">
                                                     <label class="text-dark">Item Details (OPTIONAL) </label>
                                                     <textarea name="description" style="height: 50px; resize: vertical;" class="form-control" placeholder=""></textarea>
@@ -607,7 +710,7 @@
 
                                     <div class="form-group col-md-6">
                                         <label class="text-dark">Purpose</label>
-                                        <textarea name="purpose" class="form-control" cols="1" rows="1" style="border: 1px solid #bebebe;"></textarea>
+                                        <textarea name="purpose" class="form-control" cols="1" rows="1" style="border: 1px solid #bebebe;" required></textarea>
                                     </div>
                                 </div>
 
@@ -636,156 +739,171 @@
 
 <!-- Add this script to hide the alerts after 5 seconds -->
 <script>
+    let itemDetails = {}; // Object to store details of each item (name, quantity, handler)
 
-    let itemQuantities = {}; // Object to store quantities of each item
-
-function populateItems() {
-    fetch('/get-faculty-items/') // Your actual endpoint to fetch items
-        .then(response => response.json())
-        .then(data => {
-            const itemSelects = document.querySelectorAll('select[name="itemm"]');
-            itemSelects.forEach(itemSelect => {
-                // Clear existing options (except the default) only if the select is empty
-                if (itemSelect.options.length === 1) {
-                    data.forEach(item => {
-                        const option = document.createElement('option');
-                        option.value = item.id; // Set the item's ID as the value
-                        option.textContent = `${item.name} (Available: ${item.quantity})`; // Set the display text
-                        itemSelect.appendChild(option);
-                        // Store the item's quantity for later validation
-                        itemQuantities[item.id] = item.quantity;
-                    });
-                }
-            });
-        })
-        .catch(error => console.error('Error fetching items:', error));
-}
-
-// Validate quantity based on selected item
-function validateQuantity(selectElement, quantityInput) {
-    const selectedItemId = selectElement.value;
-    const availableQuantity = itemQuantities[selectedItemId] || 0; // Get available quantity
-
-    const quantityValue = parseInt(quantityInput.value, 10);
-    const quantityError = quantityInput.nextElementSibling; // Assumes error message is the next sibling
-    const selectError = selectElement.nextElementSibling; // Assumes error message for select field is the next sibling
-
-    // Clear previous error messages
-    quantityError.textContent = '';
-    selectError.textContent = '';
-
-    // Show an error if quantity is 2 or more and no item is selected
-    if (!selectedItemId && quantityValue >= 1) {
-        quantityError.textContent = 'Please select an item before adding a quantity.';
-    } else if (selectedItemId) {
-        // If an item is selected, check if quantity exceeds available stock
-        const availableQuantity = itemQuantities[selectedItemId] || 0; // Get available quantity
-        if (quantityValue > availableQuantity) {
-            quantityError.textContent = `You cannot borrow more than ${availableQuantity} of this item.`;
+    // Fetch and populate items in all dropdowns
+    function populateItems() {
+        fetch('/get-faculty-items/') // Replace with your actual endpoint
+            .then(response => response.json())
+            .then(data => {
+                const itemSelects = document.querySelectorAll('select[name="itemm"]');
+                itemSelects.forEach(itemSelect => {
+                    // Populate items only if dropdown is empty
+                    if (itemSelect.options.length === 1) {
+                        data.forEach(item => {
+                            const option = document.createElement('option');
+                            option.value = item.id; // Set item ID
+                            option.textContent = `${item.name} (Available: ${item.quantity})`;
+                            itemSelect.appendChild(option);
+    
+                            // Store item details
+                            itemDetails[item.id] = {
+                                name: item.name,
+                                quantity: item.quantity,
+                                handler: item.user__username,
+                            };
+                        });
+                    }
+                });
+            })
+            .catch(error => console.error('Error fetching items:', error));
+    }
+    
+    // Display handler information dynamically in the corresponding <p> tag
+    function displayHandlerInfo(selectElement) {
+        const selectedItemId = selectElement.value;
+        const handlerInfoP = selectElement.closest('.card-bodyd').querySelector('p');
+    
+        // Clear previous handler info
+        handlerInfoP.textContent = '';
+    
+        // Show handler info if an item is selected
+        if (selectedItemId && itemDetails[selectedItemId]) {
+            handlerInfoP.textContent = `Handled by: ${itemDetails[selectedItemId].handler}`;
         }
     }
-
-    // Validate uniqueness of selected item across cards
-    const selectedItemIds = Array.from(document.querySelectorAll('select[name="itemm"]')).map(select => select.value);
-    const duplicateItemId = selectedItemIds.find((id, index) => selectedItemIds.indexOf(id) !== index && id !== ''); // Check for duplicates
-
-    if (duplicateItemId) {
-        selectError.textContent = 'This item has already been selected in another card.';
+    
+    // Validate quantity and uniqueness of selection
+    function validateQuantity(selectElement, quantityInput) {
+        const selectedItemId = selectElement.value;
+        const availableQuantity = itemDetails[selectedItemId]?.quantity || 0;
+        const quantityValue = parseInt(quantityInput.value, 10);
+        const quantityError = quantityInput.nextElementSibling;
+        const selectError = selectElement.nextElementSibling;
+    
+        // Clear error messages
+        quantityError.textContent = '';
+        selectError.textContent = '';
+    
+        // Validate item selection and quantity
+        if (!selectedItemId && quantityValue >= 1) {
+            quantityError.textContent = 'Please select an item before adding a quantity.';
+        } else if (quantityValue > availableQuantity) {
+            quantityError.textContent = `You cannot borrow more than ${availableQuantity} of this item.`;
+        }
+    
+        // Validate uniqueness of selected item across cards
+        const selectedItems = Array.from(document.querySelectorAll('select[name="itemm"]')).map(select => select.value);
+        if (selectedItems.filter(id => id === selectedItemId).length > 1) {
+            selectError.textContent = 'This item has already been selected in another card.';
+        }
     }
-
-    updateSubmitButtonState(); // Check submit button state after validation
-}
-
-
-// Enable or disable the submit button based on validation
-function updateSubmitButtonState() {
-    const errorMessages = document.querySelectorAll('.text-danger'); // Select all error messages
-    const submitButton = document.querySelector('button[type="submit"]');
-    const hasErrors = Array.from(errorMessages).some(message => message.textContent.trim() !== '');
-
-    submitButton.disabled = hasErrors; // Disable button if there are any error messages
-}
-
-// Event listener for select change
-document.addEventListener('change', (event) => {
-    if (event.target.matches('select[name="itemm"]')) {
-        const selectElement = event.target;
-        const quantityInput = selectElement.closest('.card-bodyd').querySelector('input[name="quantityy"]');
-        validateQuantity(selectElement, quantityInput); // Validate on select change
+    
+    // Update submit button state based on errors
+    function updateSubmitButtonState() {
+        const errors = document.querySelectorAll('.text-danger');
+        const submitButton = document.querySelector('button[type="submit"]');
+        const hasErrors = Array.from(errors).some(error => error.textContent.trim() !== '');
+        submitButton.disabled = hasErrors;
     }
-});
-
-// Event listener for quantity input change
-document.addEventListener('input', (event) => {
-    if (event.target.matches('input[name="quantityy"]')) {
-        const quantityInput = event.target;
-        const selectElement = quantityInput.closest('.card-bodyd').querySelector('select[name="itemm"]');
-        validateQuantity(selectElement, quantityInput); // Validate on quantity input change
+    
+    // Duplicate the card with independent behavior
+    function duplicateCard(event) {
+        const originalCol = event.target.closest('.col-xl-6');
+        if (!originalCol) return;
+    
+        const newColDiv = originalCol.cloneNode(true);
+    
+        // Reset fields in the new card
+        const quantityInput = newColDiv.querySelector('input[name="quantityy"]');
+        if (quantityInput) {
+            quantityInput.value = 1;
+            quantityInput.nextElementSibling.textContent = '';
+        }
+    
+        const selectElement = newColDiv.querySelector('select[name="itemm"]');
+        if (selectElement) {
+            selectElement.selectedIndex = 0;
+            selectElement.nextElementSibling.textContent = '';
+        }
+    
+        const descriptionInput = newColDiv.querySelector('textarea[name="description"]');
+        if (descriptionInput) {
+            descriptionInput.value = '';
+        }
+    
+        const handlerInfoP = newColDiv.querySelector('p');
+        if (handlerInfoP) {
+            handlerInfoP.textContent = '';
+        }
+    
+        // Add "X" icon to remove card
+        const closeIcon = document.createElement('div');
+        closeIcon.innerHTML = '<i class="fa fa-times text-danger" style="cursor: pointer;"></i>';
+        closeIcon.style.position = 'absolute';
+        closeIcon.style.top = '10px';
+        closeIcon.style.right = '10px';
+        newColDiv.appendChild(closeIcon);
+    
+        closeIcon.addEventListener('click', () => {
+            newColDiv.remove();
+            updateSubmitButtonState();
+        });
+    
+        // Append the new card
+        originalCol.closest('.form-row').appendChild(newColDiv);
+    
+        // Repopulate items for the new card
+        populateItems();
+    
+        // Attach event listeners to the new card
+        const newPlusIcon = newColDiv.querySelector('.plus-icon');
+        if (newPlusIcon) {
+            newPlusIcon.addEventListener('click', duplicateCard);
+        }
     }
-});
-
-
-// Function to handle duplicating the col-xl-6 div
-function duplicateCard(event) {
-    const originalCol = event.target.closest('.col-xl-6');  // Find the closest col-xl-6 to the clicked plus icon
-    if (!originalCol) return;  // Ensure there's a col-xl-6 to duplicate
-
-    const newColDiv = originalCol.cloneNode(true);  // Clone the entire col-xl-6 div
-
-    // Reset quantity input and clear error messages in the new card
-    const quantityInput = newColDiv.querySelector('input[name="quantityy"]');
-    if (quantityInput) {
-        quantityInput.value = 1;  // Reset quantity
-        quantityInput.nextElementSibling.textContent = '';  // Clear quantity error message
-    }
-
-    // Clear selected item in the new card and clear errors
-    const selectElement = newColDiv.querySelector('select[name="itemm"]');
-    if (selectElement) {
-        selectElement.selectedIndex = 0;  // Reset to the default option
-        selectElement.nextElementSibling.textContent = '';  // Clear select error message
-    }
-
-    // Clear the description field in the new card
-    const descriptionInput = newColDiv.querySelector('textarea[name="description"]');
-    if (descriptionInput) {
-        descriptionInput.value = '';  // Clear the description field
-    }
-
-    // Add "X" icon for deleting the col-xl-6 div
-    const closeIcon = document.createElement('div');
-    closeIcon.innerHTML = '<i class="fa fa-times text-danger" style="cursor: pointer;"></i>';
-    closeIcon.style.position = 'absolute';
-    closeIcon.style.top = '10px';
-    closeIcon.style.right = '10px';
-    newColDiv.appendChild(closeIcon);
-    closeIcon.addEventListener('click', () => newColDiv.remove());  // Remove the col-xl-6 div on click
-
-    // Append the new col-xl-6 div to the container
-    originalCol.closest('.form-row').appendChild(newColDiv);
-
-    // Repopulate the items for the new card
-    populateItems();
-
-    // Reattach the event listener to the new plus icon in the duplicated col-xl-6
-    const newPlusIcon = newColDiv.querySelector('.plus-icon');
-    if (newPlusIcon) {
-        newPlusIcon.addEventListener('click', duplicateCard);
-    }
-}
-
-// Call this function when the document is loaded
-document.addEventListener('DOMContentLoaded', () => {
-    populateItems();  // Fetch and populate items on load
-
-    // Attach event listener to all plus icons (both original and dynamically added)
-    document.querySelectorAll('.plus-icon').forEach(plusIcon => {
-        plusIcon.addEventListener('click', duplicateCard);  // Add event listeners to all plus icons
+    
+    // Event listeners for select and input changes
+    document.addEventListener('change', event => {
+        if (event.target.matches('select[name="itemm"]')) {
+            const selectElement = event.target;
+            const quantityInput = selectElement.closest('.card-bodyd').querySelector('input[name="quantityy"]');
+            displayHandlerInfo(selectElement);
+            validateQuantity(selectElement, quantityInput);
+            updateSubmitButtonState();
+        }
     });
-
-    updateSubmitButtonState();  // Check the initial state of the submit button
-});
-
+    
+    document.addEventListener('input', event => {
+        if (event.target.matches('input[name="quantityy"]')) {
+            const quantityInput = event.target;
+            const selectElement = quantityInput.closest('.card-bodyd').querySelector('select[name="itemm"]');
+            validateQuantity(selectElement, quantityInput);
+            updateSubmitButtonState();
+        }
+    });
+    
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        populateItems();
+    
+        document.querySelectorAll('.plus-icon').forEach(plusIcon => {
+            plusIcon.addEventListener('click', duplicateCard);
+        });
+    
+        updateSubmitButtonState();
+    });
+    
 
 
 
@@ -959,13 +1077,39 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
 
-
 </script>
 
 
-
-
-
-
-
+<script>
+    function previewImage(event) {
+        const previewContainer = document.getElementById('image-preview');
+        const label = document.getElementById('image-label');
+    
+        // Get the file from the input
+        const file = event.target.files[0];
+    
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                // Clear any previous image
+                const existingImg = previewContainer.querySelector('img');
+                if (existingImg) {
+                    previewContainer.removeChild(existingImg);
+                }
+    
+                // Add the new image preview
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.classList.add('preview-image');
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.objectFit = 'cover'; // Ensure the image fits nicely
+                previewContainer.appendChild(img);
+            };
+            reader.readAsDataURL(file); // Read the image file as a data URL
+        }
+    }
+    
+    
+</script>
 {% endblock content %}

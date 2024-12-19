@@ -32,6 +32,25 @@ button:disabled {
 
         
     </style>
+
+    <style>
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: #3498db;
+            animation: spin 1s ease-in-out infinite;
+        }
+    
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+    
 {% endblock %}
 
 
@@ -168,15 +187,15 @@ button:disabled {
                         <img src="{% static 'images/add-item.png'%}" width="30" height="30" alt="">
                         <span class="nav-text">Add Borrow Item</span></a>
                     </li>
-                    <li class="activee"><a href="{% url 'borrow-record'%}" aria-expanded="false">
+                    <li><a href="{% url 'borrow-record'%}" aria-expanded="false">
                         <img src="{% static 'images/search.png'%}" width="30" height="30" alt="">
-                        <span class="nav-text text-white">Borrow Record</span></a>
+                        <span class="nav-text ">Borrow Record</span></a>
                     </li>
 
                     <li class="nav-label">Borrower's Reservation</li>
-                    <li><a  href="{% url 'student-reservation' %}" aria-expanded="false">
+                    <li class="activee"><a  href="{% url 'student-reservation' %}" aria-expanded="false">
                         <img src="{% static 'images/reservation.png'%}" width="30" height="30" alt="">
-                        <span class="nav-text">Reservation List</span></a>
+                        <span class="nav-text text-white">Reservation List</span></a>
                     </li>
 
                     <li class="nav-label">ACCOUNTS</li>
@@ -223,25 +242,47 @@ button:disabled {
                                     <input type="hidden" name="status" value="">
                                 
                                     <div class="row mb-1">
-                                        <div class="col-3">
+                                        <div class="col-2">
                                             <label class="font-weight-bold text-dark" style="font-size: 15px;">Student ID:</label>
                                             <p id="modal-student-id" style="font-size: 15px; color: #474747;">{{ reservation.student_id }}</p>
                                         </div>
-                                        <div class="col-3">
+                                        <div class="col-2">
                                             <label class="font-weight-bold text-dark" style="font-size: 15px;">Name:</label>
                                             <p id="modal-name" style="font-size: 15px; color: #474747;">{{ reservation.name }}</p>
                                         </div>
-                                        <div class="col-3">
+                                        <div class="col-2">
                                             <label class="font-weight-bold text-dark" style="font-size: 15px;">Course:</label>
                                             <p id="modal-course" style="font-size: 15px; color: #474747;">{{ reservation.course }}</p>
                                         </div>
-                                        <div class="col-3">
+                                        <div class="col-2">
                                             <label class="font-weight-bold text-dark" style="font-size: 15px;">Date Reserve:</label>
                                             <p id="modal-date-borrow" style="font-size: 15px; color: #474747;">{{ reservation.reserve_date }}</p>
                                         </div>
+                                        <div class="col-2">
+                                            <label class="font-weight-bold text-dark" style="font-size: 15px;">Date Return:</label>
+                                            <p id="modal-date-borrow" style="font-size: 15px; color: #474747;">{{ reservation.date_return }}</p>
+                                        </div>
+                                        <div class="col-2">
+                                            <label class="font-weight-bold text-dark" style="font-size: 15px;">Purpose:</label>
+                                            <p id="modal-date-borrow" style="font-size: 15px; color: #474747;">{{ reservation.purpose }}</p>
+                                        </div>
                                     </div>
+
+                                    <div class="row mb-5">
+                                        <div class="col-3">
+                                            <label class="font-weight-bold text-dark" style="font-size: 15px;">Student ID Image:</label><br>
+                                            {% if reservation.upload_image %}
+                                                <a href="{{ reservation.upload_image.url }}" target="_blank" title="Click to view full image">
+                                                    <img src="{{ reservation.upload_image.url }}" alt="Student ID Image" class="img-fluid" style="max-width: 30%; height: auto;">
+                                                </a>
+                                            {% else %}
+                                                <p>No image uploaded.</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
                                 
-                                    <div class="row mb-1">
+                                    <div class="row mt-4">
                                         <div class="col-3">
                                             <p style="font-size: 15px; font-weight: 800;" class="text-dark">Items:</p>
                                         </div>
@@ -275,6 +316,9 @@ button:disabled {
                                                     </div>
                                                     <div class="col-3">
                                                         <!-- Approve Button -->
+                                                        <div id="loading-approve-{{ item.id }}" class="loading-spinner" style="display: none; margin-left: 5px;"></div>
+                                                        
+                                                        
                                                         {% if item.status != 'Denied' %}
                                                             <button type="button" class="btn btn-success btn-sm approveButton text-white"
                                                                     data-item-id="{{ item.id }}" data-status="Approved"
@@ -285,6 +329,7 @@ button:disabled {
                                                             <div id="loading-approve-{{ item.id }}" class="loading-spinner" style="display: none;"></div> <!-- Loading Spinner -->
                                                         {% endif %}
                                                         
+                                                        <div id="loading-deny-{{ item.id }}" class="loading-spinner" style="display: none; margin-left: 5px;"></div>
                                                         <!-- Denied Button -->
                                                         {% if item.status != 'Approved' %}
                                                             <button type="button" class="btn btn-danger btn-sm denyButton"
@@ -340,14 +385,14 @@ button:disabled {
             if (loadingSpinner) {
                 loadingSpinner.style.display = 'inline-block'; // Show the loading spinner
             }
-        
-            // Disable the buttons while the request is being processed
+    
+            // Disable buttons
             const approveButton = document.querySelector(`button[data-item-id="${itemId}"][data-status="Approved"]`);
             const denyButton = document.querySelector(`button[data-item-id="${itemId}"][data-status="Denied"]`);
-        
+    
             if (approveButton) approveButton.disabled = true;
             if (denyButton) denyButton.disabled = true;
-        
+    
             // Send the request to the server
             fetch("{% url 'update_reservation_item_status' %}", {
                 method: 'POST',
@@ -360,56 +405,44 @@ button:disabled {
                     'status': status
                 })
             })
-            .then(response => response.json())  // Parse JSON response
+            .then(response => response.json())
             .then(data => {
-                // Hide loading spinner once request is complete
-                if (loadingSpinner) {
-                    loadingSpinner.style.display = 'none';
-                }
-        
+                if (loadingSpinner) loadingSpinner.style.display = 'none'; // Hide spinner
                 if (data.success) {
-                    // Get the elements to update in real time
+                    // Update UI on success
                     const itemRow = document.getElementById(`item-row-${itemId}`);
-        
-                    // Apply line-through styling to the entire row (item name, description, and quantity)
                     itemRow.querySelectorAll('p').forEach(element => {
                         element.style.textDecoration = 'line-through';
-                        element.style.textDecorationColor = 'black'; // Ensures the line-through color is black
-                        element.style.color = 'black'; // Ensures the text color itself is also black
+                        element.style.color = 'black';
                     });
-        
-                    // Disable and style the clicked button, remove the opposite button
+    
                     if (status === 'Approved') {
                         approveButton.disabled = true;
                         approveButton.style.cursor = 'not-allowed';
-                        approveButton.style.textDecoration = 'line-through';
                         if (denyButton) denyButton.remove();
                     } else if (status === 'Denied') {
                         denyButton.disabled = true;
                         denyButton.style.cursor = 'not-allowed';
                         if (approveButton) approveButton.remove();
                     }
-        
-                    // Optionally, display a success message
+    
                     alert(data.message);
-        
-                    // Redirect if URL is provided
+    
                     if (data.redirect_url) {
                         window.location.href = data.redirect_url;
                     }
                 } else {
                     alert("Failed to update the status.");
+                    if (approveButton) approveButton.disabled = false;
+                    if (denyButton) denyButton.disabled = false;
                 }
             })
             .catch(error => {
-                // Hide loading spinner on error
-                if (loadingSpinner) {
-                    loadingSpinner.style.display = 'none';
-                }
-                console.error('Error:', error);  // Catch any errors
+                if (loadingSpinner) loadingSpinner.style.display = 'none';
+                console.error('Error:', error);
             });
         }
-        
     </script>
+    
 
 {% endblock content %}

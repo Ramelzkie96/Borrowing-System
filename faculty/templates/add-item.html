@@ -196,7 +196,7 @@
                         <form method="post" id="item-form">
                             {% csrf_token %}
                             <div class="form-group row mb-4">
-                                <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Property ID (OPTIONAL)</label>
+                                <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Property ID</label>
                                 <div class="col-sm-12 col-md-4">
                                     <input type="text" name="property_id" style="border: 1px solid #bebebe;" class="form-control" value="{{ property_id }}">
                                 </div>
@@ -213,7 +213,7 @@
                             <div class="form-group row mb-4">
                                 <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Quantity</label>
                                 <div class="col-sm-12 col-md-7">
-                                    <input type="number" id="quantity" style="width: 100px; border: 1px solid #bebebe;" class="form-control" name="quantity" value="{{ quantity|default:1 }}" min="1" max="100" required>
+                                    <input type="number" id="quantity" style="width: 100px; border: 1px solid #bebebe;" class="form-control" name="total_quantity" value="{{ total_quantity|default:1 }}" min="1" max="100" required>
                                 </div>
                             </div>
                             
@@ -281,33 +281,5 @@ document.addEventListener("DOMContentLoaded", function() {
     </script>
 
 
-    <script>
-        document.getElementById('item-name').addEventListener('input', function() {
-          const name = this.value;
-          const errorDiv = document.getElementById('name-error');
-          const submitButton = document.getElementById('toastr-success-bottom-left');
-      
-          if (name) {
-              fetch(`/admin-validate-item-name/?name=${encodeURIComponent(name)}`)
-                  .then(response => response.json())
-                  .then(data => {
-                      if (data.exists) {
-                          errorDiv.style.display = 'block';
-                          submitButton.disabled = true; // Disable the button if the item name exists
-                      } else {
-                          errorDiv.style.display = 'none';
-                          submitButton.disabled = false; // Enable the button if the item name does not exist
-                      }
-                  })
-                  .catch(error => {
-                      console.error('Error:', error);
-                      submitButton.disabled = false; // Enable the button if there's an error in the request
-                  });
-          } else {
-              errorDiv.style.display = 'none';
-              submitButton.disabled = false; // Enable the button if the input is cleared
-          }
-      });
-        </script>
 
 {% endblock content %}

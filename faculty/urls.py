@@ -27,4 +27,9 @@ urlpatterns = [
     path('search-borrow-request/', views.search_borrow_request, name='search_borrow_request'),
     path('update-reservation-status/<int:reservation_id>/', views.status_update, name='update-reservation-status'),
     path('update-reservation-item-status/', views.update_reservation_item_status, name='update_reservation_item_status'),
+    path('proceed-borrow/<int:reservation_id>/', views.proceed_borrow, name='proceed-borrow'),
+    path('save-reservation-request/', views.save_reservation_request, name='save_reservation_request'),
+    
+ 
+    
 ]

@@ -292,35 +292,45 @@
                           <form method="post" id="item-form">
                             {% csrf_token %}
                             <div class="form-group row mb-4">
-                                <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3" style="font-size: 15px">Property ID (OPTIONAL)</label>
-                                <div class="col-sm-12 col-md-4">
-                                    <input type="text" name="property_id" class="form-control" value="{{ property_id }}">
+                                <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3" style="font-size: 15px">Property ID</label>
+                                <div class="col-sm-12 col-md-4" id="property-id-container">
+                                    <!-- Dynamic inputs for Property ID will appear here -->
                                 </div>
                             </div>
-                            
+
                             <div class="form-group row mb-4">
-                                <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3" style="font-size: 15px">Name</label>
-                                <div class="col-sm-12 col-md-4">
-                                    <input type="text" name="name" id="item-name" class="form-control" value="{{ name }}" required>
-                                    <div id="name-error" class="text-danger" style="display:none;">Item name already exists.</div>
-                                </div>
-                            </div>
+                              <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3" style="font-size: 15px">Name</label>
+                              <div class="col-sm-12 col-md-4">
+                                  <input type="text" name="name" id="item-name" class="form-control" value="{{ name }}" required>
+                                  <div id="name-error" class="text-danger" style="display:none;">Item name already exists.</div>
+                              </div>
+                          </div>
                         
                             <div class="form-group row mb-4">
                                 <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3" style="font-size: 15px">Quantity</label>
                                 <div class="col-sm-12 col-md-7">
-                                    <input type="number" id="quantity" style="width: 100px;" class="form-control" name="quantity" value="{{ quantity|default:1 }}" min="1" max="100" required>
+                                    <input
+                                        type="number"
+                                        id="quantity"
+                                        style="width: 100px;"
+                                        class="form-control"
+                                        name="total_quantity"
+                                        value="{{ total_quantity|default:1 }}"
+                                        min="1"
+                                        max="100"
+                                        required
+                                    >
                                 </div>
                             </div>
-                            
+                        
                             <div class="form-group row mb-4">
                                 <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3"></label>
                                 <div class="col-sm-12 col-md-7">
-                                  <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Add Item</button>
-
+                                    <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Add Item</button>
                                 </div>
                             </div>
                         </form>
+                        
                         
                         
                         
@@ -371,33 +381,54 @@
 
 
   <script>
-    document.getElementById('item-name').addEventListener('input', function() {
-      const name = this.value;
-      const errorDiv = document.getElementById('name-error');
-      const submitButton = document.getElementById('toastr-success-bottom-left');
-  
-      if (name) {
-          fetch(`/admin-validate-item-name/?name=${encodeURIComponent(name)}`)
-              .then(response => response.json())
-              .then(data => {
-                  if (data.exists) {
-                      errorDiv.style.display = 'block';
-                      submitButton.disabled = true; // Disable the button if the item name exists
-                  } else {
-                      errorDiv.style.display = 'none';
-                      submitButton.disabled = false; // Enable the button if the item name does not exist
-                  }
-              })
-              .catch(error => {
-                  console.error('Error:', error);
-                  submitButton.disabled = false; // Enable the button if there's an error in the request
-              });
-      } else {
-          errorDiv.style.display = 'none';
-          submitButton.disabled = false; // Enable the button if the input is cleared
+  document.addEventListener("DOMContentLoaded", function () {
+    const quantityInput = document.getElementById("quantity");
+    const propertyIdContainer = document.getElementById("property-id-container");
+
+    // Store the initial value of the quantity input
+    const initialQuantity = parseInt(quantityInput.value, 10) || 1;
+
+    // Function to update property_id inputs based on quantity
+    const updatePropertyInputs = () => {
+      // Clear all existing inputs in the container
+      propertyIdContainer.innerHTML = "";
+
+      // Get the current quantity value
+      const quantity = parseInt(quantityInput.value, 10) || 1;
+
+      // Create inputs dynamically based on the quantity
+      for (let i = 1; i <= quantity; i++) {
+        const input = document.createElement("input");
+        input.type = "text";
+        input.name = `property_id_${i}`; // Unique name for each input
+        input.className = "form-control mt-2"; // Add styling classes
+        input.required = true; // Mark input as required
+
+        // Add placeholder for Property ID 1 only if quantity is increased
+        if (i === 1 && quantity > initialQuantity) {
+          input.placeholder = "Property ID 1";
+        }
+
+        // Add placeholders for Property ID 2 and beyond
+        if (i > 1) {
+          input.placeholder = `Property ID ${i}`;
+        }
+
+        // Append input to the container
+        propertyIdContainer.appendChild(input);
       }
+    };
+
+    // Listen for changes in the quantity input
+    quantityInput.addEventListener("input", updatePropertyInputs);
+
+    // Initialize inputs on page load
+    updatePropertyInputs();
   });
-    </script>
+</script>
+
+  
+
 
 {% endblock content %}
   

@@ -32,7 +32,10 @@ urlpatterns = [
     path('admin-delete-item/<int:item_id>/', views.delete_item, name='admin-delete_item'),
     path('admin-borrowers', views.borrowers, name='admin-borrowers'),
     path('admin-search-borrow-request/', views.search_borrow_request, name='admin-search_borrow_request'),
-    path('admin-borrow-record', views.borrow_record, name='admin-borrow-record'),
+    path('admin-proceed-borrow/<int:reservation_id>/', views.proceed_borrow, name='admin-proceed-borrow'),
+    path('admin-save-reservation-request/', views.save_reservation_request, name='admin-save_reservation_request'),
+    
+    path('admin-borrow-record/', views.borrow_record, name='admin-borrow-record'),
     path('admin-borrower-details/', views.borrower_details, name='admin-borrower-details'),
     path('admin-borrower-details-dash/', views.borrower_details_dashboard, name='admin-borrower-details-dashboard'),
     path('admin-update-borrower/', views.fetch_borrow_request, name='admin-update-borrower'),
@@ -43,10 +46,19 @@ urlpatterns = [
     path('admin-student-reservation/', views.admin_student_reservation, name='admin-student-reservation'),
     path('admin-change-profile', views.change_profile, name='admin-change-profile'),
     path('admin-change-password', views.change_password, name='admin-change-password'),
-    path('admin-validate-item-name/', views.validate_item_name, name='admin-validate_item_name'),
     path('admin-get-available-quantity/<int:item_id>/', views.get_available_quantity, name='admin-get_available_quantity'),
     path('admin-update-reservation-status/<int:reservation_id>/', views.status_update, name='admin-update-reservation-status'),
     path('admin-update-reservation-item-status/', views.update_reservation_item_status, name='admin-update_reservation_item_status'),
+    
+    
+    path('delete-borrow-request/<int:borrow_request_id>/', views.delete_borrow_request, name='delete-borrow-request'),
+    
+    path('delete-reservation/<int:reservation_id>/', views.delete_reservation, name='delete_reservation'),
+    
+    
+    path('aa-update-student-reservation/', views.aa_update_student_reservation, name='aa-update_student_reservation'),
+    path('get_property_ids/<int:item_id>/', views.get_property_ids, name='get_property_ids'),
+    path('update-property-status/', views.update_property_status, name='update-property-status'),
     
 ] 
 if settings.DEBUG:

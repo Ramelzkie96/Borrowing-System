@@ -30,6 +30,57 @@ button:disabled {
 }
 
 
+
+
+/* Styling for a smaller image preview container */
+.image-preview {
+    width: 180px; /* Smaller width */
+    height: 110px; /* Smaller height */
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background-color: #f7f7f7;
+  }
+  
+  /* Hidden file input */
+  #image-upload {
+    display: none;
+  }
+  
+  /* Style for the label that acts as the button */
+  #image-label {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    
+    color: #333; /* Default dark text */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    opacity: 1;
+    transition: opacity 0.3s ease, color 0.3s ease;
+    font-size: 14px;
+    font-weight: bold;
+  }
+  
+  /* Hover effect: show overlay and change text color to white */
+  .image-preview:hover #image-label {
+    opacity: 1;
+    color: #0f2f67;
+  }
+  
+  /* Style for the uploaded image */
+  .image-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+  }
         
     </style>
 {% endblock %}
@@ -226,21 +277,6 @@ button:disabled {
                                 
                                 <div class="form-row">
                                  
-                                <div class="form-group col-md-6">
-                                  <label style="color: #474747;">Date Borrow</label>
-                                  
-                                            <div class="input-with-icon">
-                                              <input name="datepicker" id="dateBorrow" class="datepicker-default form-control"
-                                                value="{{ date_borrow }}" style="border: 1px solid #bebebe;">
-                                              <i class="fas fa-calendar-alt" style="position: absolute; top: 38px; right: 20px;"></i>
-                                            </div>
-                                   
-                                        {% if form.date_borrow.errors %}
-                                            <script>
-                                                document.querySelector('#datepicker').classList.add('error-border');
-                                            </script>
-                                        {% endif %} 
-                                </div>
             
             
                                     <div class="form-group col-md-3">
@@ -251,9 +287,49 @@ button:disabled {
                                         <label style="color: #474747;">Name</label>
                                         <input type="text" name="name" class="form-control" value="{{ name }}" style="border: 1px solid #bebebe;">
                                     </div>
+
+                                    <div class="form-group col-md-3">
+                                        <label style="color: #474747;">Date Reserve</label>
+                                        
+                                                  <div class="input-with-icon">
+                                                    <input name="date_borrow" id="dateBorrow" class="datepicker-default form-control"
+                                                      value="{{ date_borrow }}" style="border: 1px solid #bebebe;">
+                                                    <i class="fas fa-calendar-alt" style="position: absolute; top: 38px; right: 20px;"></i>
+                                                  </div>
+                                         
+                                              {% if form.date_borrow.errors %}
+                                                  <script>
+                                                      document.querySelector('#datepicker').classList.add('error-border');
+                                                  </script>
+                                              {% endif %} 
+                                      </div>
+
+                                      <div class="form-group col-md-3">
+                                        <label style="color: #474747;">Expected Date Return</label>
+                                        
+                                                  <div class="input-with-icon">
+                                                    <input name="date_return" id="dateBorrow" class="datepicker-default form-control"
+                                                    value="{{ date_return }}" style="border: 1px solid #bebebe;">
+                                                    <i class="fas fa-calendar-alt" style="position: absolute; top: 38px; right: 20px;"></i>
+                                                  </div>
+                                         
+                                              {% if form.date_borrow.errors %}
+                                                  <script>
+                                                      document.querySelector('#datepicker').classList.add('error-border');
+                                                  </script>
+                                              {% endif %} 
+                                      </div>
+
+
                                     <div class="form-group col-md-6">
                                         <label style="color: #474747;">Course</label>
-                                        <input type="text" name="course" class="form-control" value="{{ course }}" style="border: 1px solid #bebebe;">
+                                        <select class="form-control" name="course" style="border: 1px solid #bebebe" required>
+                                            <option value="">Select ---</option>
+                                            <option value="BS INFORMATION TECHNOLOGY" {% if course == "BS INFORMATION TECHNOLOGY" %}selected{% endif %}>BS INFORMATION TECHNOLOGY</option>
+                                            <option value="BS INDUSTRIAL TECHNOLOGY" {% if course == "BS INDUSTRIAL TECHNOLOGY" %}selected{% endif %}>BS INDUSTRIAL TECHNOLOGY</option>
+                                            <option value="BS ELECTRICAL ENGINEERING" {% if course == "BS ELECTRICAL ENGINEERING" %}selected{% endif %}>BS ELECTRICAL ENGINEERING</option>
+                                            <option value="BS MECHANICAL ENGINEERING" {% if course == "BS MECHANICAL ENGINEERING" %}selected{% endif %}>BS MECHANICAL ENGINEERING</option>
+                                        </select>
                                     </div>
                                     <div class="form-group col-md-6">
                                         <label style="color: #474747;">Year</label>
@@ -280,6 +356,16 @@ button:disabled {
                                 </div>
                             
                                 <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label class="text-dark">Student ID image (Optional)</label>
+                                        <div class="image-preview" id="image-preview">
+                                            {% if upload_image_url %}
+                                                <img src="{{ upload_image_url }}" class="preview-image" style="width: 100%; height: auto;">
+                                            {% endif %}
+                                            <label for="image-upload" id="image-label">Click to Upload Image</label>
+                                        </div>
+                                        <input type="file" name="upload_image" id="image-upload" accept="image/*" onchange="previewImage(event)">
+                                    </div>
                                     <div class="form-group col-md-2">
                                         <label style="color: #474747;">
                                             <input type="radio" name="borrower_type" value="Student" id="student_radio" style="width: 20px; height: 20px;" {% if borrower_type == "Student" %}checked{% endif %}>&nbsp; Student
@@ -410,5 +496,39 @@ button:disabled {
             checkErrors();
         });
         </script>
+
+
+
+        <script>
+            function previewImage(event) {
+              const previewContainer = document.getElementById('image-preview');
+              const label = document.getElementById('image-label');
+              
+              // Remove any existing images except the label
+              while (previewContainer.firstChild) {
+                  if (previewContainer.firstChild !== label) {
+                      previewContainer.removeChild(previewContainer.firstChild);
+                  } else {
+                      break;
+                  }
+              }
+          
+              const file = event.target.files[0]; // Get the selected file
+              
+              if (file) {
+                  const reader = new FileReader();
+                  reader.onload = function (e) {
+                      const img = document.createElement('img');
+                      img.src = e.target.result;
+                      img.classList.add('preview-image');
+                      img.style.width = '100%'; // Adjust the size as needed
+                      img.style.height = 'auto'; // Maintain aspect ratio
+                      previewContainer.appendChild(img); // Append the new image
+                  };
+                  reader.readAsDataURL(file); // Read the image file as data URL
+              }
+          }
+          
+          </script>
 
 {% endblock content %}

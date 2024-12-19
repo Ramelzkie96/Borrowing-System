@@ -90,6 +90,16 @@
 }
 </style>
 
+<style>
+    .dropdown-item i {
+        color: inherit; /* Default color */
+        transition: color 0.3s ease; /* Smooth transition */
+    }
+    .dropdown-item:hover i {
+        color: var(--primary-color, #007bff); /* Primary color */
+    }
+</style>
+
 {% endblock %}
 
 
@@ -109,37 +119,37 @@
 <script src="dist/js/pages/dashboard2.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 
-<!-- Include Pickadate JS from CDN -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pickadate.js/3.6.2/compressed/picker.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pickadate.js/3.6.2/compressed/picker.date.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<!-- Initialize Pickadate with Desired Format -->
+<script src="https://cdn.jsdelivr.net/npm/moment/min/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/js/tempusdominus-bootstrap-4.min.js"></script>
+<!-- date picker -->
 <script>
-  $(document).ready(function() {
-    // Initialize Pickadate on the input field
-    var $datePicker = $('#dateReturn').pickadate({
-        format: 'd mmmm, yyyy',  // Format as "20 September, 2024"
-        selectMonths: true,      // Enable dropdown to select month
-        selectYears: 10,         // Enable dropdown for selecting year
-        today: 'Today',
-        clear: 'Clear',
-        close: 'Close',
-        closeOnSelect: true,     // Close picker on date selection
-        onSet: function(context) {
-            // Ensure the input is blurred to prevent duplicate appearances
-            if (context.select) {
-                this.$node.blur(); // Unfocus the input to avoid re-triggering the picker
-            }
-        }
-    });
-    
-    // Optional: Ensure no duplicate initialization
-    if ($datePicker.data('pickadate')) {
-        return; // Prevent duplicate initialization
-    }
-});
-</script>
+  $(function () {
+      // Initialize date pickers
+      $('#reservationdate').datetimepicker({
+          format: 'D MMMM, YYYY' // Custom format
+      });
+      $('#returndate').datetimepicker({
+          format: 'D MMMM, YYYY' // Custom format
+      });
+  
+      // Open date picker on input focus
+      $('.datetimepicker-input').on('focus', function() {
+          $(this).siblings('.input-group-append').click();
+      });
+  
+      // Set today's date for Date Borrow
+      $('#set-today-borrow').on('click', function() {
+          const today = moment().format('D MMMM, YYYY'); // Use moment.js for the custom format
+          $('#date_borrow').val(today);
+      });
+  
+      // Set today's date for Date Return
+      $('#set-today-return').on('click', function() {
+          const today = moment().format('D MMMM, YYYY'); // Use moment.js for the custom format
+          $('#date_return').val(today);
+      });
+  });
+  </script>
 {% endblock %}
 
 
@@ -363,12 +373,14 @@
                                 <thead class="dark-mode">
                                     <tr>
                                         <th scope="col" style="width: 100px;">Student ID</th>
+                                        <th scope="col">Student ID image</th>
                                         <th scope="col">Name</th>
                                         <th scope="col">Course</th>
                                         <th scope="col">Year</th>
                                         <th scope="col">Phone Number</th>
                                         <th scope="col">Date Reserve</th>
-                                        <th scope="col">Item</th>
+                                        <th scope="col">Expected Date Return</th>
+                                        <th scope="col">Status</th>
                                         <th scope="col">Time Span</th>
                                         <th scope="col" style="width: 80px;">Action</th>
                                     </tr>
@@ -378,11 +390,23 @@
                                         {% for request in page_obj %}
                                             <tr>
                                                 <td>{{ request.student_id }}</td>
+                                                <td >
+                                                    {% if request.upload_image %}
+                                                      <a href="{{ request.upload_image.url }}" target="_blank">
+                                                        <img src="{{ request.upload_image.url }}" alt="Borrowed Item" style="width: 55px; height: auto;">
+                                                      </a>
+                                                    {% else %}
+                                                      <a href="{% static 'images/sample.jpg' %}" target="_blank">
+                                                        <img src="{% static 'images/sample.jpg' %}" alt="Default Item" style="width: 55px; height: auto;">
+                                                      </a>
+                                                    {% endif %}
+                                                  </td>
                                                 <td>{{ request.name }}</td>
                                                 <td>{{ request.course }}</td>
                                                 <td>{{ request.year_level }}</td>
                                                 <td>{{ request.phone_number }}</td>
                                                 <td>{{ request.reserve_date}}</td>
+                                                <td>{{ request.date_return}}</td>
                                                 <td>
                                                     {% if request.single_handle_status == "Approved" %}
                                                         <div class="badge badge-success">{{ request.single_handle_status }}</div>
@@ -398,18 +422,58 @@
                                                 </td>
                                 
                                                 <td>{{ request.time_ago }}</td>
+                                                
+                                                
                                                 <td style="text-align: center; vertical-align: middle;">
+                                                    <!-- Button to trigger the modal -->
+                                                <!-- <button class="btn btn-primary edit-button" data-bs-toggle="modal" data-bs-target="#dateImageModal"
+                                                data-id="{{ request.id }}" data-date-return="{{ request.date_return }}" data-course="{{ request.course }}" data-purpose="{{ request.purpose }}">
+                                                <i class="fa-solid fa-pen-to-square"></i>
+                                                </button> -->
+
+
+                                                <!-- <button class="btn btn-danger delete-button" data-id="{{ request.id }}">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button> -->
+                                                    {% if request.single_handle_status == "Completed" and not request.has_approved %}
                                                     <a href="{% url 'admin-update-reservation-status' reservation_id=request.id %}">
-                                                        <button type="button" class="btn btn-secondary">
+                                                        <button type="button" class="btn btn-primary btn-sm">
                                                             <i class="fas fa-eye"></i>
                                                         </button>
                                                     </a>
-                                                </td>  
+                                                    {% elif request.single_handle_status == "Completed" %}
+                                                        <!-- Show dropdown only if conditions are met -->
+                                                        <div class="dropdownnn">
+                                                            <a class="btn btn-link font-24 p-0 line-height-1 no-arrow -toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
+                                                                <img src="{% static 'images/mores.png' %}" alt="" width="30" height="30">
+                                                            </a>
+                                                            <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
+                                                                <a href="{% url 'admin-update-reservation-status' reservation_id=request.id %}">
+                                                                    <button type="button" class="dropdown-item">
+                                                                        <i class="fas fa-eye"></i> Reservation Approval
+                                                                    </button>
+                                                                </a>
+                                                                <a href="{% url 'admin-proceed-borrow' reservation_id=request.id %}">
+                                                                    <button type="button" class="dropdown-item">
+                                                                        <i class="fas fa-arrow-right"></i> Proceed to Borrow
+                                                                    </button>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                    {% elif request.single_handle_status == "Pending" %}
+                                                        <a href="{% url 'admin-update-reservation-status' reservation_id=request.id %}">
+                                                            <button type="button" class="btn btn-primary btn-sm">
+                                                                <i class="fas fa-eye"></i>
+                                                            </button>
+                                                        </a>
+                                                    {% endif %}
+                                                </td>
+                                                                                                    
                                             </tr>
                                         {% endfor %}
                                     {% else %}
                                         <tr>
-                                            <td colspan="9" class="text-center">No student reservation found</td>
+                                            <td colspan="11" class="text-center">No student reservation found</td>
                                         </tr>
                                     {% endif %}
                                 </tbody>
@@ -469,12 +533,66 @@
         
 
 
+                <div class="modal fade" id="dateImageModal" tabindex="-1" aria-labelledby="dateImageModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="dateImageModalLabel">Date Input and Image</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <form id="reservationForm" enctype="multipart/form-data" method="post" action="{% url 'aa-update_student_reservation' %}">
+                                {% csrf_token %}
+                                <div class="modal-body">
+                                    <!-- Date Input -->
+                                    <div class="mb-3">
+                                        <label>Expected Date Return</label>
+                                        <div class="input-group">
+                                            <div class="input-group date" id="returndate" data-target-input="nearest">
+                                                <input type="text" class="form-control datetimepicker-input" id="date_return" placeholder="Select Date" name="date_return" data-target="#returndate" />
+                                                <div class="input-group-append" data-target="#returndate" data-toggle="datetimepicker">
+                                                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Course Dropdown -->
+                                    <div class="mb-3">
+                                        <label for="course">Course</label>
+                                        <select class="form-control" id="course" name="course" style="border: 1px solid #bebebe" required>
+                                            <option value="">Select ---</option>
+                                            <option value="BS INFORMATION TECHNOLOGY">BS INFORMATION TECHNOLOGY</option>
+                                            <option value="BS INDUSTRIAL TECHNOLOGY">BS INDUSTRIAL TECHNOLOGY</option>
+                                            <option value="BS ELECTRICAL ENGINEERING">BS ELECTRICAL ENGINEERING</option>
+                                            <option value="BS MECHANICAL ENGINEERING">BS MECHANICAL ENGINEERING</option>
+                                        </select>
+                                    </div>
+                                    <!-- Purpose -->
+                                    <div class="mb-3">
+                                        <label class="text-dark">Purpose for Borrow</label>
+                                        <textarea name="purpose" id="purpose" class="form-control" style="border: 1px solid #bebebe;" required></textarea>
+                                    </div>
 
+                                    <!-- Image -->
+                                    <div class="text-center">
+                                        <input type="file" name="upload_image" class="form-control" required>
+                                    </div>
 
+                                    
+                                    <input type="hidden" name="reservation_id" id="reservationId">
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <button type="submit" class="btn btn-primary">Save changes</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
                 
 
-
-      
+                <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script> -->
+                 
 
 
 
@@ -511,116 +629,155 @@
 
 <script>
 
+    function updateShowEntries(value) {
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set('show', value);
+        window.location.search = urlParams.toString();
+    }
 
 
+    document.addEventListener("DOMContentLoaded", function () {
+        // Select all edit buttons
+        const editButtons = document.querySelectorAll(".edit-button");
+    
+        // Add click event listener to each button
+        editButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                // Get data attributes from the clicked button
+                const dateReturn = button.getAttribute("data-date-return");
+                const reservationId = button.getAttribute("data-id");
+                const course = button.getAttribute("data-course");
+                const purpose = button.getAttribute("data-purpose");
+    
+                // Populate modal fields
+                document.getElementById("date_return").value = dateReturn || ""; // Set to empty if null
+                document.getElementById("reservationId").value = reservationId;
+    
+                // Set the course in the dropdown
+                const courseSelect = document.querySelector("select[name='course']");
+                if (courseSelect) {
+                    courseSelect.value = course || "";
+                }
+    
+                // Set the purpose in the textarea
+                const purposeTextarea = document.getElementById("purpose");
+                if (purposeTextarea) {
+                    purposeTextarea.value = purpose || "";
+                }
+            });
+        });
+    });
+    
+    
 
 
-
-  document.getElementById("searchInput").addEventListener("input", function () {
-    searchTable();
-});
-
-function searchTable() {
-    var input, filter, table, tbody, tr, td, i, j, txtValue, regex;
-    input = document.getElementById("searchInput");
-    filter = input.value.toUpperCase();
-    regex = new RegExp(`(${filter})`, 'gi');
-    table = document.getElementById("itemTable");
-    tbody = table.getElementsByTagName("tbody")[0];  // Work only with tbody
-    tr = tbody.getElementsByTagName("tr");  // Get rows only from tbody
-    var noMatch = true;
-
-    // If the input is empty, reset table to show all rows and keep the badge and action button intact
-    if (!filter) {
-        for (i = 0; i < tr.length; i++) {
+    document.getElementById("searchInput").addEventListener("input", function () {
+        searchTable();
+      });
+      
+      function searchTable() {
+        var input, filter, table, tbody, tr, td, i, j, txtValue, regex;
+        input = document.getElementById("searchInput");
+        filter = input.value.toUpperCase();
+        regex = new RegExp(`(${filter})`, 'gi');
+        table = document.getElementById("itemTable");
+        tbody = table.getElementsByTagName("tbody")[0]; // Work only with tbody
+        tr = tbody.getElementsByTagName("tr"); // Get rows only from tbody
+        var noMatch = true;
+      
+        // If the input is empty, reset table to show all rows and ensure "No record found" row is removed
+        if (!filter) {
+          for (i = 0; i < tr.length; i++) {
             if (tr[i].classList.contains("no-record-row")) continue; // Skip the "No record found" row
             tr[i].style.display = ""; // Show all rows
             td = tr[i].getElementsByTagName("td");
             for (j = 0; j < td.length; j++) {
-                // Ensure buttons, dropdowns, badges, and action columns are not affected
-                if (j == 5 || j == 6 || j === 7 || j === 8 || td[j].querySelector('.dropdown') || td[j].querySelector('.badge') || td[j].querySelector('.action-buttons')) {
-                    continue; // Skip "Status", "Action", and dropdowns, badges
-                }
-                td[j].innerHTML = td[j].textContent || td[j].innerText; // Reset text content
+              // Ensure buttons, dropdowns, badges, and action columns are not affected
+              if (j === 1 || j === 8 || j === 9 || j === 10 || td[j].querySelector('.dropdownnn') || td[j].querySelector('.badge') || td[j].querySelector('.action-buttons')) {
+                continue; // Skip "Status", "Action", and dropdowns, badges
+              }
+              td[j].innerHTML = td[j].textContent || td[j].innerText; // Reset text content
             }
+          }
+          removeNoRecordRow(); // Remove "No record found" if it exists
+          return; // Exit function if input is empty
         }
-        removeNoRecordRow();  // Remove "No record found" if it exists
-        return; // Exit function if input is empty
-    }
-
-    // If there's input, filter the table rows
-    noMatch = true;  // Reset noMatch for the filtering
-    for (i = 0; i < tr.length; i++) {
-        if (tr[i].classList.contains("no-record-row")) continue; // Skip "No record found" row
-
-        tr[i].style.display = "none"; // Hide all rows initially
-        td = tr[i].getElementsByTagName("td");
-        let rowContainsFilter = false;
-
-        // Iterate through each cell in the row
-        for (j = 0; j < td.length; j++) {
-            if (j == 5 || j == 6 || j === 7 || j === 8) continue; // Skip "Status" and "Action" columns
+      
+        // If there's input, filter the table rows
+        noMatch = true; // Reset noMatch for the filtering
+        for (i = 0; i < tr.length; i++) {
+          if (tr[i].classList.contains("no-record-row")) continue; // Skip "No record found" row
+      
+          tr[i].style.display = "none"; // Hide all rows initially
+          td = tr[i].getElementsByTagName("td");
+          let rowContainsFilter = false;
+      
+          // Iterate through each cell in the row
+          for (j = 0; j < td.length; j++) {
+            if (j === 1 || j === 8 || j === 9 || j == 10) continue; // Skip "Status" and "Action" columns
             if (td[j]) {
-                txtValue = td[j].textContent || td[j].innerText;
-                if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                    rowContainsFilter = true;
-                    // Highlight matched text only in non-dropdown cells
-                    if (!td[j].querySelector('.dropdown')) {
-                        td[j].innerHTML = txtValue.replace(regex, "<span style='background-color: #3f6791; color: white;'>$1</span>");
-                    }
-                } else {
-                    // Remove highlights if no match
-                    if (!td[j].querySelector('.dropdown')) {
-                        td[j].innerHTML = txtValue.replace(/<span style='background-color: rgb\(0, 255, 13\);'>(.*?)<\/span>/g, "$1");
-                    }
+              txtValue = td[j].textContent || td[j].innerText;
+              if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                rowContainsFilter = true;
+                // Highlight matched text only in non-dropdown cells
+                if (!td[j].querySelector('.dropdown')) {
+                  td[j].innerHTML = txtValue.replace(regex, "<span style='background-color: #3f6791; color: white;'>$1</span>");
                 }
+              } else {
+                // Remove highlights if no match
+                if (!td[j].querySelector('.dropdown')) {
+                  td[j].innerHTML = txtValue.replace(/<span style='background-color:.*?'>(.*?)<\/span>/g, "$1");
+                }
+              }
             }
-        }
-
-        // If the row contains the filter, show it
-        if (rowContainsFilter) {
+          }
+      
+          // If the row contains the filter, show it
+          if (rowContainsFilter) {
             tr[i].style.display = "";
             noMatch = false;
+          }
         }
-    }
+      
+        // Remove existing "no record found" row if present
+        var noRecordRow = document.getElementById("noRecordRow");
+        if (noRecordRow) {
+          noRecordRow.remove();
+        }
+      
+        // If no matches found, add a "no record found" row
+        if (noMatch) {
+          showNoRecordRow(tbody, table);
+        } else {
+          removeNoRecordRow(); // Remove the "No record found" row if there are matches
+        }
+      }
+      
+      function showNoRecordRow(tbody, table) {
+        var noRecordRow = document.querySelector(".no-record-row");
+        if (!noRecordRow) {
+          var newRow = tbody.insertRow();
+          newRow.setAttribute("id", "noRecordRow");
+          newRow.setAttribute("class", "no-record-row");
+          var cell = newRow.insertCell(0);
+          cell.colSpan = table.getElementsByTagName("th").length;
+          cell.style.textAlign = "center";
+          cell.textContent = "No borrow requests found.";
+        } else {
+          noRecordRow.style.display = "";
+        }
+      }
+      
+      function removeNoRecordRow() {
+        var noRecordRow = document.querySelector(".no-record-row");
+        if (noRecordRow) {
+          noRecordRow.style.display = "none";
+        }
+      }
 
-    // Show or hide "No record found" message based on matches
-    if (noMatch) {
-        showNoRecordRow();
-    } else {
-        removeNoRecordRow(); // Remove the "No record found" row if there are matches
-    }
 
-    // Remove existing "no record found" row if present
-    var noRecordRow = document.getElementById("noRecordRow");
-    if (noRecordRow) {
-        noRecordRow.remove();
-    }
 
-    // If no matches found, add a "no record found" row
-    if (noMatch) {
-        var newRow = tbody.insertRow();
-        newRow.setAttribute("id", "noRecordRow");
-        var cell = newRow.insertCell(0);
-        cell.colSpan = table.getElementsByTagName("th").length;
-        cell.style.textAlign = "center";
-        cell.textContent = "No borrow requests found.";
-    }
-}
 
-function showNoRecordRow() {
-    var noRecordRow = document.querySelector(".no-record-row");
-    if (noRecordRow) {
-        noRecordRow.style.display = "";
-    }
-}
-
-function removeNoRecordRow() {
-    var noRecordRow = document.querySelector(".no-record-row");
-    if (noRecordRow) {
-        noRecordRow.style.display = "none";
-    }
-}
 
 
 // viewing modal
@@ -748,7 +905,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!noRecordsRow) {
             const noRecordsHTML = `
                 <tr class="no-records-row">
-                    <td colspan="9" class="text-center">
+                    <td colspan="11" class="text-center">
                         No records found.
                     </td>
                 </tr>
@@ -825,6 +982,42 @@ function getCookie(name) {
     }
     return cookieValue;
 }
+</script>
+
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const deleteButtons = document.querySelectorAll('.delete-button');
+  
+    deleteButtons.forEach(button => {
+        button.addEventListener("click", function () {
+            const reservationId = button.getAttribute("data-id");
+            
+            if (confirm("Are you sure you want to delete this reservation?")) {
+                fetch(`/delete-reservation/${reservationId}/`, {
+                    method: "POST",
+                    headers: {
+                        "X-CSRFToken": "{{ csrf_token }}",
+                        "Content-Type": "application/json",
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        button.closest("tr").remove(); // Remove the table row
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("Something went wrong. Please try again.");
+                });
+            }
+        });
+    });
+  });
 </script>
 
 {% endblock content %}

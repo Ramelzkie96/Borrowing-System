@@ -112,7 +112,7 @@
 /* Hover effect: show overlay and change text color to white */
 .image-preview:hover #image-label {
   opacity: 1;
-  color: #2e7bff;
+  color: #0f2f67;
 }
 
 /* Style for the uploaded image */
@@ -152,24 +152,38 @@
 <!-- date picker -->
 <script>
   $(function () {
-    $('#reservationdate').datetimepicker({
-        format: 'D MMMM, YYYY' // Custom format: 1 November, 2024
-    });
-
-    // Optional: Open the date picker when the input is focused
-    $('.datetimepicker-input').on('focus', function() {
-        $(this).siblings('.input-group-append').click();
-    });
-
-    // Set today's date when the calendar icon is clicked
-    $('#set-today').on('click', function() {
-        const today = moment().format('D MMMM, YYYY'); // Use moment.js for the custom format
-        $('#date_borrow').val(today);
-    });
-});
+      // Initialize date pickers
+      $('#reservationdate').datetimepicker({
+          format: 'D MMMM, YYYY' // Custom format
+      });
+      $('#returndate').datetimepicker({
+          format: 'D MMMM, YYYY' // Custom format
+      });
+  
+      // Open date picker on input focus
+      $('.datetimepicker-input').on('focus', function() {
+          $(this).siblings('.input-group-append').click();
+      });
+  
+      // Set today's date for Date Borrow
+      $('#set-today-borrow').on('click', function() {
+          const today = moment().format('D MMMM, YYYY'); // Use moment.js for the custom format
+          $('#date_borrow').val(today);
+      });
+  
+      // Set today's date for Date Return
+      $('#set-today-return').on('click', function() {
+          const today = moment().format('D MMMM, YYYY'); // Use moment.js for the custom format
+          $('#date_return').val(today);
+      });
+  });
 
 
 </script>
+
+
+
+
 
 
 
@@ -179,6 +193,16 @@
 
   
 {% block content %}
+
+<div id="faculty-items-data" 
+     data-items='{% for item in faculty_items %} 
+                   { 
+                     "id": "{{ item.id }}", 
+                     "name": "{{ item.name | escapejs }}", 
+                     "quantity": "{{ item.quantity }}"
+                   }{% if not forloop.last %},{% endif %} 
+                 {% endfor %}'>
+</div>
 
 <div class="wrapper">
 
@@ -348,13 +372,16 @@
           <div class="row">
             <div class="container-fluid">
 
-                <div class="card mt-3" style="border-top: 4px solid #593bdb; box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 4px;">
-                    <div class="card-header">
-                        <h4 class="card-title" style="font-size: 30px; font-weight: 700;">Add New Borrower</h4>
-                    </div>
+              <div class="card mt-3" style="border-top: 4px solid #593bdb; box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 4px;">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h4 class="card-title" style="font-size: 30px; font-weight: 700;">Add New Borrower</h4>
+            
+                    
+                </div>
+                
                     <div class="card-body">
                         <div class="basic-form">
-                            <form method="post" enctype="multipart/form-data">
+                            <form method="post" enctype="multipart/form-data" id="reservation-form">
                                 {% csrf_token %}
                                 <div class="form-row">
                                   
@@ -370,22 +397,40 @@
                                         {{ form.name }}
                                     </div>
 
-                                    <div class="form-group col-md-6">
+
+                                    <div class="form-group col-md-3">
                                       <label>Date Borrow</label>
-                                            <div class="input-group">
-                                              <div class="input-group date" id="reservationdate" data-target-input="nearest">
-                                                <input type="text" class="form-control datetimepicker-input" id="date_borrow" placeholder="Select Date" name="date_borrow" data-target="#reservationdate"/>
-                                                <div class="input-group-append" data-target="#reservationdate" data-toggle="datetimepicker">
-                                                    <div class="input-group-text" id="set-today"><i class="fa fa-calendar"></i></div>
-                                                </div>
-                                            </div>
-                                            </div>
-                                            {% if form.date_borrow.errors %}
+                                      <div class="input-group">
+                                          <div class="input-group date" id="reservationdate" data-target-input="nearest">
+                                              <input type="text" class="form-control datetimepicker-input" id="date_borrow" placeholder="Select Date" name="date_borrow" data-target="#reservationdate"/>
+                                              <div class="input-group-append" data-target="#reservationdate" data-toggle="datetimepicker">
+                                                  <div class="input-group-text" id="set-today-borrow"><i class="fa fa-calendar"></i></div>
+                                              </div>
+                                          </div>
+                                      </div>
+                                      {% if form.date_borrow.errors %}
                                                 <script>
                                                     document.querySelector('#datepicker').classList.add('error-border');
                                                 </script>
                                             {% endif %} 
-                                    </div>
+                                  </div>
+                                  
+                                  <div class="form-group col-md-3">
+                                      <label>Expected Date Return</label>
+                                      <div class="input-group">
+                                          <div class="input-group date" id="returndate" data-target-input="nearest">
+                                              <input type="text" class="form-control datetimepicker-input" id="date_return" placeholder="Select Date" name="date_return" data-target="#returndate"/>
+                                              <div class="input-group-append" data-target="#returndate" data-toggle="datetimepicker">
+                                                  <div class="input-group-text" id="set-today-return"><i class="fa fa-calendar"></i></div>
+                                              </div>
+                                          </div>
+                                      </div>
+                                      {% if form.date_borrow.errors %}
+                                                <script>
+                                                    document.querySelector('#datepicker').classList.add('error-border');
+                                                </script>
+                                            {% endif %} 
+                                  </div>
                                     <div class="form-group col-md-6">
                                         <label>Course</label>
                                         {{ form.course }}
@@ -409,58 +454,87 @@
                                   
                                 </div>
                                 <div class="form-row">
-                                  <div class="form-group col-md-2">
+                                  <div class="form-group col-md-6">
+                                    <label>Student ID Image (Optional)</label>
+                                    <div class="image-preview" id="image-preview">
+                                      <label for="image-upload" id="image-label">Click to Upload Image</label>
+                                    </div>
+                                    <input type="file" name="upload_image" id="image-upload" accept="image/*" onchange="previewImage(event)">
+                                    <input type="hidden" name="hidden_upload_image" id="hidden-upload-image">
+                                  </div>
+                                  
+                                  <div class="form-group col-md-3">
                                       <label>
                                           <input type="radio" name="borrower_type" value="Student" id="student_radio" style="width: 20px; height: 20px;" onclick="clearOtherBorrowerType()">&nbsp;
                                           Student
                                       </label>
                                   </div>
-                                  <div class="form-group col-md-2">
+                                  <div class="form-group col-md-3">
                                       <label>
                                           <input type="radio" name="borrower_type" value="Teacher" id="teacher_radio" style="width: 20px; height: 20px;" onclick="clearOtherBorrowerType()">&nbsp;
                                           Faculty/Employee
                                       </label>
                                   </div>
+                                  
                               </div>
+
                               
-                             
-                              
-                                
-                                <div class="form-row">
-                                  <div class="col-xl-6">
-                                      <div class="card {% if selected_item_has_zero_quantity %}border border-danger{% endif %}" style="position: relative;" id="card-container">
-                                          <i class="fas fa-plus add-card" style="position: absolute; top: 10px; right: 10px; cursor: pointer; color: #007bff;"></i>
-                                          <div class="card-body">
-                                              <div class="mb-2">
-                                                  <h4 class="card-title">Items</h4>
-                                                  <br>
-                                                  <p>Select items you want to borrow</p>
-                                              </div>
-                                              <div id="items-container">
-                                                  <div class="item-entry">
-                                                      {{ form.item.label_tag }}
-                                                      {{ form.item }} <!-- Dropdown for selecting items -->
-                                                      <span class="text-danger error-duplicate"></span>
-                                                      <div class="mt-4">
-                                                        <label>Description & Specification</label>
-                                                        <textarea name="description" class="form-control" id="" required></textarea>
-                                                    </div>
-                                                    <div class="mt-4">
-                                                      <label>Quantity</label>
-                                                      <input type="number" class="form-control col-md-3"  name="quantities[]" min="1" value="1" required>
-                                                      <span class="text-danger error-quantity"></span>
+                                 
+                              <div class="form-row">
+
+                                <!-- Original col-xl-6 for item selection -->
+                                <div class="col-xl-6" id="original-item-container">
+                                  <div class="card {% if selected_item_has_zero_quantity %}border border-danger{% endif %}" style="position: relative;" id="card-container">
+                                      <i class="fas fa-plus add-card" style="position: absolute; top: 10px; right: 10px; cursor: pointer; color: #007bff;"></i>
+                                      <div class="card-body">
+                                          <div class="mb-2">
+                                              <h4 class="card-title">Items</h4>
+                                              <br>
+                                              <p>Select items you want to borrow</p>
+                                          </div>
+                                          <div id="items-container">
+                                              <div class="item-entry">
+                                                  <!-- Manually generate the item dropdown for faculty items -->
+                                                  <label for="item" class="form-label">Item</label>
+                                                  <select name="item" id="item" class="form-control">
+                                                      <option value="" disabled selected>------</option> <!-- Default selected option -->
+                                                      {% for item in faculty_items %}
+                                                          <option value="{{ item.id }}" {% if selected_item == item.id %}selected{% endif %}>
+                                                              {{ item.name }} (Available stock: {{ item.quantity }})
+                                                          </option>
+                                                      {% empty %}
+                                                          <option disabled>No items available</option>
+                                                      {% endfor %}
+                                                  </select>
+                                                  
+                                                  <span class="text-danger error-duplicate"></span>
+                                                  <div class="mt-4">
+                                                      <label>Description & Specification</label>
+                                                      <textarea name="description" class="form-control" required></textarea>
                                                   </div>
+                                                  <div class="mt-4">
+                                                      <label>Quantity</label>
+                                                      <input type="number" class="form-control col-md-3" name="quantities[]" min="1" value="1" required>
+                                                      <span class="text-danger error-quantity"></span>
                                                   </div>
                                               </div>
                                           </div>
                                       </div>
                                   </div>
-                                  <div class="form-group col-md-6">
-                                      <label class="text-dark">Purpose for borrow</label>
-                                      {{ form.purpose }}
-                                  </div>
                               </div>
-                                <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Save</button>
+                                
+                                
+                                
+                            
+                                <div class="form-group col-md-6">
+                                    <label class="text-dark">Purpose for borrow</label>
+                                    {{ form.purpose }}
+                                </div>
+                            </div>
+
+                          
+
+                            <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Save</button>
                             </form>
                         </div>
                     </div>
@@ -511,82 +585,109 @@
 
 
   
-  <script>
-    $(document).ready(function() {
-      $('input[name="student_id"]').on('keyup', function() {
-        // Get the student ID from the input field and remove hyphens
-        let studentId = $(this).val().replace(/-/g, ''); // Remove all hyphens
-  
-        // Clear previous error messages
-        $('#error-message').remove();
-  
+<script>
+  $(document).ready(function () {
+    const $studentIdInput = $('input[name="student_id"]');
+    const $imagePreviewContainer = $('#image-preview');
+
+    $studentIdInput.on('keyup', function () {
+        const originalStudentId = $studentIdInput.val(); // Original value with hyphens
+        const cleanedStudentId = originalStudentId.replace(/-/g, ''); // Remove hyphens
+
         // Clear fields if the input is empty
-        if (studentId === "") {
-          clearFields();
-          return;
+        if (!$.trim(originalStudentId)) {
+            clearFields();
+            return;
         }
-  
-        if (studentId) { // Only perform the AJAX request if there is input
-          $.ajax({
-            url: "{% url 'admin-search_borrow_request' %}", // URL of the search view
+
+        // Perform AJAX request with both versions
+        $.ajax({
+            url: `{% url 'admin-search_borrow_request' %}`,
             data: {
-              'student_id': studentId
+                student_id: cleanedStudentId,
+                original_id: originalStudentId
             },
-            success: function(data) {
-              if (data.success) {
-                // Populate the fields with the retrieved data
-                $('input[name="name"]').val(data.name);
-                $('input[name="course"]').val(data.course);
-                $('select[name="year"]').val(data.year);
-                $('input[name="email"]').val(data.email);
-                $('input[name="phone"]').val(data.phone);
-  
-                // Set the date_borrow input
-                $('input[name="date_borrow"]').val(data.date_borrow); // Fill in the date_borrow input
-  
-                // Check borrower_type and set the appropriate radio or text input
-                if (data.borrower_type === "Student") {
-                  $('#student_radio').prop('checked', true);
-                  $('#other_borrower_type').val(''); // Clear other input if any
-                } else if (data.borrower_type === "Teacher") {
-                  $('#teacher_radio').prop('checked', true);
-                  $('#other_borrower_type').val(''); // Clear other input if any
+            dataType: 'json',
+            success: function (data) {
+                if (data.success) {
+                    // Populate the fields with the retrieved data
+                    $('input[name="name"]').val(data.name || '');
+                    $('select[name="course"]').val(data.course || '');
+                    $('select[name="year"]').val(data.year || '');
+                    $('input[name="email"]').val(data.email || '');
+                    $('input[name="phone"]').val(data.phone || '');
+                    $('textarea[name="purpose"]').val(data.purpose || '');
+                    $('input[name="date_borrow"]').val(data.date_borrow || '');
+                    $('input[name="date_return"]').val(data.date_return || '');
+
+                    // Handle borrower_type
+                    if (data.borrower_type === "Student") {
+                        $('#student_radio').prop('checked', true);
+                        $('input[name="other_borrower_type"]').val('');
+                    } else if (data.borrower_type === "Teacher") {
+                        $('#teacher_radio').prop('checked', true);
+                        $('input[name="other_borrower_type"]').val('');
+                    } else {
+                        $('input[name="borrower_type"]').prop('checked', false);
+                        $('input[name="other_borrower_type"]').val(data.borrower_type || '');
+                    }
+
+                    // Update image preview
+                    $imagePreviewContainer.empty();
+                    if (data.upload_image) {
+                        const $img = $('<img>').attr('src', data.upload_image)
+                            .addClass('preview-image')
+                            .css({ width: '100%', height: '100%' });
+                        $imagePreviewContainer.append($img);
+
+                        // Set hidden input value
+                        $('input[name="hidden_upload_image"]').val(data.upload_image);
+                    } else {
+                        $imagePreviewContainer.html('<label for="image-upload" id="image-label">Click to Upload Image</label>');
+                        $('input[name="hidden_upload_image"]').val('');
+                    }
                 } else {
-                  $('input[name="borrower_type"]').prop('checked', false); // Uncheck radio buttons
-                  $('#other_borrower_type').val(data.borrower_type); // Set other type
+                    clearFields();
                 }
-  
-                // Remove error message if found
-                $('#error-message').remove();
-              } else {
-                // Clear fields if no record found
-                clearFields();
-                // Append error message directly below the input field
-                $('#student_id').after('<span class="text-danger" id="error-message">' + data.error + '</span>');
-              }
             },
-            error: function(xhr) {
-              // Clear fields on error
-              clearFields();
-              // Append error message directly below the input field
-              $('#student_id').after('<span class="text-danger" id="error-message">' + xhr.responseJSON.error + '</span>');
+            error: function () {
+                clearFields();
             }
-          });
-        }
-      });
-  
-      function clearFields() {
+        });
+    });
+
+    function clearFields() {
         $('input[name="name"]').val('');
-        $('input[name="course"]').val('');
+        $('select[name="course"]').val('');
         $('select[name="year"]').val('');
         $('input[name="email"]').val('');
         $('input[name="phone"]').val('');
-        $('input[name="borrower_type"]').prop('checked', false); // Clear radio buttons
-        $('input[name="other_borrower_type"]').val(''); // Clear other type
-        $('input[name="date_borrow"]').val(''); // Clear date_borrow input
-      }
-    });
-  </script>
+        $('input[name="borrower_type"]').prop('checked', false);
+        $('input[name="other_borrower_type"]').val('');
+        $('input[name="date_borrow"]').val('');
+        $('input[name="date_return"]').val('');
+        $('textarea[name="purpose"]').val('');
+        $('input[name="hidden_upload_image"]').val('');
+        $imagePreviewContainer.html('<label for="image-upload" id="image-label">Click to Upload Image</label>');
+    }
+});
+
+</script>
+  
+  
+
+
+
+  
+
+
+
+
+  
+  
+  
+
+  
   
     
     
@@ -639,7 +740,11 @@
     
             originalCard.parentNode.appendChild(newCard);
     
-            closeIcon.addEventListener("click", () => newCard.remove());
+            closeIcon.addEventListener("click", () => {
+                newCard.remove();
+                enableSaveButtonIfNoErrors(); // Recheck errors after removing card
+            });
+    
             newCard.querySelector(".add-card").addEventListener("click", addCard);
             setupQuantityValidation(newCard);
             setupDuplicateItemValidation(newCard);
@@ -648,21 +753,39 @@
         document.querySelector(".add-card").addEventListener("click", addCard);
     
         function setupQuantityValidation(card) {
-            const itemSelect = card.querySelector("select[name='item']");
-            const quantityInput = card.querySelector("input[name='quantities[]']");
-            
-            itemSelect.addEventListener("change", async function () {
-                const availableQuantity = await getAvailableQuantity(this.value);
-                quantityInput.dataset.availableQuantity = availableQuantity;
-                validateQuantity(quantityInput, availableQuantity);
-                validateDuplicateItems();
-            });
-    
-            quantityInput.addEventListener("input", function () {
-                const availableQuantity = parseInt(this.dataset.availableQuantity || "0", 10);
-                validateQuantity(this, availableQuantity);
-            });
-        }
+          const itemSelect = card.querySelector("select[name='item']");
+          const quantityInput = card.querySelector("input[name='quantities[]']");
+          const errorQuantitySpan = quantityInput.parentNode.querySelector('.error-quantity');
+      
+          // Validate when the item is changed
+          itemSelect.addEventListener("change", async function () {
+              const selectedItem = this.value;
+              if (selectedItem) {
+                  const availableQuantity = await getAvailableQuantity(selectedItem);
+                  quantityInput.dataset.availableQuantity = availableQuantity;
+                  validateQuantity(quantityInput, availableQuantity);
+                  validateDuplicateItems();
+              } else {
+                  errorQuantitySpan.textContent = 'Please select an item before adding quantity.';
+                  disableSaveButton();
+              }
+          });
+      
+          // Validate when the quantity is changed
+          quantityInput.addEventListener("input", function () {
+              const availableQuantity = parseInt(this.dataset.availableQuantity || "0", 10);
+              const selectedItem = itemSelect.value;
+      
+              if (!selectedItem) {
+                  errorQuantitySpan.textContent = 'Please select an item first before adding quantity.';
+                  this.value = 0; // Reset quantity input to 0
+                  disableSaveButton();
+                  return;
+              }
+      
+              validateQuantity(this, availableQuantity);
+          });
+      }
     
         function setupDuplicateItemValidation(card) {
             const itemSelect = card.querySelector("select[name='item']");
@@ -708,7 +831,7 @@
         }
     
         function enableSaveButtonIfNoErrors() {
-            const hasErrors = document.querySelectorAll(".text-danger").some(span => span.textContent.trim() !== "");
+            const hasErrors = Array.from(document.querySelectorAll(".text-danger")).some(span => span.textContent.trim() !== "");
             if (!hasErrors) {
                 saveButton.disabled = false;
                 saveButton.style.cursor = "pointer";
@@ -717,7 +840,7 @@
     
         async function getAvailableQuantity(itemId) {
             try {
-                const response = await fetch(`/admin-get-available-quantity/${itemId}/`);
+                const response = await fetch(`/get-available-quantity/${itemId}/`);
                 const data = await response.json();
                 return data.available_quantity;
             } catch (error) {
@@ -738,6 +861,7 @@
     
     
     
+    
       
 
 
@@ -750,25 +874,41 @@
 
 
 
-function previewImages(event) {
-  const previewContainer = document.getElementById('image-preview');
-  previewContainer.innerHTML = ''; // Clear previous previews
-  const files = event.target.files;
-
-  Array.from(files).forEach(file => {
-      const reader = new FileReader();
-      reader.onload = function (e) {
+    function previewImage(event) {
+      const previewContainer = document.getElementById('image-preview');
+      const label = document.getElementById('image-label');
+      const hiddenInput = document.getElementById('hidden-upload-image'); // Reference the hidden input
+      
+      // Clear any previous preview
+      previewContainer.innerHTML = '';
+      
+      // Re-add the label to keep it visible
+      previewContainer.appendChild(label);
+    
+      const file = event.target.files[0]; // Get the first selected file
+      
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
           const img = document.createElement('img');
           img.src = e.target.result;
           img.classList.add('preview-image');
-          img.style.width = '100px'; // Adjust the size as needed
-          img.style.marginRight = '10px'; // Spacing between images
-          previewContainer.appendChild(img);
-      };
-      reader.readAsDataURL(file);
-  });
-}
-
+          img.style.width = '100%'; // Adjust the size as needed
+          img.style.height = '100%'; // Adjust the height to fit the container
+          previewContainer.appendChild(img); // Append the image to the container
+        };
+    
+        // Populate the hidden input with the file name
+        hiddenInput.value = file.name;
+    
+        reader.readAsDataURL(file); // Read the image file as data URL
+      } else {
+        // Clear the hidden input if no file is selected
+        hiddenInput.value = '';
+      }
+    }
+    
+    
 
 
 

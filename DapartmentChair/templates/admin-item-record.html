@@ -87,6 +87,154 @@
   background-color: #e0e0e0;            /* Set a light background for today */
   color: #000;                          /* Black text color for today */
 }
+
+
+/* From Uiverse.io by vihstorck */ 
+.switch {
+  /* switch */
+  --switch-width: 46px;
+  --switch-height: 24px;
+  --switch-bg: rgb(255, 47, 47);
+  --switch-checked-bg: #1676df;
+  --switch-offset: calc((var(--switch-height) - var(--circle-diameter)) / 2);
+  --switch-transition: all 0.2s cubic-bezier(0.27, 0.2, 0.25, 1.51);
+  /* circle */
+  --circle-diameter: 18px;
+  --circle-bg: #fff;
+  --circle-shadow: 1px 1px 2px rgba(146, 146, 146, 0.45);
+  --circle-checked-shadow: -1px 1px 2px rgba(163, 163, 163, 0.45);
+  --circle-transition: var(--switch-transition);
+  /* icon */
+  --icon-transition: all 0.2s cubic-bezier(0.27, 0.2, 0.25, 1.51);
+  --icon-cross-color: var(--switch-bg);
+  --icon-cross-size: 6px;
+  --icon-checkmark-color: var(--switch-checked-bg);
+  --icon-checkmark-size: 10px;
+  /* effect line */
+  --effect-width: calc(var(--circle-diameter) / 2);
+  --effect-height: calc(var(--effect-width) / 2 - 1px);
+  --effect-bg: var(--circle-bg);
+  --effect-border-radius: 1px;
+  --effect-transition: all 0.2s ease-in-out;
+}
+
+.switch input {
+  display: none;
+}
+
+.switch {
+  display: inline-block;
+}
+
+.switch i {
+  -webkit-transition: var(--icon-transition);
+  -o-transition: var(--icon-transition);
+  transition: var(--icon-transition);
+  position: absolute;
+  height: auto;
+}
+
+.switch .checkmark {
+  width: var(--icon-checkmark-size);
+  color: var(--icon-checkmark-color);
+  -webkit-transform: scale(0);
+  -ms-transform: scale(0);
+  transform: scale(0);
+}
+
+.switch .cross {
+  width: var(--icon-cross-size);
+  color: var(--icon-cross-color);
+}
+
+.slider {
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  width: var(--switch-width);
+  height: var(--switch-height);
+  background: var(--switch-bg);
+  border-radius: 999px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  position: relative;
+  -webkit-transition: var(--switch-transition);
+  -o-transition: var(--switch-transition);
+  transition: var(--switch-transition);
+  cursor: pointer;
+}
+
+.circle {
+  width: var(--circle-diameter);
+  height: var(--circle-diameter);
+  background: var(--circle-bg);
+  border-radius: inherit;
+  -webkit-box-shadow: var(--circle-shadow);
+  box-shadow: var(--circle-shadow);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  -webkit-transition: var(--circle-transition);
+  -o-transition: var(--circle-transition);
+  transition: var(--circle-transition);
+  z-index: 1;
+  position: absolute;
+  left: var(--switch-offset);
+}
+
+.slider::before {
+  content: "";
+  position: absolute;
+  width: var(--effect-width);
+  height: var(--effect-height);
+  left: calc(var(--switch-offset) + (var(--effect-width) / 2));
+  background: var(--effect-bg);
+  border-radius: var(--effect-border-radius);
+  -webkit-transition: var(--effect-transition);
+  -o-transition: var(--effect-transition);
+  transition: var(--effect-transition);
+}
+
+/* actions */
+
+.switch input:checked + .slider {
+  background: var(--switch-checked-bg);
+}
+
+.switch input:checked + .slider .checkmark {
+  -webkit-transform: scale(1);
+  -ms-transform: scale(1);
+  transform: scale(1);
+}
+
+.switch input:checked + .slider .cross {
+  -webkit-transform: scale(0);
+  -ms-transform: scale(0);
+  transform: scale(0);
+}
+
+.switch input:checked + .slider::before {
+  left: calc(
+    100% - var(--effect-width) - (var(--effect-width) / 2) -
+      var(--switch-offset)
+  );
+}
+
+.switch input:checked + .slider .circle {
+  left: calc(100% - var(--circle-diameter) - var(--switch-offset));
+  -webkit-box-shadow: var(--circle-checked-shadow);
+  box-shadow: var(--circle-checked-shadow);
+}
+
 </style>
 
 {% endblock %}
@@ -308,53 +456,43 @@
         <div class="container-fluid">
 
 
-    
     <!-- Modal for Editing Item -->
-    <div class="modal fade" id="exampleModalCenter">
-      <div class="modal-dialog modal-dialog-centered" role="document">
-          <div class="modal-content">
-              <div class="modal-header">
-                  <h5 class="modal-title" style="font-size: 25px; font-weight: 700;">Edit Item</h5>
-                  <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+<!-- Modal for Editing Item -->
+<div class="modal fade" id="exampleModalCenter">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" style="font-size: 25px; font-weight: 700;">Edit Item</h5>
+              <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+          </div>
+          <div class="modal-body">
+            <form action="{% url 'update-property-status' %}" method="POST">
+              {% csrf_token %}
+              <table class="table table-bordered" style="table-layout: fixed; width: 100%;">
+                  <thead class="thead-dark">
+                      <tr>
+                          <th style="width: 33%;">Property ID</th>
+                          <th style="width: 33%;">Item</th>
+                          <th style="width: 33%;">Status</th>
+                          <th style="width: 33%;">Condition (Good/Defect)</th>
+                      </tr>
+                  </thead>
+                  <tbody id="modalTableBody">
+                      <!-- Dynamic rows will be added here based on the selected item -->
+                  </tbody>
+              </table>
+          
+              <div class="modal-footer">
+                  <button type="submit" name="submit" class="btn btn-secondary">Save</button>
               </div>
-              <div class="modal-body">
-                  <form method="POST" action="{% url 'admin-update_item' %}" id="edit-item-form">
-                      {% csrf_token %}
-                      <input type="hidden" name="item_id" value="">
-
-                      <div class="form-group row mb-4">
-                          <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3" style="font-size: 15px">Property ID</label>
-                          <div class="col-sm-12 col-md-7">
-                              <input type="text" name="property_id" class="form-control">
-                          </div>
-                      </div>
-
-                      <div class="form-group row mb-4">
-                          <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3" style="font-size: 15px">Name</label>
-                          <div class="col-sm-12 col-md-7">
-                              <input type="text" name="name" class="form-control" id="item-name" required>
-                              <div id="name-validation-error" class="text-danger" style="display: none;">This item name already exists.</div>
-                          </div>
-                      </div>
-
-                      <div class="form-group row mb-4">
-                          <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3" style="font-size: 15px">Quantity</label>
-                          <div class="col-sm-12 col-md-7">
-                              <input type="number" style="width: 100px;" class="form-control" name="quantity" min="1" max="100" required>
-                          </div>
-                      </div>
-
-                      <div class="form-group row mb-4">
-                          <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3"></label>
-                          <div class="col-sm-12 col-md-7">
-                              <button class="btn btn-primary" type="submit" id="submit-button">Update</button>
-                          </div>
-                      </div>
-                  </form>
-              </div>
+          </form>
+          
           </div>
       </div>
-    </div>
+  </div>
+</div>
+
+
 
 
 
@@ -392,10 +530,10 @@
         
                             <table id="itemTable" class="table table-bordered table-striped table-responsive-sm">
                                 <thead class="dark-mode">
-                                    <tr>
-                                        <th style="width: 300px;">Property ID</th>  <!-- Change ID to # for numbering -->
+                                    <tr>  
                                         <th>Item</th>
-                                        <th>Quantity</th>
+                                        <th>Total Quantity</th>
+                                        <th>Available Quantity</th>
                                         <th style="width: 200px;">Action</th>
                                     </tr>
                                 </thead>
@@ -403,19 +541,19 @@
                                     {% if page_obj %}
                                         {% for item in page_obj %}
                                             <tr>
-                                                <td>{{ item.property_id }}</td>  <!-- Display the loop index starting from 1 -->
                                                 <td>{{ item.name }}</td>
+                                                <td>{{ item.total_quantity }}</td>
                                                 <td>{{ item.quantity }}</td>
                                                 <td style="text-align: center;">
                                                   <button type="button" class="btn btn-secondary edit-item-btn" 
                                                   data-id="{{ item.id }}" 
                                                   data-name="{{ item.name }}"
-                                                  data-property-id="{{ item.property_id }}" 
+                                                  data-totalquantity="{{ item.total_quantity }}"
                                                   data-quantity="{{ item.quantity }}"
                                                   data-toggle="modal" 
                                                   data-target="#exampleModalCenter">
-                                                  <i class="fas fa-edit"></i>
-                                              </button>
+                                              <i class="fas fa-edit"></i>
+                                          </button>
                                               
                                                     <button class="btn btn-danger btn deleteButton" data-item-id="{{ item.id }}"><i class="fas fa-trash"></i></button>
                                                 </td>
@@ -527,52 +665,130 @@
     }
 
     //edit
-    document.addEventListener('DOMContentLoaded', function() {
-      var editButtons = document.querySelectorAll('.edit-item-btn');
-      
-      editButtons.forEach(function(button) {
-          button.addEventListener('click', function() {
-              var itemId = this.getAttribute('data-id');
-              var itemName = this.getAttribute('data-name');
-              var itemQuantity = this.getAttribute('data-quantity');
-              var propertyId = this.getAttribute('data-property-id');
-  
-              // Set the modal input values
-              document.querySelector('#exampleModalCenter input[name="item_id"]').value = itemId;
-              document.querySelector('#exampleModalCenter input[name="name"]').value = itemName;
-              document.querySelector('#exampleModalCenter input[name="quantity"]').value = itemQuantity;
-              document.querySelector('#exampleModalCenter input[name="property_id"]').value = propertyId;
+    document.querySelectorAll('.edit-item-btn').forEach(button => {
+      button.addEventListener('click', function() {
+        const itemId = this.getAttribute('data-id');
+        const itemName = this.getAttribute('data-name');
+        const totalQuantity = this.getAttribute('data-totalquantity');
+        const quantity = this.getAttribute('data-quantity');
+    
+        // Fetch PropertyID related to the item
+        fetch(`/get_property_ids/${itemId}/`) // Assuming you have an endpoint that returns the Property IDs
+          .then(response => response.json())
+          .then(data => {
+            // Empty the modal table body
+            const modalTableBody = document.getElementById('modalTableBody');
+            modalTableBody.innerHTML = '';
+    
+            // Loop through each property ID and add a new row to the table
+            data.property_ids.forEach(property => {
+              const row = document.createElement('tr');
+              row.setAttribute('data-property-id', property.property_id); // Set a data attribute for easier reference
+    
+              row.innerHTML = `
+                <td style="text-align: center; vertical-align: middle;">${property.property_id}</td>
+                <td style="text-align: center; vertical-align: middle;">${itemName}</td>
+                <td style="text-align: center; vertical-align: middle;">
+                  <span class="badge ${property.status === 'Good' ? 'badge-success' : 'badge-secondary'} status-badge">
+                    ${property.status}
+                  </span>
+                </td>
+                <td style="text-align: center; vertical-align: middle;">
+                  <label class="switch">
+                    <input type="checkbox" ${property.status === 'Good' ? 'checked' : ''} data-id="${property.property_id}" class="status-toggle" />
+                    <div class="slider">
+                      <div class="circle">
+                        <i class="fa-solid fa-x cross" style="font-size:9px;"></i>
+                        <i class="fa-solid fa-check checkmark" style="font-size: 11px;"></i>
+                      </div>
+                    </div>
+                  </label>
+                </td>
+              `;
+              modalTableBody.appendChild(row);
+            });
+    
+            // Attach event listener to the checkboxes after rows are added
+            document.querySelectorAll('.status-toggle').forEach(checkbox => {
+              checkbox.addEventListener('change', function() {
+                const propertyId = this.getAttribute('data-id');
+                const newStatus = this.checked ? 'Good' : 'Defective';
+    
+                // Update the badge in the table
+                const statusBadge = this.closest('tr').querySelector('.status-badge');
+                statusBadge.textContent = newStatus;
+                statusBadge.className = `badge ${newStatus === 'Good' ? 'badge-success' : 'badge-secondary'} status-badge`;
+              });
+            });
+          })
+          .catch(error => {
+            console.error('Error fetching property IDs:', error);
           });
       });
-  });
+    });
+    
+    // When form is submitted, check the selected checkboxes and set status to "Defective" or "Good"
+    document.querySelector('form').addEventListener('submit', function(event) {
+      // Iterate over each row in the table to check the checkbox status
+      const rows = document.querySelectorAll('#modalTableBody tr');
+      rows.forEach(row => {
+        const checkbox = row.querySelector('.status-toggle');
+        if (checkbox) {
+          const propertyId = checkbox.getAttribute('data-id');
+          const status = checkbox.checked ? 'Good' : 'Defective';
+          const statusBadge = row.querySelector('.status-badge');
+    
+          // Update the status badge in the table (for UI consistency)
+          statusBadge.textContent = status;
+          statusBadge.className = `badge ${status === 'Good' ? 'badge-success' : 'badge-secondary'} status-badge`;
+    
+          // Add hidden input field with Property ID and updated status to be sent with the form
+          const statusInput = document.createElement('input');
+          statusInput.type = 'hidden';
+          statusInput.name = 'property_ids[]';  // Array of property IDs
+          statusInput.value = `${propertyId},${status}`;  // Store the property_id and the new status
+          row.appendChild(statusInput);
+        }
+      });
+    });
+    
+  
 
 
-  document.getElementById('item-name').addEventListener('input', function () {
-    const nameField = this;
-    const errorDiv = document.getElementById('name-validation-error');
+
+
+
+
+
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    const totalQuantityField = document.querySelector('input[name="total_quantity"]');
+    const availableQuantityField = document.querySelector('input[name="quantity"]');
     const submitButton = document.getElementById('submit-button');
-    const nameValue = nameField.value;
+    
+    function validateQuantities() {
+        const totalQuantity = parseInt(totalQuantityField.value, 10);
+        const availableQuantity = parseInt(availableQuantityField.value, 10);
+        const errorDiv = document.getElementById('quantity-validation-error');
 
-    if (nameValue.trim().length > 0) {
-        fetch(`/admin-validate-item-name/?name=${encodeURIComponent(nameValue)}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.exists) {
-                    errorDiv.style.display = 'block';
-                    submitButton.disabled = true; // Disable the button if item name exists
-                } else {
-                    errorDiv.style.display = 'none';
-                    submitButton.disabled = false; // Enable the button if item name does not exist
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                submitButton.disabled = false; // Enable the button if there's an error in the request
-            });
-    } else {
-        errorDiv.style.display = 'none';
-        submitButton.disabled = false; // Enable the button if the input is cleared
+        if (!isNaN(totalQuantity) && !isNaN(availableQuantity)) {
+            if (availableQuantity > totalQuantity) {
+                errorDiv.style.display = 'block';
+                errorDiv.textContent = 'Available quantity cannot exceed the total quantity.';
+                submitButton.disabled = true;
+            } else {
+                errorDiv.style.display = 'none';
+                submitButton.disabled = false;
+            }
+        } else {
+            errorDiv.style.display = 'none';
+            submitButton.disabled = false;
+        }
     }
+
+    totalQuantityField.addEventListener('input', validateQuantities);
+    availableQuantityField.addEventListener('input', validateQuantities);
 });
 
   
@@ -641,6 +857,7 @@ function getCookie(name) {
 }
 
 
+
 document.getElementById("searchInput").addEventListener("input", function () {
   searchTable();
 });
@@ -651,99 +868,97 @@ function searchTable() {
   filter = input.value.toUpperCase();
   regex = new RegExp(`(${filter})`, 'gi');
   table = document.getElementById("itemTable");
-  tbody = table.getElementsByTagName("tbody")[0];  // Work only with tbody
-  tr = tbody.getElementsByTagName("tr");  // Get rows only from tbody
+  tbody = table.getElementsByTagName("tbody")[0]; // Work only with tbody
+  tr = tbody.getElementsByTagName("tr"); // Get rows only from tbody
   var noMatch = true;
 
-  // If the input is empty, reset table to show all rows and keep the badge and action button intact
+  // If the input is empty, reset table to show all rows and ensure "No record found" row is removed
   if (!filter) {
-      for (i = 0; i < tr.length; i++) {
-          if (tr[i].classList.contains("no-record-row")) continue; // Skip the "No record found" row
-          tr[i].style.display = ""; // Show all rows
-          td = tr[i].getElementsByTagName("td");
-          for (j = 0; j < td.length; j++) {
-              // Ensure buttons, dropdowns, badges, and action columns are not affected
-              if (j == 4 || j === 7 || j === 8 || j === 9 || td[j].querySelector('.dropdownnn') || td[j].querySelector('.badge') || td[j].querySelector('.action-buttons')) {
-                  continue; // Skip "Status", "Action", and dropdowns, badges
-              }
-              td[j].innerHTML = td[j].textContent || td[j].innerText; // Reset text content
-          }
+    for (i = 0; i < tr.length; i++) {
+      if (tr[i].classList.contains("no-record-row")) continue; // Skip the "No record found" row
+      tr[i].style.display = ""; // Show all rows
+      td = tr[i].getElementsByTagName("td");
+      for (j = 0; j < td.length; j++) {
+        // Ensure buttons, dropdowns, badges, and action columns are not affected
+        if (j === 4 || td[j].querySelector('.dropdownnn') || td[j].querySelector('.badge') || td[j].querySelector('.action-buttons')) {
+          continue; // Skip "Status", "Action", and dropdowns, badges
+        }
+        td[j].innerHTML = td[j].textContent || td[j].innerText; // Reset text content
       }
-      removeNoRecordRow();  // Remove "No record found" if it exists
-      return; // Exit function if input is empty
+    }
+    removeNoRecordRow(); // Remove "No record found" if it exists
+    return; // Exit function if input is empty
   }
 
   // If there's input, filter the table rows
-  noMatch = true;  // Reset noMatch for the filtering
+  noMatch = true; // Reset noMatch for the filtering
   for (i = 0; i < tr.length; i++) {
-      if (tr[i].classList.contains("no-record-row")) continue; // Skip "No record found" row
+    if (tr[i].classList.contains("no-record-row")) continue; // Skip "No record found" row
 
-      tr[i].style.display = "none"; // Hide all rows initially
-      td = tr[i].getElementsByTagName("td");
-      let rowContainsFilter = false;
+    tr[i].style.display = "none"; // Hide all rows initially
+    td = tr[i].getElementsByTagName("td");
+    let rowContainsFilter = false;
 
-      // Iterate through each cell in the row
-      for (j = 0; j < td.length; j++) {
-          if (j == 4 ||j === 8 || j === 9 || j == 10) continue; // Skip "Status" and "Action" columns
-          if (td[j]) {
-              txtValue = td[j].textContent || td[j].innerText;
-              if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                  rowContainsFilter = true;
-                  // Highlight matched text only in non-dropdown cells
-                  if (!td[j].querySelector('.dropdown')) {
-                      td[j].innerHTML = txtValue.replace(regex, "<span style='background-color: #3f6791; color:white;'>$1</span>");
-                  }
-              } else {
-                  // Remove highlights if no match
-                  if (!td[j].querySelector('.dropdown')) {
-                      td[j].innerHTML = txtValue.replace(/<span style='background-color: rgb\(0, 255, 13\);'>(.*?)<\/span>/g, "$1");
-                  }
-              }
+    // Iterate through each cell in the row
+    for (j = 0; j < td.length; j++) {
+      if (j === 4) continue; // Skip "Status" and "Action" columns
+      if (td[j]) {
+        txtValue = td[j].textContent || td[j].innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+          rowContainsFilter = true;
+          // Highlight matched text only in non-dropdown cells
+          if (!td[j].querySelector('.dropdown')) {
+            td[j].innerHTML = txtValue.replace(regex, "<span style='background-color: #3f6791; color: white;'>$1</span>");
           }
+        } else {
+          // Remove highlights if no match
+          if (!td[j].querySelector('.dropdown')) {
+            td[j].innerHTML = txtValue.replace(/<span style='background-color:.*?'>(.*?)<\/span>/g, "$1");
+          }
+        }
       }
+    }
 
-      // If the row contains the filter, show it
-      if (rowContainsFilter) {
-          tr[i].style.display = "";
-          noMatch = false;
-      }
-  }
-
-  // Show or hide "No record found" message based on matches
-  if (noMatch) {
-      showNoRecordRow();
-  } else {
-      removeNoRecordRow(); // Remove the "No record found" row if there are matches
+    // If the row contains the filter, show it
+    if (rowContainsFilter) {
+      tr[i].style.display = "";
+      noMatch = false;
+    }
   }
 
   // Remove existing "no record found" row if present
   var noRecordRow = document.getElementById("noRecordRow");
   if (noRecordRow) {
-      noRecordRow.remove();
+    noRecordRow.remove();
   }
 
   // If no matches found, add a "no record found" row
   if (noMatch) {
-      var newRow = tbody.insertRow();
-      newRow.setAttribute("id", "noRecordRow");
-      var cell = newRow.insertCell(0);
-      cell.colSpan = table.getElementsByTagName("th").length;
-      cell.style.textAlign = "center";
-      cell.textContent = "No borrow requests found.";
+    showNoRecordRow(tbody, table);
+  } else {
+    removeNoRecordRow(); // Remove the "No record found" row if there are matches
   }
 }
 
-function showNoRecordRow() {
+function showNoRecordRow(tbody, table) {
   var noRecordRow = document.querySelector(".no-record-row");
-  if (noRecordRow) {
-      noRecordRow.style.display = "";
+  if (!noRecordRow) {
+    var newRow = tbody.insertRow();
+    newRow.setAttribute("id", "noRecordRow");
+    newRow.setAttribute("class", "no-record-row");
+    var cell = newRow.insertCell(0);
+    cell.colSpan = table.getElementsByTagName("th").length;
+    cell.style.textAlign = "center";
+    cell.textContent = "No borrow requests found.";
+  } else {
+    noRecordRow.style.display = "";
   }
 }
 
 function removeNoRecordRow() {
   var noRecordRow = document.querySelector(".no-record-row");
   if (noRecordRow) {
-      noRecordRow.style.display = "none";
+    noRecordRow.style.display = "none";
   }
 }
 

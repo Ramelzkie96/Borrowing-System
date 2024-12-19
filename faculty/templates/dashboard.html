@@ -10,6 +10,29 @@
     .activee {
         background: #6b51df;
     }
+
+
+    .button-container {
+        display: flex; /* Align buttons in a row */
+        gap: 10px; /* Space between the buttons */
+        justify-content: center; /* Center buttons within the table cell */
+        align-items: center; /* Vertically center buttons */
+        flex-wrap: nowrap; /* Prevent wrapping */
+    }
+    
+    .button-container button {
+        padding: 8px 12px; /* Standard button size */
+        font-size: 14px; /* Adjust button text size */
+        white-space: nowrap; /* Prevent text wrapping */
+    }
+    
+    @media (max-width: 1280px) { /* Adjustments for 1280px or smaller screens */
+        .button-container button {
+            padding: 6px 10px; /* Reduce padding for smaller buttons */
+            font-size: 12px; /* Reduce font size */
+        }
+    }
+    
 </style>
 {% endblock %}
 
@@ -255,6 +278,17 @@
                                                     <p id="modal-date-borrow" style="font-size: 15px; color: #474747;"></p>
                                                 </div>
                                             </div>
+
+                                            <div class="row mb-1">
+                                                <div class="col-3">
+                                                    <label for="" class="font-weight-bold text-dark">Expected Date Return:</label>
+                                                    <p id="modal-date-return" style="font-size: 15px; color: #474747;"></p>
+                                                </div>
+                                                <div class="col-3">
+                                                    <label for="" class="font-weight-bold text-dark">Handle By:</label>
+                                                    <p id="modal-handle" style="font-size: 15px; color: #474747;"></p>
+                                                </div>
+                                            </div>
                             
                                             <div class="row">
                                                 <div class="col-4">
@@ -291,9 +325,10 @@
             <div class="row page-titles mx-0" style="box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 4px;">
                 <div class="col-sm-6 p-md-0">
                     <div class="welcome-text">
-                        <h4>Hi, welcome back!</h4>
-                        <p class="mb-0">This is Multimedia Borrow System</p>
+                        <h4>Hi, {{ username }}!</h4> <!-- Use the username variable -->
+                        <p class="mb-0">Welcome to IT Borrowing System</p>
                     </div>
+                    
                 </div>
 
             </div>
@@ -306,7 +341,7 @@
                                 <img src="{% static 'images/borrowers.png' %}" width="60" height="60" alt="">
                             </div>
                             <div class="stat-content d-inline-block">
-                                <div class="stat-text">Borrowed Items</div>
+                                <div class="stat-text">Total Borrowers</div>
                                 <div class="stat-digit">{{ borrow_request_count }}</div>
                             </div>
                         </div>
@@ -357,7 +392,7 @@
                                         <tr>
                                             <th>STUDENT ID</th>
                                             <th>NAME</th>
-                                            <th>COURSE</th>
+                                            <th style="width: 150px;">COURSE</th>
                                             <th>YEAR</th>
                                             <th>PHONE</th>
                                             <th>DATE BORROW</th>
@@ -390,25 +425,28 @@
 
 
                                             <td>
-                                                <button type="button" class="btn btn-secondary view-item-btn" data-toggle="modal" data-target="#exampleModalCenter"
+                                                <div class="button-container">
+                                                    <button type="button" class="btn btn-secondary view-item-btn" data-toggle="modal" data-target="#exampleModalCenter"
                                                             data-request-id="{{ request.id }}"
                                                             data-student-id="{{ request.student_id }}"
                                                             data-name="{{ request.name }}"
                                                             data-course="{{ request.course }}"
+                                                            data-return="{{ request.date_return }}"
+                                                            data-handle="{{ request.user }}"
                                                             data-date="{{ request.date_borrow }}">
-                                                            
-                                                            <i class="fas fa-eye"></i>
-                                                </button>
-
-                                                <button type="button" class="btn btn-secondary send-email-btn"
-                                                        data-toggle="modal" data-target="#exampleModalLong"
-                                                        data-email="{{ request.email }}"
-                                                        data-sender-name="{{ user.username }}"
-                                                        data-borrow-id="{{ request.id }}">
-                                                    <i class="fa-regular fa-envelope"></i>
-                                                </button>
-
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                            
+                                                    <button type="button" class="btn btn-secondary send-email-btn"
+                                                            data-toggle="modal" data-target="#exampleModalLong"
+                                                            data-email="{{ request.email }}"
+                                                            data-sender-name="{{ user.username }}"
+                                                            data-borrow-id="{{ request.id }}">
+                                                        <i class="fa-regular fa-envelope"></i>
+                                                    </button>
+                                                </div>
                                             </td>
+                                            
                                         </tr>
                                         {% endfor %}
                                         {% else %}
@@ -437,12 +475,12 @@
     <!--**********************************
             Footer start
         ***********************************-->
-    <div class="footer">
+    <!-- <div class="footer">
         <div class="copyright">
             <p>Copyright © Designed &amp; Developed by <a href="#" target="_blank">Quixkit</a> 2019</p>
             <p>Distributed by <a href="https://themewagon.com/" target="_blank">Themewagon</a></p>
         </div>
-    </div>
+    </div> -->
 </div>
 
 
@@ -455,45 +493,55 @@
 
 <script>
 
-//send email
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.send-email-btn').forEach(function (button) {
-            button.addEventListener('click', function () {
-                const email = this.getAttribute('data-email');
-                const borrowId = this.getAttribute('data-borrow-id');
-                
-                document.getElementById('emailAddress').value = email;
-                document.getElementById('emailTitle').value = 'Reminder: Outstanding Borrowed Items';
-                
-                // Fetch the unreturned items for the given borrow ID
-                fetch(`/get-unreturned-items/${borrowId}/`)
-                    .then(response => response.json())
-                    .then(data => {
-                        const emailMessageDisplay = document.getElementById('emailMessageDisplay');
-                        if (data.success) {
-                            const unreturnedItems = data.items;
-                            let messageContent = 'The following items need to be returned:<br><br>';
-                            
-                            if (unreturnedItems.length > 0) {
-                                unreturnedItems.forEach((item, index) => {
-                                    messageContent += `${index + 1}. ${item.name} (Quantity: ${item.quantity})<br>`;
-                                });
-                            } else {
-                                messageContent = 'All items have been returned.';
-                            }
-                            
-                            // Display the message in the <p> tag
-                            emailMessageDisplay.innerHTML = messageContent;
+// Send email
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.send-email-btn').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const email = this.getAttribute('data-email');
+            const borrowId = this.getAttribute('data-borrow-id');
+            
+            // Populate email fields
+            document.getElementById('emailAddress').value = email;
+            document.getElementById('emailTitle').value = 'Reminder: Outstanding Borrowed Items';
+            
+            // Fetch the unreturned items for the given borrow ID
+            fetch(`/get-unreturned-items/${borrowId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    const emailMessageDisplay = document.getElementById('emailMessageDisplay');
+                    if (data.success) {
+                        const unreturnedItems = data.items;
+                        let messageContent = 'The following items need to be returned:<br><br>';
+                        
+                        if (unreturnedItems.length > 0) {
+                            unreturnedItems.forEach((item, index) => {
+                                messageContent += `
+                                    ${index + 1}. ${item.name} 
+                                    (Quantity: ${item.quantity}), 
+                                    ${item.date_borrow}, 
+                                    Time ago: ${item.time_ago}<br>
+                                `;
+                            });
                         } else {
-                            emailMessageDisplay.textContent = 'Error fetching items.';
+                            messageContent = 'All items have been returned.';
                         }
-                    })
-                    .catch(() => {
-                        document.getElementById('emailMessageDisplay').textContent = 'Error fetching items.';
-                    });
-            });
+                        
+                        // Display the message in the <p> tag
+                        emailMessageDisplay.innerHTML = messageContent;
+                    } else {
+                        emailMessageDisplay.textContent = 'Error fetching items.';
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('emailMessageDisplay').textContent = 'Error fetching items.';
+                });
+
+            // Automatic message for the textarea
+            const emailMessageTextarea = document.getElementById('emailMessage');
+            emailMessageTextarea.value = 'Please return the borrowed items immediately. Thank you for your prompt attention to this matter.';
         });
     });
+});
 
 
 
@@ -543,12 +591,16 @@
                 const name = button.getAttribute('data-name');
                 const course = button.getAttribute('data-course');
                 const dateBorrow = button.getAttribute('data-date');
+                const dateRreturn = button.getAttribute('data-return');
+                const handle = button.getAttribute('data-handle');
     
                 // Populate modal fields
                 document.getElementById('modal-student-id').textContent = studentId;
                 document.getElementById('modal-name').textContent = name;
                 document.getElementById('modal-course').textContent = course;
                 document.getElementById('modal-date-borrow').textContent = dateBorrow;
+                document.getElementById('modal-date-return').textContent = dateRreturn;
+                document.getElementById('modal-handle').textContent = handle;
     
                 // Clear previous items
                 const borrowItemsList = document.getElementById('borrow-items-list');

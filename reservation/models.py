@@ -55,10 +55,12 @@ class StudentReservation(models.Model):
     year_level = models.CharField(max_length=50)
     email = models.EmailField()
     phone_number = models.CharField(max_length=15)
-    reserve_date = models.CharField(max_length=50)  # Changed to DateField for better date handling
+    reserve_date = models.CharField(max_length=50)
+    date_return = models.CharField(max_length=50, null=True)
     purpose = models.TextField(null=True)
     status = models.CharField(max_length=20, default='Pending')
     user = models.ForeignKey('ReservationUser', on_delete=models.CASCADE)
+    upload_image = models.ImageField(upload_to='borrow_upload/', null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     
     def __str__(self):

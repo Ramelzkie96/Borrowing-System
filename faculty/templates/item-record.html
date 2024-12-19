@@ -137,12 +137,12 @@
                     </li> -->
                     <li><a  href="{% url 'dashboard'%}" aria-expanded="false">
                         <img src="{% static 'images/dashboard.png'%}" width="30" height="30" alt="">
-                        <span class="nav-text" style="color: white;">Dashboard</span></a>
+                        <span class="nav-text">Dashboard</span></a>
 
                     </li>
 
                     <li class="nav-label">ITEMS</li>
-                    <li><a class="has-arrow" href="javascript:void()" aria-expanded="false">
+                    <li><a class="activee has-arrow" href="javascript:void()" aria-expanded="false">
                         <img src="{% static 'images/item.png'%}" width="30" height="30" alt="">
                         <span class="nav-text" >Manage Items</span></a>
                         <ul aria-expanded="false">
@@ -218,9 +218,17 @@
                         </div>
 
                         <div class="form-group row mb-4">
-                            <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Quantity</label>
+                            <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Total Quantity</label>
                             <div class="col-sm-12 col-md-7">
-                                <input type="number" style="width: 100px; border: 1px solid #bebebe;" class="form-control" name="quantity" min="1" max="100" required>
+                                <input type="number" style="width: 100px; border: 1px solid #bebebe;" class="form-control" name="total_quantity" min="1" max="100" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group row mb-4">
+                            <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Available Quantity</label>
+                            <div class="col-sm-12 col-md-7">
+                                <input type="number" style="width: 100px; border: 1px solid #bebebe;" class="form-control" name="quantity" max="100" required>
+                                <div id="quantity-validation-error" class="text-danger" style="display: none;"></div>
                             </div>
                         </div>
 
@@ -257,7 +265,7 @@
                             <div class="card-body">
                                 <div class="table-responsive">
                                     <div style="display: flex; justify-content: space-between;">
-                                        <a href="{% url 'add-item' %}" class="btn btn-whatsapp mb-3" style="box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;">Add New Item <span class="btn-icon-right"><img src="{% static 'images/plus.png' %}" alt="" width="30" height="30"></span></a>
+                                        <a href="{% url 'add-item' %}" class="btn btn-whatsapp mb-3" style="box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;"><img src="{% static 'images/plus.png' %}" alt="" width="30" height="30"> Add New Item </a>
                                         <div class="sea">
                                             <i class='bx bx-search-alt-2' style="color: #593bdb; position: absolute; font-size: 20px; right: 200px; top: 83px;"></i>
                                             <input type="search" id="searchInput" placeholder="Search" class="form-control intp" onkeyup="searchTable()">
@@ -281,7 +289,8 @@
                                             <tr>
                                                 <th>Property ID</th>  <!-- Change ID to # for numbering -->
                                                 <th>Item</th>
-                                                <th>Quantity</th>
+                                                <th>Total Quantity</th>
+                                                <th>Available Quantity</th>
                                                 <th style="width: 150px;">Action</th>
                                             </tr>
                                         </thead>
@@ -291,12 +300,14 @@
                                                     <tr>
                                                         <td>{{ item.property_id }}</td>  <!-- Display the loop index starting from 1 -->
                                                         <td>{{ item.name }}</td>
+                                                        <td>{{ item.total_quantity }}</td>
                                                         <td>{{ item.quantity }}</td>
                                                         <td>
                                                             <button type="button" class="btn btn-secondary edit-item-btn"
                                                                 data-id="{{ item.id }}"
                                                                 data-name="{{ item.name }}"
-                                                                date-property-id="{{ item.property_id }}"
+                                                                data-property-id="{{ item.property_id }}"
+                                                                data-totalquantity="{{ item.total_quantity }}"
                                                                 data-quantity="{{ item.quantity }}"
                                                                 data-toggle="modal"
                                                                 data-target="#exampleModalCenter">
@@ -382,20 +393,22 @@
 
 
     <script>
-            //edit
+     //edit
     document.addEventListener('DOMContentLoaded', function() {
         var editButtons = document.querySelectorAll('.edit-item-btn');
-
+        
         editButtons.forEach(function(button) {
             button.addEventListener('click', function() {
                 var itemId = this.getAttribute('data-id');
                 var itemName = this.getAttribute('data-name');
+                var totalquantity = this.getAttribute('data-totalquantity');
                 var itemQuantity = this.getAttribute('data-quantity');
-                var propertyId = this.getAttribute('date-property-id');
-
+                var propertyId = this.getAttribute('data-property-id');
+    
                 // Set the modal input values
                 document.querySelector('#exampleModalCenter input[name="item_id"]').value = itemId;
                 document.querySelector('#exampleModalCenter input[name="name"]').value = itemName;
+                document.querySelector('#exampleModalCenter input[name="total_quantity"]').value = totalquantity;
                 document.querySelector('#exampleModalCenter input[name="quantity"]').value = itemQuantity;
                 document.querySelector('#exampleModalCenter input[name="property_id"]').value = propertyId;
             });
@@ -403,33 +416,42 @@
     });
 
 
-    document.getElementById('item-name').addEventListener('input', function () {
-      const nameField = this;
-      const errorDiv = document.getElementById('name-validation-error');
-      const submitButton = document.getElementById('submit-button');
-      const nameValue = nameField.value;
 
-      if (nameValue.trim().length > 0) {
-          fetch(`/admin-validate-item-name/?name=${encodeURIComponent(nameValue)}`)
-              .then(response => response.json())
-              .then(data => {
-                  if (data.exists) {
-                      errorDiv.style.display = 'block';
-                      submitButton.disabled = true; // Disable the button if item name exists
-                  } else {
-                      errorDiv.style.display = 'none';
-                      submitButton.disabled = false; // Enable the button if item name does not exist
-                  }
-              })
-              .catch(error => {
-                  console.error('Error:', error);
-                  submitButton.disabled = false; // Enable the button if there's an error in the request
-              });
-      } else {
-          errorDiv.style.display = 'none';
-          submitButton.disabled = false; // Enable the button if the input is cleared
-      }
-  });
+
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const totalQuantityField = document.querySelector('input[name="total_quantity"]');
+    const availableQuantityField = document.querySelector('input[name="quantity"]');
+    const submitButton = document.getElementById('submit-button');
+    
+    function validateQuantities() {
+        const totalQuantity = parseInt(totalQuantityField.value, 10);
+        const availableQuantity = parseInt(availableQuantityField.value, 10);
+        const errorDiv = document.getElementById('quantity-validation-error');
+
+        if (!isNaN(totalQuantity) && !isNaN(availableQuantity)) {
+            if (availableQuantity > totalQuantity) {
+                errorDiv.style.display = 'block';
+                errorDiv.textContent = 'Available quantity cannot exceed the total quantity.';
+                submitButton.disabled = true;
+            } else {
+                errorDiv.style.display = 'none';
+                submitButton.disabled = false;
+            }
+        } else {
+            errorDiv.style.display = 'none';
+            submitButton.disabled = false;
+        }
+    }
+
+    totalQuantityField.addEventListener('input', validateQuantities);
+    availableQuantityField.addEventListener('input', validateQuantities);
+});
+
+
+
+
+
 
         function updateShowEntries(value) {
     const urlParams = new URLSearchParams(window.location.search);
@@ -442,91 +464,107 @@
 
 document.getElementById("searchInput").addEventListener("input", function () {
     searchTable();
-});
-
-function searchTable() {
+  });
+  
+  function searchTable() {
     var input, filter, table, tbody, tr, td, i, j, txtValue, regex;
     input = document.getElementById("searchInput");
     filter = input.value.toUpperCase();
     regex = new RegExp(`(${filter})`, 'gi');
     table = document.getElementById("itemTable");
-    tbody = table.getElementsByTagName("tbody")[0];
-    tr = tbody.getElementsByTagName("tr");
+    tbody = table.getElementsByTagName("tbody")[0]; // Work only with tbody
+    tr = tbody.getElementsByTagName("tr"); // Get rows only from tbody
     var noMatch = true;
-
-    // If input is empty, reset table to show all rows and remove the "No record found" row
+  
+    // If the input is empty, reset table to show all rows and ensure "No record found" row is removed
     if (!filter) {
-        for (i = 0; i < tr.length; i++) {
-            tr[i].style.display = ""; // Show all rows
-            td = tr[i].getElementsByTagName("td");
-            for (j = 0; j < td.length; j++) {
-                if (j === 4) { // Skip the action column
-                    continue;
-                }
-                td[j].innerHTML = td[j].textContent || td[j].innerText; // Reset content to normal text
-            }
-        }
-        removeNoRecordRow(); // Remove "No record found" row if it exists
-        return;
-    }
-
-    // If there's input, filter the table rows
-    for (i = 0; i < tr.length; i++) {
-        tr[i].style.display = "none"; // Hide all rows initially
+      for (i = 0; i < tr.length; i++) {
+        if (tr[i].classList.contains("no-record-row")) continue; // Skip the "No record found" row
+        tr[i].style.display = ""; // Show all rows
         td = tr[i].getElementsByTagName("td");
-        let rowContainsFilter = false;
-
         for (j = 0; j < td.length; j++) {
-            if (j === 4) { // Skip the action column
-                continue;
-            }
-            if (td[j]) {
-                txtValue = td[j].textContent || td[j].innerText;
-                if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                    rowContainsFilter = true;
-                    // Highlight matched text
-                    td[j].innerHTML = txtValue.replace(regex, "<span style='background-color: rgb(0, 255, 13);'>$1</span>");
-                } else {
-                    // Remove highlight if no match
-                    td[j].innerHTML = txtValue.replace(/<span style='background-color: rgb\(0, 255, 13\);'>(.*?)<\/span>/g, "$1");
-                }
-            }
+          // Ensure buttons, dropdowns, badges, and action columns are not affected
+          if (j === 4 || td[j].querySelector('.dropdownnn') || td[j].querySelector('.badge') || td[j].querySelector('.action-buttons')) {
+            continue; // Skip "Status", "Action", and dropdowns, badges
+          }
+          td[j].innerHTML = td[j].textContent || td[j].innerText; // Reset text content
         }
-
-        if (rowContainsFilter) {
-            tr[i].style.display = ""; // Show the row if it matches the filter
-            noMatch = false;
-        }
+      }
+      removeNoRecordRow(); // Remove "No record found" if it exists
+      return; // Exit function if input is empty
     }
-
-    // Show or hide "No record found" message
+  
+    // If there's input, filter the table rows
+    noMatch = true; // Reset noMatch for the filtering
+    for (i = 0; i < tr.length; i++) {
+      if (tr[i].classList.contains("no-record-row")) continue; // Skip "No record found" row
+  
+      tr[i].style.display = "none"; // Hide all rows initially
+      td = tr[i].getElementsByTagName("td");
+      let rowContainsFilter = false;
+  
+      // Iterate through each cell in the row
+      for (j = 0; j < td.length; j++) {
+        if (j === 4) continue; // Skip "Status" and "Action" columns
+        if (td[j]) {
+          txtValue = td[j].textContent || td[j].innerText;
+          if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            rowContainsFilter = true;
+            // Highlight matched text only in non-dropdown cells
+            if (!td[j].querySelector('.dropdown')) {
+              td[j].innerHTML = txtValue.replace(regex, "<span style='background-color: #3f6791; color: white;'>$1</span>");
+            }
+          } else {
+            // Remove highlights if no match
+            if (!td[j].querySelector('.dropdown')) {
+              td[j].innerHTML = txtValue.replace(/<span style='background-color:.*?'>(.*?)<\/span>/g, "$1");
+            }
+          }
+        }
+      }
+  
+      // If the row contains the filter, show it
+      if (rowContainsFilter) {
+        tr[i].style.display = "";
+        noMatch = false;
+      }
+    }
+  
+    // Remove existing "no record found" row if present
+    var noRecordRow = document.getElementById("noRecordRow");
+    if (noRecordRow) {
+      noRecordRow.remove();
+    }
+  
+    // If no matches found, add a "no record found" row
     if (noMatch) {
-        showNoRecordRow();
+      showNoRecordRow(tbody, table);
     } else {
-        removeNoRecordRow();
+      removeNoRecordRow(); // Remove the "No record found" row if there are matches
     }
-}
-
-function showNoRecordRow() {
+  }
+  
+  function showNoRecordRow(tbody, table) {
     var noRecordRow = document.querySelector(".no-record-row");
     if (!noRecordRow) {
-        var tbody = document.querySelector("#itemTable tbody");
-        var newRow = tbody.insertRow();
-        newRow.classList.add("no-record-row");
-        var cell = newRow.insertCell(0);
-        cell.colSpan = 5; // Adjust this to span across all columns, including the action column
-        cell.style.textAlign = "center";
-        cell.textContent = "No record found.";
+      var newRow = tbody.insertRow();
+      newRow.setAttribute("id", "noRecordRow");
+      newRow.setAttribute("class", "no-record-row");
+      var cell = newRow.insertCell(0);
+      cell.colSpan = table.getElementsByTagName("th").length;
+      cell.style.textAlign = "center";
+      cell.textContent = "No borrow requests found.";
+    } else {
+      noRecordRow.style.display = "";
     }
-}
-
-function removeNoRecordRow() {
+  }
+  
+  function removeNoRecordRow() {
     var noRecordRow = document.querySelector(".no-record-row");
     if (noRecordRow) {
-        noRecordRow.remove();
+      noRecordRow.style.display = "none";
     }
-}
-
+  }
 
 
 

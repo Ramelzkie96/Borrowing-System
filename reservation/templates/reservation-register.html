@@ -67,11 +67,6 @@
                 <span class="text-primary header-text" style="font-weight: 800;">&nbsp; Student Reservation Item</span>
             </a>
         </div>
-        <div class="login-menu">
-            <ul>
-                <li><a href="{% url 'home_redirect' %}" class="login-link">Faculty Login</a></li>
-            </ul>
-        </div>
     </div>
 </div>
 
@@ -124,13 +119,13 @@
 	<div class="login-wrap d-flex align-items-center flex-wrap justify-content-center">
         <div class="container">
             <div class="row align-items-center">
-                <div class="col-md-6 col-lg-7">
+                <div class="col-md-5 col-lg-4">
                     <img src="{% static 'images/reserve.png' %}" alt="" class="responsive-img">
                 </div>
-                <div class="col-md-6 col-lg-5">
-                    <div class="login-box bg-white box-shadow border-radius-10">
+                <div class="col-md-7 col-lg-8">
+                    <div class="login-box bg-white box-shadow border-radius-10" style="max-width: 800px; margin: auto;">
                         <div class="login-title">
-                            <h2 class="text-center text-primary">Student Register</h2>
+                            <h2 class="text-center text-primary">Student Registration</h2>
                         </div>
                         <form method="POST" action="{% url 'reservation-register' %}">
                             {% csrf_token %}
@@ -149,13 +144,19 @@
                                             <div class="invalid-feedback" style="color: red;">{{ student_id_error }}</div>
                                         {% endif %}
                                     </div>
-                                </div>  
+                                </div>
                             </div>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label>Course :</label>
-                                        <input type="text" class="form-control" name="course" value="{{ request.POST.course }}" required>
+                                        <label>COURSE :</label>
+                                        <select class="custom-select form-control" name="course" required>
+                                            <option value="">Select ---</option>
+                                            <option value="BS INFORMATION TECHNOLOGY">BS INFORMATION TECHNOLOGY</option>
+                                            <option value="BS INDUSTRIAL TECHNOLOGY">BS INDUSTRIAL TECHNOLOGY</option>
+                                            <option value="BS ELECTRICAL ENGINEERING">BS ELECTRICAL ENGINEERING</option>
+                                            <option value="BS MECHANICAL ENGINEERING">BS MECHANICAL ENGINEERING</option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -222,6 +223,7 @@
             </div>
         </div>
     </div>
+    
     
     <style>
         /* Responsive image */

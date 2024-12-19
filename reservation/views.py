@@ -168,7 +168,7 @@ def reservation_register(request):
             student_id_error = "Student ID must contain exactly 9 digits. Example: 21-****-*** or 21*******"
 
         # Check if student_id already exists (using the sanitized version)
-        if ReservationUser.objects.filter(student_id=sanitized_student_id).exists():
+        elif ReservationUser.objects.filter(student_id=sanitized_student_id).exists():
             student_id_error = "Student ID already exists."
 
         # Check if email already exists
@@ -225,8 +225,8 @@ def logout(request):
 
 
 
-from datetime import datetime
 from django.utils.timezone import make_aware
+from datetime import datetime
 
 def submit_reservation(request):
     if request.method == 'POST':
@@ -238,11 +238,18 @@ def submit_reservation(request):
         email = request.POST.get('email')
         phone_number = request.POST.get('phone')
         reserve_date = request.POST.get('datepicker')
+        date_return = request.POST.get('date_return')
         purpose = request.POST.get('purpose')
         item_ids = request.POST.getlist('itemm')
         quantities = request.POST.getlist('quantityy')
         descriptions = request.POST.getlist('description')
-        
+        upload_image = request.FILES.get('upload_image')
+
+        # Validate image upload
+        if not upload_image:
+            messages.error(request, "Image upload is required for reservation.")
+            return redirect('reservation-dashboard')
+
         # Retrieve the user_id from the session
         user_id = request.session.get('user_id')
         if not user_id:
@@ -252,50 +259,68 @@ def submit_reservation(request):
         # Retrieve the logged-in user instance
         logged_in_user = ReservationUser.objects.get(id=user_id)
 
-        # Validate that reserve_date is provided
-        if not reserve_date:
-            messages.error(request, "Please select a reservation date.")
-            return redirect('reservation-dashboard')  # Redirect back to the reservation form
-
-        # Convert the reserve_date to a datetime object (format: '6 November, 2024')
-        try:
-            reserve_date = datetime.strptime(reserve_date, '%d %B, %Y')  # '%d %B, %Y' matches the format '6 November, 2024'
-            reserve_date = make_aware(reserve_date)  # Ensure it is timezone-aware if necessary
-        except ValueError:
-            messages.error(request, "Invalid date format. Please select a valid date.")
+        # Validate dates
+        if not reserve_date or not date_return:
+            messages.error(request, "Please select both reservation and return dates.")
             return redirect('reservation-dashboard')
 
-        # Make current time aware before comparison
-        current_time = make_aware(datetime.now())
+        try:
+            # Convert reserve_date and date_return to datetime objects
+            reserve_date = make_aware(datetime.strptime(reserve_date, '%d %B, %Y'))
+            date_return = make_aware(datetime.strptime(date_return, '%d %B, %Y'))
 
-        # Check if the reserve_date is in the past
-        if reserve_date < current_time:
-            messages.error(request, "The reservation date cannot be in the past.")
-            return redirect('reservation-dashboard')  # Redirect back to the reservation form
+            # Ensure dates are valid
+            current_time = make_aware(datetime.now())
+            if reserve_date < current_time:
+                messages.error(request, "The reservation date cannot be in the past.")
+                return redirect('reservation-dashboard')
+            if date_return <= reserve_date:
+                messages.error(request, "The return date must be after the reservation date.")
+                return redirect('reservation-dashboard')
+
+        except ValueError:
+            messages.error(request, "Invalid date format. Please select valid dates.")
+            return redirect('reservation-dashboard')
 
         try:
             with transaction.atomic():
                 # Check if a reservation already exists for this student_id and reserve_date
-                reservation, created = StudentReservation.objects.get_or_create(
+                reservation = StudentReservation.objects.filter(
                     student_id=student_id,
-                    reserve_date=reserve_date.strftime('%d %B, %Y'),  # Store date in the same format in the model
-                    defaults={
-                        'name': name,
-                        'course': course,
-                        'year_level': year_level,
-                        'email': email,
-                        'phone_number': phone_number,
-                        'purpose': purpose,
-                        'status': 'Pending',
-                        'user': logged_in_user,
-                    }
-                )
+                    reserve_date=reserve_date.strftime('%d %B, %Y')
+                ).first()
+
+                if reservation:
+                    # If the reservation exists, check its status
+                    if reservation.status in ['Completed', 'Approved', 'Denied', 'Pending']:
+                        # Create a new reservation with status Pending
+                        reservation.status = 'Pending'
+                        reservation.save(update_fields=['status'])
+                    else:
+                        messages.error(request, f"Reservation already exists with status {reservation.status}.")
+                        return redirect('reservation-dashboard')
+                else:
+                    # Create a new reservation if none exists
+                    reservation = StudentReservation.objects.create(
+                        student_id=student_id,
+                        name=name,
+                        course=course,
+                        year_level=year_level,
+                        email=email,
+                        phone_number=phone_number,
+                        reserve_date=reserve_date.strftime('%d %B, %Y'),
+                        date_return=date_return.strftime('%d %B, %Y'),
+                        purpose=purpose,
+                        status='Pending',
+                        upload_image=upload_image,
+                        user=logged_in_user
+                    )
 
                 # Loop through items and handle ReservationItem entries
                 for item_id, quantity, description in zip(item_ids, quantities, descriptions):
                     quantity = int(quantity)
                     item = facultyItem.objects.get(id=item_id)
-                    
+
                     # Default to 'N/A' if description is empty
                     if not description:
                         description = 'N/A'
@@ -305,25 +330,38 @@ def submit_reservation(request):
                         messages.error(request, f"Only {item.quantity} items available for {item.name}.")
                         return redirect('reservation-dashboard')
 
-                    # Check if ReservationItem for this item_name already exists in the reservation
-                    reservation_item, item_created = ReservationItem.objects.get_or_create(
-                        reservation=reservation,
-                        item_name=item.name,
-                        defaults={
-                            'user': logged_in_user,  # Associate with the logged-in user
-                            'description': description,
-                            'quantity': quantity,
-                            'status': 'Pending',
-                            'user_facultyItem': item.user,  # Store the user from facultyItem
-                        }
-                    )
+                    if reservation.status == 'Pending':
+                        # Check if ReservationItem for this item_name already exists in the reservation
+                        reservation_item, item_created = ReservationItem.objects.get_or_create(
+                            reservation=reservation,
+                            item_name=item.name,
+                            defaults={
+                                'user': logged_in_user,
+                                'description': description,
+                                'quantity': quantity,
+                                'status': 'Pending',
+                                'user_facultyItem': item.user,
+                            }
+                        )
 
-                    if not item_created:
-                        # If the item exists, increment the quantity
-                        reservation_item.quantity += quantity
-                        reservation_item.save()
+                        if not item_created:
+                            # If the item exists, increment the quantity
+                            reservation_item.quantity += quantity
+                            reservation_item.save()
+                    else:
+                        # Create a new ReservationItem for completed/approved/denied reservations
+                        ReservationItem.objects.create(
+                            reservation=reservation,
+                            item_name=item.name,
+                            user=logged_in_user,
+                            description=description,
+                            quantity=quantity,
+                            status='Pending',
+                            user_facultyItem=item.user,
+                        )
 
-                    # No need to store the handled_by field, as requested
+                    # Save item to update its availability
+                  
                     item.save()
 
             messages.success(request, "Items reserved successfully!")
@@ -344,10 +382,15 @@ def submit_reservation(request):
 
 
 
+
+
+
     
 
 def get_faculty_items(request):
-    items = facultyItem.objects.all().values('id', 'name', 'quantity')
+    items = facultyItem.objects.all().select_related('handler').values(
+        'id', 'name', 'quantity', 'user__username'
+    )
     item_list = list(items)
     return JsonResponse(item_list, safe=False)
 
@@ -393,7 +436,7 @@ def reservation_status(request):
             'reservation_items': reservation_items,
             'current_show': current_show
         }
-        return render(request, 'reservation-status.html', context)
+        return render(request, 'reservation-status.html', context,)
     
     except ReservationUser.DoesNotExist:
         # Handle case where the user is not found
@@ -459,11 +502,13 @@ def reservation_edit(request, reservation_id):
         'phone': reservation.phone_number,
         'user': user,
         'reserve_date': reservation.reserve_date,
+        'date_return': reservation.date_return,
         'purpose': reservation.purpose,
         'status': reservation.status,
         'reservation_items': reservation_items_data,  # Use prepared data for the items
         'reservation_itemss': reservation_itemss,
         'all_faculty_items': all_faculty_items,  # Pass all faculty items for selection in the form
+        'upload_image_url': reservation.upload_image.url if reservation.upload_image else None,  # Add this
     }
 
     return render(request, 'reservation-edit.html', context)
@@ -487,7 +532,11 @@ def reservation_update(request):
         reservation.email = request.POST.get('email')
         reservation.phone_number = request.POST.get('phone')
         reservation.reserve_date = request.POST.get('datepicker')
+        reservation.date_return = request.POST.get('date_return')
         reservation.purpose = request.POST.get('purpose')
+        # Handle the file upload
+        if 'upload_image' in request.FILES:
+            reservation.upload_image = request.FILES['upload_image']
         reservation.save()
 
         # Process reservation items

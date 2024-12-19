@@ -261,23 +261,47 @@
                                     <input type="hidden" name="status" value="">
                                 
                                     <div class="row mb-1">
-                                        <div class="col-3">
+                                        <div class="col-2">
                                             <label class="font-weight-bold" style="font-size: 15px;">Student ID:</label>
                                             <p id="modal-student-id" style="font-size: 15px;">{{ reservation.student_id }}</p>
                                         </div>
-                                        <div class="col-3">
+                                        <div class="col-2">
                                             <label class="font-weight-bold" style="font-size: 15px;">Name:</label>
                                             <p id="modal-name" style="font-size: 15px;">{{ reservation.name }}</p>
                                         </div>
-                                        <div class="col-3">
+                                        <div class="col-2">
                                             <label class="font-weight-bold" style="font-size: 15px;">Course:</label>
                                             <p id="modal-course" style="font-size: 15px;">{{ reservation.course }}</p>
                                         </div>
-                                        <div class="col-3">
+                                        <div class="col-2">
                                             <label class="font-weight-bold" style="font-size: 15px;">Date Borrow:</label>
                                             <p id="modal-date-borrow" style="font-size: 15px;">{{ reservation.reserve_date }}</p>
                                         </div>
+                                        <div class="col-2">
+                                            <label class="font-weight-bold" style="font-size: 15px;">Expected Date Return:</label>
+                                            <p id="modal-date-borrow" style="font-size: 15px;">{{ reservation.date_return }}</p>
+                                        </div>
+                                        <div class="col-2">
+                                            <label class="font-weight-bold" style="font-size: 15px;">Purpose:</label>
+                                            <p id="modal-date-borrow" style="font-size: 15px;">{{ reservation.purpose }}</p>
+                                        </div>
                                     </div>
+
+
+                                    <div class="row mb-5">
+                                        <div class="col-3">
+                                            <label class="font-weight-bold" style="font-size: 15px;">Student ID Image:</label><br>
+                                            {% if reservation.upload_image %}
+                                                <a href="{{ reservation.upload_image.url }}" target="_blank" title="Click to view full image">
+                                                    <img src="{{ reservation.upload_image.url }}" alt="Student ID Image" class="img-fluid" style="max-width: 30%; height: auto;">
+                                                </a>
+                                            {% else %}
+                                                <p>No image uploaded.</p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    
+                                    
                                 
                                     <div class="row mb-1">
                                         <div class="col-3">
@@ -320,7 +344,9 @@
                             onclick="updateItemStatus('{{ item.id }}', 'Approved')">
                         Approve
                     </button>
-                    <div id="loading-approve-{{ item.id }}" class="loading-spinner" style="display: none;"></div> <!-- Loading Spinner -->
+                    <div id="loading-approve-{{ item.id }}" class="loading-spinner" style="display: none;">
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    </div> <!-- Loading Spinner -->
                 {% endif %}
                 
                 <!-- Denied Button -->
@@ -329,11 +355,14 @@
                             data-item-id="{{ item.id }}" data-status="Denied"
                             {% if item.is_update or item.status == 'Denied' %}disabled style="cursor: not-allowed; padding: 2px 5px; font-size: 12px;"{% else %}style="padding: 2px 5px; font-size: 12px;"{% endif %}
                             onclick="updateItemStatus('{{ item.id }}', 'Denied')">
-                        Denied
+                        Deny
                     </button>
-                    <div id="loading-deny-{{ item.id }}" class="loading-spinner" style="display: none;"></div> <!-- Loading Spinner -->
+                    <div id="loading-deny-{{ item.id }}" class="loading-spinner" style="display: none;">
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    </div> <!-- Loading Spinner -->
                 {% endif %}
             </div>
+            
         </div>
     {% endfor %}
 </div>
@@ -388,7 +417,6 @@
 
 
 
-
 <script>
     function updateItemStatus(itemId, status) {
         // Show loading spinner
@@ -396,14 +424,14 @@
         if (loadingSpinner) {
             loadingSpinner.style.display = 'inline-block'; // Show the loading spinner
         }
-    
+
         // Disable the buttons while the request is being processed
         const approveButton = document.querySelector(`button[data-item-id="${itemId}"][data-status="Approved"]`);
         const denyButton = document.querySelector(`button[data-item-id="${itemId}"][data-status="Denied"]`);
-    
+
         if (approveButton) approveButton.disabled = true;
         if (denyButton) denyButton.disabled = true;
-    
+
         // Send the request to the server
         fetch("{% url 'admin-update_reservation_item_status' %}", {
             method: 'POST',
@@ -416,38 +444,33 @@
                 'status': status
             })
         })
-        .then(response => response.json())  // Parse JSON response
+        .then(response => response.json())
         .then(data => {
             // Hide loading spinner once request is complete
             if (loadingSpinner) {
                 loadingSpinner.style.display = 'none';
             }
-    
+
             if (data.success) {
-                // Get the elements to update in real time
+                // Update the status visually
                 const itemRow = document.getElementById(`item-row-${itemId}`);
-    
-                // Apply line-through styling to the entire row (item name, description, and quantity)
-                itemRow.querySelectorAll('p').forEach(element => {
-                    element.style.textDecoration = 'line-through';
-                });
-    
-                // Disable and style the clicked button, remove the opposite button
+                itemRow.querySelectorAll('p').forEach(el => el.style.textDecoration = 'line-through');
+
+                // Disable buttons and optionally remove the opposite button
                 if (status === 'Approved') {
                     approveButton.disabled = true;
                     approveButton.style.cursor = 'not-allowed';
-                    approveButton.style.textDecoration = 'line-through';
                     if (denyButton) denyButton.remove();
                 } else if (status === 'Denied') {
                     denyButton.disabled = true;
                     denyButton.style.cursor = 'not-allowed';
                     if (approveButton) approveButton.remove();
                 }
-    
-                // Optionally, display a success message
+
+                // Optionally display a success message
                 alert(data.message);
-    
-                // Redirect if URL is provided
+
+                // Redirect if a URL is provided
                 if (data.redirect_url) {
                     window.location.href = data.redirect_url;
                 }
@@ -460,11 +483,11 @@
             if (loadingSpinner) {
                 loadingSpinner.style.display = 'none';
             }
-            console.error('Error:', error);  // Catch any errors
+            console.error('Error:', error);
         });
     }
-    
 </script>
+
 
 
 

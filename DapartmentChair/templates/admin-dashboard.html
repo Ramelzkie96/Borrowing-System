@@ -344,7 +344,7 @@
                 <span class="info-box-icon bg-success elevation-1"><img src="{% static 'dist/img/borrow-item.png' %}" width="30" height="30" alt=""></span>
   
                 <div class="info-box-content">
-                  <span class="info-box-text">Borrowed Items</span>
+                  <span class="info-box-text">Total Borrowers</span>
                   <span class="info-box-number">{{ borrow_request_count }}</span>
                 </div>
                 <!-- /.info-box-content -->
@@ -463,32 +463,32 @@
               <h5 class="modal-title">Send Email Notification</h5>
               <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
           </div>
-          <form id="emailNotificationForm" method="post" action="{% url 'send_email' %}">
-              {% csrf_token %}
-              <div class="modal-body">
-                  <div class="form-group">
-                      <label for="emailTitle" style="color: #333;">Title</label>
-                      <input type="text" class="form-control" id="emailTitle" name="title" required style="border: 1px solid #474747;">
-                  </div>
-                  <div class="form-group">
-                      <label for="emailAddress" style="color: #333;">Email</label>
-                      <input type="email" class="form-control" id="emailAddress" name="email" required style="border: 1px solid #474747;">
-                  </div>
-                  <!-- New paragraph to display the message -->
-                  <p id="emailMessageDisplay" style="margin-top: 10px; color: #333;"></p>
-                  <div class="form-group">
-                      <label for="emailMessage" style="color: #333;">Message</label>
-                      <textarea class="form-control" id="emailMessage" name="message" rows="4" required style="border: 1px solid #474747;"></textarea>
-                  </div>
-              </div>
-              <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                  <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Send Email</button>
-                  <div id="loader" style="display:none; margin-left: 10px;">
-                      <div class="loader"></div>
-                  </div>
-              </div>
-          </form>
+          <form id="emailNotificationForm" method="post" action="{% url 'admin-send_email' %}">
+            {% csrf_token %}
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="emailTitle">Title</label>
+                    <input type="text" class="form-control" id="emailTitle" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="emailAddress">Email</label>
+                    <input type="email" class="form-control" id="emailAddress" name="email" required>
+                </div>
+                <!-- New paragraph to display the message -->
+                <p id="emailMessageDisplay" style="margin-top: 10px; color: #333;"></p>
+                <div class="form-group">
+                    <label for="emailMessage">Message</label>
+                    <textarea class="form-control" id="emailMessage" name="message" rows="4" required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary" id="toastr-success-bottom-left">Send Email</button>
+                <div id="loader" style="display:none; margin-left: 10px;">
+                    <div class="loader"></div>
+                </div>
+            </div>
+        </form>
       </div>
   </div>
 </div>
@@ -541,7 +541,7 @@
                                   <a href="{% url 'admin-borrowers' %}" class="btn btn-whatsapp mb-1" style="box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px; visibility: hidden;">Add Borrower's <span class="btn-icon-right"><img src="{% static 'images/plus.png' %}" alt="" width="30" height="30"></span></a>
                                       <div class="dataTables_length" id="example_length" style="color: rgba(255, 255, 255, .75); width: 140px; margin-right: 200px">
                                           <input type="text" id="date-range-picker" class="form-control" placeholder="Select a date range to show record" style="width: 300px; padding: 5px;">
-                                          <i class="fa-solid fa-x" style="position: absolute; right: 70px; top: 135px; display: none;"  id="clear-icon"></i>
+                                          <i class="fa-solid fa-x" style="position: absolute; right: 70px; top: 158px; display: none; color: black; font-size: 13px;"  id="clear-icon"></i>
                                       </div>
                                   </div>
 
@@ -556,6 +556,7 @@
                                               <th scope="col">Name</th>
                                               <th scope="col">Course</th>
                                               <th scope="col">Year</th>
+                                              <th scope="col">Phone</th>
                                               <th scope="col">Date Borrow</th>
                                               <th scope="col">Time Span</th>
                                               <th scope="col">Status</th>
@@ -570,6 +571,7 @@
                                                       <td>{{ request.name }}</td>
                                                       <td>{{ request.course }}</td>
                                                       <td>{{ request.year }}</td>
+                                                      <td>{{ request.phone }}</td>
                                                       <td>{{ request.date_borrow }}</td>
                                                       <td>{{ request.time_ago }}</td>
                                                       <td>
@@ -591,9 +593,21 @@
                                                                     <img src="{% static 'images/mores.png' %}" alt="" width="30" height="30">
                                                                 </a>
                                                                 <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
-                                                                  <button onclick="redirectToBorrowerDetails('{{ request.student_id }}', '{{ request.name }}', '{{ request.date_borrow }}', '{{ request.id }}', '{{ request.status }}', '{{ request.status }}')" class="dropdown-item">
-                                                                    <i class="fas fa-eye"></i>&nbsp; Borrower Details
-                                                                </button>
+                                                                  <button onclick="redirectToBorrowerDetails(
+                                                                '{{ request.student_id }}', 
+                                                                '{{ request.name }}', 
+                                                                '{{ request.date_borrow }}', 
+                                                                '{{ request.date_return }}', 
+                                                                '{{ request.id }}', 
+                                                                '{{ request.status }}', 
+                                                                '{{ request.purpose }}', 
+                                                                '{{ request.user.id }}',  
+                                                                '{{ request.user.id }}' 
+                                                            )" class="dropdown-item">
+                                                                <i class="fas fa-eye"></i>&nbsp; Return Item
+                                                            </button>
+
+
                                                     
                                                                   
                                                                     
@@ -605,6 +619,8 @@
                                                                     data-borrow-id="{{ request.id }}">
                                                                         <i class="fa-regular fa-envelope"></i>&nbsp; Send Notification
                                                                     </button>
+
+                                                                    
                                                                 </div>
                                                             </div>
                                                         {% elif request.status == "Fully Returned" %}
@@ -716,84 +732,93 @@
     window.location.search = urlParams.toString();
 }
 
-function redirectToBorrowerDetails(studentId, name, dateBorrow, borrowRequestId, status) {
-  const url = `{% url 'admin-borrower-details-dashboard' %}?student_id=${studentId}&name=${encodeURIComponent(name)}&date_borrow=${dateBorrow}&borrow_request_id=${borrowRequestId}&status=${status}`;
+function redirectToBorrowerDetails(studentId, name, dateBorrow, dateReturn, borrowRequestId, status, purpose, userId, username) {
+  const url = `{% url 'admin-borrower-details-dashboard' %}?student_id=${studentId}&name=${encodeURIComponent(name)}&date_borrow=${dateBorrow}&date_return=${dateReturn}&borrow_request_id=${borrowRequestId}&status=${status}&purpose=${encodeURIComponent(purpose)}&user_id=${userId}&username=${username}`;
   window.location.href = url;
 }
 
 
-  //date range
+
+
+
+// Date range functionality
+// Ensure it filters records based on 'Date Borrow' field
+
 document.addEventListener('DOMContentLoaded', function () {
   const dateRangePicker = flatpickr("#date-range-picker", {
-      mode: "range",
-      dateFormat: "d F, Y",
-      onChange: function(selectedDates, dateStr, instance) {
-          const clearIcon = document.getElementById('clear-icon');
-          
-          if (selectedDates.length === 2) {
-              clearIcon.style.display = "inline";  // Show the clear icon when a date is selected
-              filterTableByDateRange(selectedDates[0], selectedDates[1]);
-          }
+    mode: "range",
+    dateFormat: "d F, Y",
+    onChange: function (selectedDates, dateStr, instance) {
+      const clearIcon = document.getElementById('clear-icon');
+
+      if (selectedDates.length === 2) {
+        clearIcon.style.display = "inline"; // Show the clear icon when a date range is selected
+        filterTableByDateRange(selectedDates[0], selectedDates[1]);
       }
+    },
   });
 
   const clearIcon = document.getElementById('clear-icon');
-  clearIcon.addEventListener('click', function() {
-      dateRangePicker.clear();  // Clear the date range picker input
-      clearIcon.style.display = "none";  // Hide the clear icon
-      resetTable();  // Reset the table to show all records
+  clearIcon.addEventListener('click', function () {
+    dateRangePicker.clear(); // Clear the date range picker input
+    clearIcon.style.display = "none"; // Hide the clear icon
+    resetTable(); // Reset the table to show all records
   });
 
   function filterTableByDateRange(startDate, endDate) {
-      const rows = document.querySelectorAll("#itemTable tbody tr");
+    const rows = document.querySelectorAll("#itemTable tbody tr");
 
-      let hasVisibleRow = false;
-      rows.forEach(row => {
-          const dateBorrowed = row.querySelector("td:nth-child(8)").textContent.trim();
-          const dateBorrowedObj = new Date(dateBorrowed);
+    let hasVisibleRow = false;
+    rows.forEach((row) => {
+      const dateBorrowCell = row.querySelector("td:nth-child(6)"); // Target the 'Date Borrow' column
 
-          if (dateBorrowedObj >= startDate && dateBorrowedObj <= endDate) {
-              row.style.display = "";  // Show row
-              hasVisibleRow = true;
-          } else {
-              row.style.display = "none";  // Hide row
-          }
-      });
+      if (dateBorrowCell) {
+        const dateBorrowed = dateBorrowCell.textContent.trim();
+        const dateBorrowedObj = new Date(dateBorrowed);
 
-      if (!hasVisibleRow) {
-          showNoRecordsMessage();
+        if (dateBorrowedObj >= startDate && dateBorrowedObj <= endDate) {
+          row.style.display = ""; // Show row
+          hasVisibleRow = true;
+        } else {
+          row.style.display = "none"; // Hide row
+        }
       }
+    });
+
+    if (!hasVisibleRow) {
+      showNoRecordsMessage();
+    }
   }
 
   function resetTable() {
-      const rows = document.querySelectorAll("#itemTable tbody tr");
-      const noRecordsRow = document.querySelector("#itemTable tbody .no-records-row");
+    const rows = document.querySelectorAll("#itemTable tbody tr");
+    const noRecordsRow = document.querySelector("#itemTable tbody .no-records-row");
 
-      if (noRecordsRow) {
-          noRecordsRow.remove();  // Remove the "No records found" row if it exists
-      }
+    if (noRecordsRow) {
+      noRecordsRow.remove(); // Remove the "No records found" row if it exists
+    }
 
-      rows.forEach(row => {
-          row.style.display = "";  // Show all rows
-      });
+    rows.forEach((row) => {
+      row.style.display = ""; // Show all rows
+    });
   }
 
   function showNoRecordsMessage() {
-      const tbody = document.querySelector("#itemTable tbody");
-      const noRecordsRow = document.querySelector("#itemTable tbody .no-records-row");
+    const tbody = document.querySelector("#itemTable tbody");
+    const noRecordsRow = document.querySelector("#itemTable tbody .no-records-row");
 
-      if (!noRecordsRow) {
-          const noRecordsHTML = `
-              <tr class="no-records-row">
-                  <td colspan="9" class="text-center">
-                      No records found.
-                  </td>
-              </tr>
-          `;
-          tbody.innerHTML += noRecordsHTML;
-      }
+    if (!noRecordsRow) {
+      const noRecordsHTML = `
+        <tr class="no-records-row">
+          <td colspan="9" class="text-center">
+            No records found.
+          </td>
+        </tr>`;
+      tbody.innerHTML += noRecordsHTML;
+    }
   }
 });
+
 
 
 
@@ -813,7 +838,7 @@ function searchTable() {
   tr = tbody.getElementsByTagName("tr"); // Get rows only from tbody
   var noMatch = true;
 
-  // If the input is empty, reset table to show all rows and keep the badge and action button intact
+  // If the input is empty, reset table to show all rows and ensure "No record found" row is removed
   if (!filter) {
     for (i = 0; i < tr.length; i++) {
       if (tr[i].classList.contains("no-record-row")) continue; // Skip the "No record found" row
@@ -821,8 +846,8 @@ function searchTable() {
       td = tr[i].getElementsByTagName("td");
       for (j = 0; j < td.length; j++) {
         // Ensure buttons, dropdowns, badges, and action columns are not affected
-        if (j === 6 || j === 7 || j === 8) {
-          continue; // Skip "Status" and "Action"
+        if (j === 6 || j === 7 || j === 8 || j === 9 || td[j].querySelector('.dropdownnn') || td[j].querySelector('.badge') || td[j].querySelector('.action-buttons')) {
+          continue; // Skip "Status", "Action", and dropdowns, badges
         }
         td[j].innerHTML = td[j].textContent || td[j].innerText; // Reset text content
       }
@@ -842,19 +867,19 @@ function searchTable() {
 
     // Iterate through each cell in the row
     for (j = 0; j < td.length; j++) {
-      if (j === 6 || j === 7 || j === 8) continue; // Skip "Status" and "Action" columns
+      if (j === 6 || j === 7 || j === 8 || j === 9 || j == 10) continue; // Skip "Status" and "Action" columns
       if (td[j]) {
         txtValue = td[j].textContent || td[j].innerText;
         if (txtValue.toUpperCase().indexOf(filter) > -1) {
           rowContainsFilter = true;
           // Highlight matched text only in non-dropdown cells
-          if (!td[j].querySelector('.dropdownnn')) {
+          if (!td[j].querySelector('.dropdown')) {
             td[j].innerHTML = txtValue.replace(regex, "<span style='background-color: #3f6791; color: white;'>$1</span>");
           }
         } else {
           // Remove highlights if no match
-          if (!td[j].querySelector('.dropdownnn')) {
-            td[j].innerHTML = txtValue.replace(/<span style='background-color: #3f6791; color: white;'>(.*?)<\/span>/g, "$1");
+          if (!td[j].querySelector('.dropdown')) {
+            td[j].innerHTML = txtValue.replace(/<span style='background-color:.*?'>(.*?)<\/span>/g, "$1");
           }
         }
       }
@@ -867,13 +892,6 @@ function searchTable() {
     }
   }
 
-  // Show or hide "No record found" message based on matches
-  if (noMatch) {
-    showNoRecordRow();
-  } else {
-    removeNoRecordRow(); // Remove the "No record found" row if there are matches
-  }
-
   // Remove existing "no record found" row if present
   var noRecordRow = document.getElementById("noRecordRow");
   if (noRecordRow) {
@@ -882,18 +900,23 @@ function searchTable() {
 
   // If no matches found, add a "no record found" row
   if (noMatch) {
+    showNoRecordRow(tbody, table);
+  } else {
+    removeNoRecordRow(); // Remove the "No record found" row if there are matches
+  }
+}
+
+function showNoRecordRow(tbody, table) {
+  var noRecordRow = document.querySelector(".no-record-row");
+  if (!noRecordRow) {
     var newRow = tbody.insertRow();
     newRow.setAttribute("id", "noRecordRow");
+    newRow.setAttribute("class", "no-record-row");
     var cell = newRow.insertCell(0);
     cell.colSpan = table.getElementsByTagName("th").length;
     cell.style.textAlign = "center";
     cell.textContent = "No borrow requests found.";
-  }
-}
-
-function showNoRecordRow() {
-  var noRecordRow = document.querySelector(".no-record-row");
-  if (noRecordRow) {
+  } else {
     noRecordRow.style.display = "";
   }
 }
@@ -942,18 +965,19 @@ function filterTable() {
 
 
   
-//send email
+// Send email
 document.addEventListener('DOMContentLoaded', function () {
   document.querySelectorAll('.send-email-btn').forEach(function (button) {
       button.addEventListener('click', function () {
           const email = this.getAttribute('data-email');
           const borrowId = this.getAttribute('data-borrow-id');
           
+          // Populate email fields
           document.getElementById('emailAddress').value = email;
           document.getElementById('emailTitle').value = 'Reminder: Outstanding Borrowed Items';
           
           // Fetch the unreturned items for the given borrow ID
-          fetch(`/admin-get-unreturned-items/${borrowId}/`)
+          fetch(`/get-unreturned-items/${borrowId}/`)
               .then(response => response.json())
               .then(data => {
                   const emailMessageDisplay = document.getElementById('emailMessageDisplay');
@@ -963,7 +987,12 @@ document.addEventListener('DOMContentLoaded', function () {
                       
                       if (unreturnedItems.length > 0) {
                           unreturnedItems.forEach((item, index) => {
-                              messageContent += `${index + 1}. ${item.name} (Quantity: ${item.quantity})<br>`;
+                              messageContent += `
+                                  ${index + 1}. ${item.name} 
+                                  (Quantity: ${item.quantity}), 
+                                  ${item.date_borrow}, 
+                                  Time ago: ${item.time_ago}<br>
+                              `;
                           });
                       } else {
                           messageContent = 'All items have been returned.';
@@ -978,6 +1007,10 @@ document.addEventListener('DOMContentLoaded', function () {
               .catch(() => {
                   document.getElementById('emailMessageDisplay').textContent = 'Error fetching items.';
               });
+
+          // Automatic message for the textarea
+          const emailMessageTextarea = document.getElementById('emailMessage');
+          emailMessageTextarea.value = 'Please return the borrowed items immediately. Thank you for your prompt attention to this matter.';
       });
   });
 });
