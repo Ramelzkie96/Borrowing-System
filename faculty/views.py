@@ -43,8 +43,14 @@ def add_item(request):
 
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
-        property_ids = request.POST.get('property_id', '').strip()  # Multiple IDs comma-separated
-        total_quantity = request.POST.get('total_quantity')
+        total_quantity = request.POST.get('total_quantity', '').strip()
+
+        # Collect all dynamically generated property IDs
+        property_id_list = [
+            value.strip()
+            for key, value in request.POST.items()
+            if key.startswith("property_id_") and value.strip()
+        ]
 
         # Ensure required fields are filled
         if name and total_quantity:
@@ -52,9 +58,6 @@ def add_item(request):
                 total_quantity = int(total_quantity)
                 if total_quantity <= 0:
                     raise ValueError("Quantity must be a positive number.")
-
-                # Split and clean property IDs
-                property_id_list = [pid.strip() for pid in property_ids.split(',') if pid.strip()]
 
                 # Check if the item already exists for the current user (case-insensitive)
                 existing_item = facultyItem.objects.filter(
@@ -66,13 +69,15 @@ def add_item(request):
                     # Update the existing item's quantities
                     existing_item.total_quantity += total_quantity
                     existing_item.quantity += total_quantity
-                    if name:
-                        existing_item.name = name
                     existing_item.save()
 
-                    # Add new property IDs to the existing item
+                    # Add new property IDs to the existing item with status 'Good'
                     for pid in property_id_list:
-                        PropertyID.objects.create(faculty_item=existing_item, property_id=pid)
+                        PropertyID.objects.create(
+                            faculty_item=existing_item, 
+                            property_id=pid, 
+                            status='Good'  # Set status to 'Good' for new PropertyID
+                        )
 
                     messages.success(request, 'SUCCESS! Item updated successfully.')
                 else:
@@ -84,9 +89,13 @@ def add_item(request):
                         user=request.user
                     )
 
-                    # Add property IDs for the new item
+                    # Add property IDs for the new item with status 'Good'
                     for pid in property_id_list:
-                        PropertyID.objects.create(faculty_item=new_item, property_id=pid)
+                        PropertyID.objects.create(
+                            faculty_item=new_item, 
+                            property_id=pid, 
+                            status='Good'  # Set status to 'Good' for new PropertyID
+                        )
 
                     messages.success(request, 'SUCCESS! New item added successfully.')
 
@@ -105,11 +114,101 @@ def add_item(request):
         # Pass the submitted data back to the template in case of an error
         return render(request, 'add-item.html', {
             'name': name,
-            'property_id': property_ids,
             'total_quantity': total_quantity
         })
 
     return render(request, 'add-item.html')
+
+
+def get_property_ids(request, item_id):
+    # Fetch the faculty item and its associated property IDs
+    item = facultyItem.objects.get(id=item_id)
+    property_ids = item.property_ids.all()  # Get all related PropertyID objects
+    
+    # Prepare the data to send as JSON
+    property_data = [
+        {
+            'property_id': pid.property_id,
+            'status': pid.status
+        }
+        for pid in property_ids
+    ]
+    
+    return JsonResponse({'property_ids': property_data})
+
+
+
+def update_property_status(request):
+    if request.method == 'POST':
+        try:
+            item_name = request.POST.get('item_name')
+            property_data = request.POST.getlist('property_updates[]')
+
+            if not property_data:
+                messages.error(request, 'No property data provided.')
+                return redirect('item-record')  # Replace with your actual redirect URL
+
+            faculty_item = None
+
+            if item_name:
+                # Update the item name if it exists
+                try:
+                    # Assuming the `faculty_item` is associated with one of the properties
+                    first_property_data = property_data[0]
+                    original_property_id = first_property_data.split(',')[0]
+                    property = PropertyID.objects.filter(property_id=original_property_id).first()
+                    if not property:
+                        messages.error(request, f'No PropertyID found for {original_property_id}.')
+                        return redirect('item-record')
+
+                    faculty_item = property.faculty_item
+                    faculty_item.name = item_name
+                    faculty_item.save()
+                except PropertyID.MultipleObjectsReturned:
+                    messages.error(request, f'Multiple PropertyID instances found for {original_property_id}.')
+                    return redirect('item-record')
+
+            # Process property updates
+            for data in property_data:
+                try:
+                    original_property_id, updated_property_id, status = data.split(',')
+
+                    # Check if the updated property ID already exists
+                    if PropertyID.objects.filter(property_id=updated_property_id).exclude(property_id=original_property_id).exists():
+                        messages.error(request, f'Duplicate Property ID found: {updated_property_id}. Update aborted.')
+                        return redirect('item-record')
+
+                    # Get the property by its original ID
+                    property = PropertyID.objects.filter(property_id=original_property_id).first()
+                    if not property:
+                        messages.error(request, f'No PropertyID found for {original_property_id}.')
+                        return redirect('item-record')
+
+                    # Update the property
+                    property.property_id = updated_property_id
+                    property.status = status
+                    property.save()
+
+                except ValueError:
+                    messages.error(request, 'Invalid property data format.')
+                    return redirect('item-record')
+
+            # Update faculty item quantity if applicable
+            if faculty_item:
+                good_count = PropertyID.objects.filter(faculty_item=faculty_item, status='Good').count()
+                faculty_item.quantity = good_count
+                faculty_item.save()
+
+            messages.success(request, 'Properties updated successfully.')
+            return redirect('item-record')
+
+        except Exception as e:
+            messages.error(request, f'Unexpected error: {str(e)}')
+            return redirect('item-record')
+
+    messages.error(request, 'Invalid request method.')
+    return redirect('item-record')
+
 
 
 
@@ -1252,6 +1351,8 @@ def generate_report(request, id):
         return response
     except Exception as e:
         return HttpResponse(f"An error occurred: {str(e)}")
+
+
 
 
 

@@ -29,6 +29,9 @@ urlpatterns = [
     path('update-reservation-item-status/', views.update_reservation_item_status, name='update_reservation_item_status'),
     path('proceed-borrow/<int:reservation_id>/', views.proceed_borrow, name='proceed-borrow'),
     path('save-reservation-request/', views.save_reservation_request, name='save_reservation_request'),
+    path('get_property_ids/<int:item_id>/', views.get_property_ids, name='get_property_ids'),
+    path('update-property-status/', views.update_property_status, name='update-property-status'),
+
     
  
     

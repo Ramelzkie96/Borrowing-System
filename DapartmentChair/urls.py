@@ -57,8 +57,13 @@ urlpatterns = [
     
     
     path('aa-update-student-reservation/', views.aa_update_student_reservation, name='aa-update_student_reservation'),
-    path('get_property_ids/<int:item_id>/', views.get_property_ids, name='get_property_ids'),
-    path('update-property-status/', views.update_property_status, name='update-property-status'),
+    path('admin-get_property_ids/<int:item_id>/', views.get_property_ids, name='admin-get_property_ids'),
+    path('admin-update-property-status/', views.update_property_status, name='admin-update-property-status'),
+    path('get-notifications/', views.get_notifications, name='get_notifications'),
+    path('mark-notifications-as-read/', views.mark_notifications_as_read, name='mark_notifications_as_read'),
+    path('delete-notificationn/<int:notification_id>/', views.delete_notification, name='delete_notificationn'),
+    path('admin-get_item_count/<int:item_id>/', views.get_item_count, name='admin-get_item_count'),
+    path('admin-view-reservation/', views.view_reservation, name='admin-view_reservation'),
     
 ] 
 if settings.DEBUG:

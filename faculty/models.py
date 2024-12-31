@@ -115,6 +115,17 @@ class BorrowRequestItemFaculty(models.Model):
 
     def __str__(self):
         return f"{self.item.name}"
+    
+    
+    
+class EmailReminderLog(models.Model):
+    borrower_name = models.CharField(max_length=100)
+    borrower_email = models.EmailField()
+    student_id = models.CharField(max_length=20)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # Reference to the user
+    notification_message = models.TextField(null=True, blank=True)
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
 
  
 

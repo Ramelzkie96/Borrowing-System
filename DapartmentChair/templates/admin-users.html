@@ -485,7 +485,8 @@ input:checked + .slider:before {
                                             <th scope="col">Profile Picture</th>
                                             <th scope="col">Faculty</th>
                                             <th scope="col">IT Chairman</th>
-                                            <th scope="col">Action</th>
+                                            <th scope="col">Edit User</th>
+                                            <th scope="col">Active</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -526,13 +527,16 @@ input:checked + .slider:before {
                                                         <i class="fa-solid fa-user-pen" style="font-size: 14px;"></i>
                                                     </button>
                                                 
+                                                    
+
+                                                </td>
+                                                <td>
                                                     <!-- Toggle Switch for Active/Inactive status -->
                                                     <label class="switch">
-                                                      <input type="checkbox" class="toggle-user-status" data-user-id="{{ user.id }}" 
-                                                            {% if user.faculty or user.is_superuser %}checked{% endif %}>
-                                                      <span class="slider"></span>
-                                                    </label>
-
+                                                        <input type="checkbox" class="toggle-user-status" data-user-id="{{ user.id }}" 
+                                                              {% if user.faculty or user.is_superuser %}checked{% endif %}>
+                                                        <span class="slider"></span>
+                                                      </label>
                                                 </td>
                                                 
                                           {% endfor %}
@@ -700,7 +704,7 @@ input:checked + .slider:before {
               td = tr[i].getElementsByTagName("td");
               for (j = 0; j < td.length; j++) {
                   // Ensure buttons, dropdowns, badges, and action columns are not affected
-                  if (j === 2 || j === 3 || j === 4 || j === 5 || td[j].querySelector('.badge') || td[j].querySelector('.action-buttons')) {
+                  if (j === 2 || j === 3 || j === 4 || j === 5 || j === 6 || td[j].querySelector('.badge') || td[j].querySelector('.action-buttons')) {
                       continue; // Skip "Status", "Action", and dropdowns, badges
                   }
                   td[j].innerHTML = td[j].textContent || td[j].innerText; // Reset text content
@@ -721,7 +725,7 @@ input:checked + .slider:before {
   
           // Iterate through each cell in the row
           for (j = 0; j < td.length; j++) {
-              if (j === 2 || j === 3 || j === 4 || j === 5) continue; // Skip "Status" and "Action" columns
+              if (j === 2 || j === 3 || j === 4 || j === 5 || j === 6) continue; // Skip "Status" and "Action" columns
               if (td[j]) {
                   txtValue = td[j].textContent || td[j].innerText;
                   if (txtValue.toUpperCase().indexOf(filter) > -1) {

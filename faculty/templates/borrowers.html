@@ -71,6 +71,97 @@
     object-fit: cover;
     border-radius: 10px;
   }
+
+  .nav {
+    display: flex;
+    justify-content: flex-end; /* Aligns items to the right */
+    padding-right: 20px; /* Adds some spacing from the edge */
+}
+
+.bell-notification {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.bell-notification i {
+    color: white;
+    font-size: 20px;
+    margin-right: 10px;
+    cursor: pointer !important;
+}
+
+.notification-count {
+    position: absolute;
+    top: -12px;
+    right: 12px !important;
+    background-color: red;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 0.2px 4px !important;
+    border-radius: 50%;
+    border: 1px solid white;
+    z-index: 1;
+}
+
+.notification-card {
+  display: none;
+  position: absolute;
+  top: 50px;
+  right: 90px;
+  width: 600px; /* Increased width for better alignment */
+  max-height: 300px; /* Set a maximum height for the card */
+  overflow-y: auto; /* Enable vertical scrolling */
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+  padding: 10px;
+}
+
+
+.notification-card h4 {
+  margin: 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ddd;
+  font-size: 16px;
+  color: #333;
+}
+
+.notification-item {
+  margin: 10px 0;
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-item p {
+  margin: 0;
+  font-size: 14px;
+  color: #555;
+}
+
+.notification-item strong {
+  color: #000;
+}
+
+.trash-icon {
+position: absolute;
+top: 5px;
+right: 5px;
+cursor: pointer;
+font-size: 8px;
+color: red;
+}
+
+.modal-custom {
+    max-width: 70%; /* Adjust to fit the table */
+  }
+  
         
     </style>
 {% endblock %}
@@ -145,6 +236,14 @@
                         </div>
 
                         <ul class="navbar-nav header-right">
+
+                            <li class="nav-item" bell-notification" onclick="toggleNotifications()">
+                                <i class="fa-solid fa-bell" style="padding-right: 1px; font-size: 23px; cursor: pointer !important;"></i>
+                                <span class="notification-count" style="position: relative; right: 23px;">0</span>
+                                <div class="notification-card" id="notificationCard" style="display: none;">
+                                    <h4>Notifications</h4>
+                                </div>
+                            </li>
                             
                             <li class="nav-item dropdown header-profile">
                                 <a class="nav-link" href="#" role="button" data-toggle="dropdown">
@@ -207,7 +306,7 @@
                     </li>
                     <li class="activee"><a href="{% url 'borrowers'%}" aria-expanded="false">
                         <img src="{% static 'images/add-item.png'%}" width="30" height="30" alt="">
-                        <span class="nav-text">Add Borrow Item</span></a>
+                        <span class="nav-text" style="color: white;">Add Borrow Item</span></a>
                     </li>
                     <li><a href="{% url 'borrow-record'%}" aria-expanded="false">
                         <img src="{% static 'images/search.png'%}" width="30" height="30" alt="">
@@ -252,6 +351,44 @@
             </div>
             <!-- Dynamic messages end -->
         <div class="container-fluid">
+
+            <div class="modal fade" id="reservationModal" tabindex="-1" role="dialog" aria-labelledby="reservationModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-custom" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="reservationModalLabel">Reservation List</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body" id="reservationModalBody">
+                            <table class="table table-striped table-bordered table-bordered table-responsive-sm mt-3">
+                                <thead class="thead-primary">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Student ID</th>
+                                        <th>Student Name</th>
+                                        <th>Reserved Quantity</th>
+                                        <th>Date Reserved</th>
+                                        <th>Expected Date Return</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="reservationTableBody" style="color: #333;">
+                                    <!-- Data will be dynamically populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+
             <div class="card" style="border-top: 4px solid #593bdb; box-shadow: rgba(0, 0, 0, 0.18) 0px 2px 4px;">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h4 class="card-title" style="font-size: 30px; font-weight: 700;">Add New Borrower</h4>
@@ -386,7 +523,7 @@
                                                             <option disabled>No items available</option>
                                                         {% endfor %}
                                                     </select>
-                                                    
+                                                    <div id="total-item-count" class="mt-2"></div>
                                                     <span class="text-danger error-duplicate"></span>
                                                     <div class="mt-4">
                                                         <label class="text-dark">Description & Specification</label>
@@ -548,11 +685,10 @@
             closeIcon.classList.add("fas", "fa-times", "remove-card");
             Object.assign(closeIcon.style, {
                 position: "absolute",
-                top: "1px",
+                top: "10px",
                 left: "10px",
                 cursor: "pointer",
                 color: "#dc3545",
-                fontSize: "17px",
             });
             newCard.appendChild(closeIcon);
     
@@ -560,12 +696,13 @@
     
             closeIcon.addEventListener("click", () => {
                 newCard.remove();
-                enableSaveButtonIfNoErrors();
+                enableSaveButtonIfNoErrors(); // Recheck errors after removing card
             });
     
             newCard.querySelector(".add-card").addEventListener("click", addCard);
             setupQuantityValidation(newCard);
             setupDuplicateItemValidation(newCard);
+            setupReservationMessage(newCard); // Ensure reservation message is reset for new card
         }
     
         document.querySelector(".add-card").addEventListener("click", addCard);
@@ -574,12 +711,12 @@
             const itemSelect = card.querySelector("select[name='item']");
             const quantityInput = card.querySelector("input[name='quantities[]']");
             const errorQuantitySpan = quantityInput.parentNode.querySelector('.error-quantity');
-        
+    
             // Validate when the item is changed
             itemSelect.addEventListener("change", async function () {
                 const selectedItem = this.value;
                 if (selectedItem) {
-                    const availableQuantity = await getAvailableQuantity(selectedItem);
+                    const availableQuantity = await fetchQuantity(`/get-available-quantity/${selectedItem}/`);
                     quantityInput.dataset.availableQuantity = availableQuantity;
                     validateQuantity(quantityInput, availableQuantity);
                     validateDuplicateItems();
@@ -588,19 +725,19 @@
                     disableSaveButton();
                 }
             });
-        
+    
             // Validate when the quantity is changed
             quantityInput.addEventListener("input", function () {
                 const availableQuantity = parseInt(this.dataset.availableQuantity || "0", 10);
                 const selectedItem = itemSelect.value;
-        
+    
                 if (!selectedItem) {
                     errorQuantitySpan.textContent = 'Please select an item first before adding quantity.';
                     this.value = 0; // Reset quantity input to 0
                     disableSaveButton();
                     return;
                 }
-        
+    
                 validateQuantity(this, availableQuantity);
             });
         }
@@ -608,6 +745,46 @@
         function setupDuplicateItemValidation(card) {
             const itemSelect = card.querySelector("select[name='item']");
             itemSelect.addEventListener("change", validateDuplicateItems);
+        }
+    
+        function setupReservationMessage(card) {
+            const itemSelect = card.querySelector("select[name='item']");
+            const totalItemCount = card.querySelector("#total-item-count");
+        
+            // Clear any existing message when a new card is added
+            let messageElement = totalItemCount.querySelector(".reservation-message");
+            if (messageElement) {
+                messageElement.innerHTML = ''; // Clear message from the new card if already exists
+            }
+        
+            itemSelect.addEventListener("change", function () {
+                const itemId = this.value;
+        
+                // Create or select the message element inside the total-item-count div
+                if (!messageElement) {
+                    messageElement = document.createElement("p");
+                    messageElement.classList.add("reservation-message", "mt-2", "text-dark");
+                    totalItemCount.appendChild(messageElement);
+                }
+        
+                if (itemId) {
+                    fetch(`/admin-get_item_count/${itemId}/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.message) {
+                                messageElement.innerHTML = data.message; // Render the response as HTML
+                            } else {
+                                messageElement.innerHTML = ''; // Clear message if no reservations exist
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching reservation count:', error);
+                            messageElement.textContent = 'Error fetching reservation data.';
+                        });
+                } else {
+                    messageElement.innerHTML = ''; // Clear message if no item is selected
+                }
+            });
         }
     
         function validateQuantity(quantityInput, availableQuantity) {
@@ -643,6 +820,17 @@
             enableSaveButtonIfNoErrors();
         }
     
+        async function fetchQuantity(url) {
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                return data.available_quantity || 0;
+            } catch (error) {
+                console.error('Error fetching quantity:', error);
+                return 0;
+            }
+        }
+    
         function disableSaveButton() {
             saveButton.disabled = true;
             saveButton.style.cursor = "not-allowed";
@@ -656,39 +844,17 @@
             }
         }
     
-        function showError(message, input) {
-            const errorSpan = input.parentNode.querySelector(".error-quantity");
-            if (errorSpan) {
-                errorSpan.textContent = message;
-            }
-        }
-    
-        function hideError(input) {
-            const errorSpan = input.parentNode.querySelector(".error-quantity");
-            if (errorSpan) {
-                errorSpan.textContent = '';
-            }
-        }
-    
-        async function getAvailableQuantity(itemId) {
-            try {
-                const response = await fetch(`/get-available-quantity/${itemId}/`);
-                const data = await response.json();
-                return data.available_quantity;
-            } catch (error) {
-                console.error('Error fetching available quantity:', error);
-                return 0;
-            }
-        }
-    
-        setupQuantityValidation(document.querySelector(".col-xl-6"));
-        setupDuplicateItemValidation(document.querySelector(".col-xl-6"));
-    
         function clearValidationErrors(card) {
             card.querySelectorAll(".text-danger").forEach(span => span.textContent = '');
             card.classList.remove("border-danger");
         }
+    
+        setupQuantityValidation(document.querySelector(".col-xl-6"));
+        setupDuplicateItemValidation(document.querySelector(".col-xl-6"));
+        setupReservationMessage(document.querySelector(".col-xl-6"));
     });
+    
+        
     
     
 
@@ -765,6 +931,185 @@
                         }
                     });
                 });
+
+
+
+                // Display the notification data
+function fetchNotifications() {
+    fetch('/get-notifications/')
+      .then(response => response.json())
+      .then(data => {
+        // Update the notification count
+        const notificationCount = document.querySelector('.notification-count');
+        notificationCount.textContent = data.unread_count;
+  
+        const notificationCard = document.getElementById('notificationCard');
+        notificationCard.innerHTML = '<h4>Notifications</h4>'; // Reset the content
+  
+        if (data.notifications.length === 0) {
+          notificationCard.innerHTML += '<p>No notifications available.</p>';
+        } else {
+          data.notifications.forEach(notification => {
+            const notificationItem = document.createElement('div');
+            notificationItem.classList.add('notification-item');
+            notificationItem.style.position = 'relative'; // Enable absolute positioning for the icon
+  
+            notificationItem.innerHTML = `
+              <div>
+                <i 
+                  class="fa-solid fa-trash" 
+                  style="position: absolute; top: 5px; right: 5px; cursor: pointer; color: red; font-size: 14px;" 
+                  onclick="deleteNotification(${notification.id})">
+                </i>
+                <p><strong>Student ID:</strong> ${notification.student_id}</p>
+                <p><strong>Name:</strong> ${notification.borrower_name}</p>
+                <p><strong>Reminder:</strong> ${notification.notification_message}</p>
+                <p><strong>Time Span:</strong> ${notification.created_at}</p>
+              </div>
+            `;
+            notificationCard.appendChild(notificationItem);
+          });
+        }
+      })
+      .catch(error => console.error('Error fetching notifications:', error));
+  }
+  
+  // Delete notification
+  function deleteNotification(notificationId) {
+    fetch(`/delete-notificationn/${notificationId}/`, {
+      method: 'DELETE',
+      headers: {
+        'X-CSRFToken': getCsrfToken(), // Ensure CSRF token is sent
+      },
+    })
+      .then(response => {
+        if (response.ok) {
+          alert('Notification deleted successfully.');
+          fetchNotifications(); // Refresh notifications after deletion
+        } else {
+          alert('Failed to delete notification. Please try again.');
+          console.error('Failed to delete notification');
+        }
+      })
+      .catch(error => console.error('Error deleting notification:', error));
+  }
+  
+  // Utility function to fetch CSRF token
+  function getCsrfToken() {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    return csrfToken;
+  }
+  
+  // Fetch notifications when the bell icon is clicked
+  function toggleNotifications() {
+    const notificationCard = document.getElementById('notificationCard');
+    if (notificationCard.style.display === 'block') {
+      notificationCard.style.display = 'none';
+    } else {
+      notificationCard.style.display = 'block';
+      fetchNotifications();
+  
+      // Mark notifications as read
+      fetch('/mark-notifications-as-read/', {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCsrfToken(),
+        },
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            const notificationCount = document.querySelector('.notification-count');
+            notificationCount.textContent = '0';
+          }
+        })
+        .catch(error => console.error('Error marking notifications as read:', error));
+    }
+  }
+  
+  // Fetch notifications once when the page loads
+  document.addEventListener('DOMContentLoaded', fetchNotifications);
+
+
+
+
+
+
+
+
+
+  
+  function showReservationModal(itemName, totalCount) {
+    const modalTitle = document.getElementById("reservationModalLabel");
+    const tableBody = document.getElementById("reservationTableBody");
+    const modalBody = document.getElementById("reservationModalBody");
+
+    // Update modal title
+    modalTitle.innerHTML = `Students Who Reserved "<strong>${itemName}</strong>"`;
+
+    // Add a heading below the modal title for total count
+    let totalCountHeading = document.getElementById("totalCountHeading");
+    if (!totalCountHeading) {
+        totalCountHeading = document.createElement("h6");
+        totalCountHeading.id = "totalCountHeading";
+        totalCountHeading.classList.add("text-muted", "mb-3");
+        modalBody.prepend(totalCountHeading); // Add heading at the top of the modal body
+    }
+    totalCountHeading.textContent = `Total Reserved Units: ${totalCount}`;
+
+    // Clear previous table data
+    tableBody.innerHTML = '<tr><td colspan="7">Loading...</td></tr>';
+
+    function getStatusBadgeClass(status) {
+        switch (status) {
+            case 'Pending':
+                return 'badge-primary';
+            case 'Approved':
+                return 'badge-success';
+            case 'Denied':
+                return 'badge-danger';
+            default:
+                return 'badge-secondary'; // Default class for unhandled statuses
+        }
+    }
+
+    // Fetch data based on itemName
+    fetch(`/admin-view-reservation/?item_name=${encodeURIComponent(itemName)}&total_count=${totalCount}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.reservations && data.reservations.length > 0) {
+                tableBody.innerHTML = ''; // Clear loading message
+                data.reservations.forEach((reservation, index) => {
+                    tableBody.innerHTML += `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${reservation.student_id}</td>
+                            <td>${reservation.name}</td>
+                            <td>${reservation.reserved_quantity}</td>
+                            <td>${reservation.reserve_date}</td>
+                            <td>${reservation.date_return}</td>
+                            <td>
+                                <span class="badge ${getStatusBadgeClass(reservation.status)}">
+                                    ${reservation.status}
+                                </span>
+                            </td>
+                        </tr>
+                    `;
+                });
+            } else {
+                tableBody.innerHTML = '<tr><td colspan="7">No reservations found for this item.</td></tr>';
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching reservation data:', error);
+            tableBody.innerHTML = '<tr><td colspan="7">Error loading reservation data. Please try again later.</td></tr>';
+        });
+
+    // Show the modal
+    $('#reservationModal').modal('show');
+}
+
+
 
         
     </script>

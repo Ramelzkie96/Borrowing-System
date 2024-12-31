@@ -21,6 +21,242 @@
         .highlight {
             background-color: rgb(0, 255, 13);
         }
+
+        
+/* From Uiverse.io by vihstorck */ 
+.switch {
+    /* switch */
+    --switch-width: 46px;
+    --switch-height: 24px;
+    --switch-bg: rgb(255, 47, 47);
+    --switch-checked-bg: #1676df;
+    --switch-offset: calc((var(--switch-height) - var(--circle-diameter)) / 2);
+    --switch-transition: all 0.2s cubic-bezier(0.27, 0.2, 0.25, 1.51);
+    /* circle */
+    --circle-diameter: 18px;
+    --circle-bg: #fff;
+    --circle-shadow: 1px 1px 2px rgba(146, 146, 146, 0.45);
+    --circle-checked-shadow: -1px 1px 2px rgba(163, 163, 163, 0.45);
+    --circle-transition: var(--switch-transition);
+    /* icon */
+    --icon-transition: all 0.2s cubic-bezier(0.27, 0.2, 0.25, 1.51);
+    --icon-cross-color: var(--switch-bg);
+    --icon-cross-size: 6px;
+    --icon-checkmark-color: var(--switch-checked-bg);
+    --icon-checkmark-size: 10px;
+    /* effect line */
+    --effect-width: calc(var(--circle-diameter) / 2);
+    --effect-height: calc(var(--effect-width) / 2 - 1px);
+    --effect-bg: var(--circle-bg);
+    --effect-border-radius: 1px;
+    --effect-transition: all 0.2s ease-in-out;
+  }
+  
+  .switch input {
+    display: none;
+  }
+  
+  .switch {
+    display: inline-block;
+  }
+  
+  .switch i {
+    -webkit-transition: var(--icon-transition);
+    -o-transition: var(--icon-transition);
+    transition: var(--icon-transition);
+    position: absolute;
+    height: auto;
+  }
+  
+  .switch .checkmark {
+    width: var(--icon-checkmark-size);
+    color: var(--icon-checkmark-color);
+    -webkit-transform: scale(0);
+    -ms-transform: scale(0);
+    transform: scale(0);
+  }
+  
+  .switch .cross {
+    width: var(--icon-cross-size);
+    color: var(--icon-cross-color);
+  }
+  
+  .slider {
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    width: var(--switch-width);
+    height: var(--switch-height);
+    background: var(--switch-bg);
+    border-radius: 999px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    position: relative;
+    -webkit-transition: var(--switch-transition);
+    -o-transition: var(--switch-transition);
+    transition: var(--switch-transition);
+    cursor: pointer;
+  }
+  
+  .circle {
+    width: var(--circle-diameter);
+    height: var(--circle-diameter);
+    background: var(--circle-bg);
+    border-radius: inherit;
+    -webkit-box-shadow: var(--circle-shadow);
+    box-shadow: var(--circle-shadow);
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-transition: var(--circle-transition);
+    -o-transition: var(--circle-transition);
+    transition: var(--circle-transition);
+    z-index: 1;
+    position: absolute;
+    left: var(--switch-offset);
+  }
+  
+  .slider::before {
+    content: "";
+    position: absolute;
+    width: var(--effect-width);
+    height: var(--effect-height);
+    left: calc(var(--switch-offset) + (var(--effect-width) / 2));
+    background: var(--effect-bg);
+    border-radius: var(--effect-border-radius);
+    -webkit-transition: var(--effect-transition);
+    -o-transition: var(--effect-transition);
+    transition: var(--effect-transition);
+  }
+  
+  /* actions */
+  
+  .switch input:checked + .slider {
+    background: var(--switch-checked-bg);
+  }
+  
+  .switch input:checked + .slider .checkmark {
+    -webkit-transform: scale(1);
+    -ms-transform: scale(1);
+    transform: scale(1);
+  }
+  
+  .switch input:checked + .slider .cross {
+    -webkit-transform: scale(0);
+    -ms-transform: scale(0);
+    transform: scale(0);
+  }
+  
+  .switch input:checked + .slider::before {
+    left: calc(
+      100% - var(--effect-width) - (var(--effect-width) / 2) -
+        var(--switch-offset)
+    );
+  }
+  
+  .switch input:checked + .slider .circle {
+    left: calc(100% - var(--circle-diameter) - var(--switch-offset));
+    -webkit-box-shadow: var(--circle-checked-shadow);
+    box-shadow: var(--circle-checked-shadow);
+  }
+
+  .nav {
+    display: flex;
+    justify-content: flex-end; /* Aligns items to the right */
+    padding-right: 20px; /* Adds some spacing from the edge */
+}
+
+.bell-notification {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.bell-notification i {
+    color: white;
+    font-size: 20px;
+    margin-right: 10px;
+    cursor: pointer !important;
+}
+
+.notification-count {
+    position: absolute;
+    top: -12px;
+    right: 12px !important;
+    background-color: red;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 0.2px 4px !important;
+    border-radius: 50%;
+    border: 1px solid white;
+    z-index: 1;
+}
+
+.notification-card {
+  display: none;
+  position: absolute;
+  top: 50px;
+  right: 90px;
+  width: 600px; /* Increased width for better alignment */
+  max-height: 300px; /* Set a maximum height for the card */
+  overflow-y: auto; /* Enable vertical scrolling */
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+  padding: 10px;
+}
+
+
+.notification-card h4 {
+  margin: 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ddd;
+  font-size: 16px;
+  color: #333;
+}
+
+.notification-item {
+  margin: 10px 0;
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+.notification-item p {
+  margin: 0;
+  font-size: 14px;
+  color: #555;
+}
+
+.notification-item strong {
+  color: #000;
+}
+
+.trash-icon {
+position: absolute;
+top: 5px;
+right: 5px;
+cursor: pointer;
+font-size: 8px;
+color: red;
+}
+
+
+  
     </style>
 {% endblock %}
 
@@ -90,6 +326,14 @@
                         </div>
 
                         <ul class="navbar-nav header-right">
+
+                            <li class="nav-item" bell-notification" onclick="toggleNotifications()">
+                                <i class="fa-solid fa-bell" style="padding-right: 1px; font-size: 23px; cursor: pointer !important;"></i>
+                                <span class="notification-count" style="position: relative; right: 23px;">0</span>
+                                <div class="notification-card" id="notificationCard" style="display: none;">
+                                    <h4>Notifications</h4>
+                                </div>
+                            </li>
 
                             <li class="nav-item dropdown header-profile">
                                 <a class="nav-link" href="#" role="button" data-toggle="dropdown">
@@ -190,59 +434,48 @@
         ***********************************-->
 
         <!-- Modal for Editing Item -->
-    <div class="modal fade" id="exampleModalCenter">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" style="font-size: 25px; font-weight: 700;">Edit Item</h5>
-                    <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+<div class="modal fade" id="exampleModalCenter">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" style="font-size: 25px; font-weight: 700;">Edit Item</h5>
+                <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+            <div class="modal-body">
+              <form action="{% url 'update-property-status' %}" method="POST">
+                {% csrf_token %}
+                
+                <!-- Input for Item Name -->
+                <div class="form-group">
+                    <label for="itemName" class="text-dark">Item Name</label>
+                    <input type="text" id="itemName" name="item_name" class="form-control text-dark" style="border: 1px solid #bebebe;">
                 </div>
-                <div class="modal-body">
-                    <form method="POST" action="{% url 'update_item' %}" id="edit-item-form">
-                        {% csrf_token %}
-                        <input type="hidden" name="item_id" value="">
-
-                        <div class="form-group row mb-4">
-                            <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Property ID</label>
-                            <div class="col-sm-12 col-md-7">
-                                <input type="text" name="property_id" style="border: 1px solid #bebebe;" class="form-control">
-                            </div>
-                        </div>
-
-                        <div class="form-group row mb-4">
-                            <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Name</label>
-                            <div class="col-sm-12 col-md-7">
-                                <input type="text" name="name" style="border: 1px solid #bebebe;" class="form-control" id="item-name" required>
-                                <div id="name-validation-error" class="text-danger" style="display: none;">This item name already exists.</div>
-                            </div>
-                        </div>
-
-                        <div class="form-group row mb-4">
-                            <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Total Quantity</label>
-                            <div class="col-sm-12 col-md-7">
-                                <input type="number" style="width: 100px; border: 1px solid #bebebe;" class="form-control" name="total_quantity" min="1" max="100" required>
-                            </div>
-                        </div>
-
-                        <div class="form-group row mb-4">
-                            <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3 text-dark" style="font-size: 15px">Available Quantity</label>
-                            <div class="col-sm-12 col-md-7">
-                                <input type="number" style="width: 100px; border: 1px solid #bebebe;" class="form-control" name="quantity" max="100" required>
-                                <div id="quantity-validation-error" class="text-danger" style="display: none;"></div>
-                            </div>
-                        </div>
-
-                        <div class="form-group row mb-4">
-                            <label class="col-form-label text-md-right col-12 col-md-3 col-lg-3"></label>
-                            <div class="col-sm-12 col-md-7">
-                                <button class="btn btn-primary" type="submit" id="submit-button">Update</button>
-                            </div>
-                        </div>
-                    </form>
+  
+                <table class="table table-bordered" style="table-layout: fixed; width: 100%;">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th style="width: 33%;">Property ID</th>
+                            <th style="width: 33%;">Status</th>
+                            <th style="width: 33%;">Condition (Good/Defect)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modalTableBody">
+                        <!-- Dynamic rows will be added here based on the selected item -->
+                    </tbody>
+                </table>
+            
+                <div class="modal-footer">
+                  <div class="mr-auto" style="font-size: 14px; color: #888;">
+                      <small>Note: You can edit the Property ID by clicking on the corresponding value in the table.</small>
+                  </div>
+                  <button type="submit" name="submit" class="btn btn-secondary">Save</button>
                 </div>
+            </form>
+            
             </div>
         </div>
-      </div>
+    </div>
+  </div>
 
 
         <div class="content-body">
@@ -287,7 +520,7 @@
                                     <table id="itemTable" class="table table-bordered table-striped table-responsive-sm" style="color: #333;">
                                         <thead class="thead-primary">
                                             <tr>
-                                                <th>Property ID</th>  <!-- Change ID to # for numbering -->
+                                               
                                                 <th>Item</th>
                                                 <th>Total Quantity</th>
                                                 <th>Available Quantity</th>
@@ -298,21 +531,20 @@
                                             {% if page_obj %}
                                                 {% for item in page_obj %}
                                                     <tr>
-                                                        <td>{{ item.property_id }}</td>  <!-- Display the loop index starting from 1 -->
+                                                       
                                                         <td>{{ item.name }}</td>
                                                         <td>{{ item.total_quantity }}</td>
                                                         <td>{{ item.quantity }}</td>
                                                         <td>
-                                                            <button type="button" class="btn btn-secondary edit-item-btn"
-                                                                data-id="{{ item.id }}"
-                                                                data-name="{{ item.name }}"
-                                                                data-property-id="{{ item.property_id }}"
-                                                                data-totalquantity="{{ item.total_quantity }}"
-                                                                data-quantity="{{ item.quantity }}"
-                                                                data-toggle="modal"
-                                                                data-target="#exampleModalCenter">
-                                                                <i class="fas fa-edit"></i>
-                                                            </button>
+                                                            <button type="button" class="btn btn-secondary edit-item-btn" 
+                                                            data-id="{{ item.id }}" 
+                                                            data-name="{{ item.name }}"
+                                                            data-totalquantity="{{ item.total_quantity }}"
+                                                            data-quantity="{{ item.quantity }}"
+                                                            data-toggle="modal" 
+                                                            data-target="#exampleModalCenter">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
                                                             <button class="btn btn-danger btn deleteButton" data-item-id="{{ item.id }}"><i class="fas fa-trash"></i></button>
                                                         </td>
                                                     </tr>
@@ -393,27 +625,114 @@
 
 
     <script>
-     //edit
-    document.addEventListener('DOMContentLoaded', function() {
-        var editButtons = document.querySelectorAll('.edit-item-btn');
-        
-        editButtons.forEach(function(button) {
-            button.addEventListener('click', function() {
-                var itemId = this.getAttribute('data-id');
-                var itemName = this.getAttribute('data-name');
-                var totalquantity = this.getAttribute('data-totalquantity');
-                var itemQuantity = this.getAttribute('data-quantity');
-                var propertyId = this.getAttribute('data-property-id');
-    
-                // Set the modal input values
-                document.querySelector('#exampleModalCenter input[name="item_id"]').value = itemId;
-                document.querySelector('#exampleModalCenter input[name="name"]').value = itemName;
-                document.querySelector('#exampleModalCenter input[name="total_quantity"]').value = totalquantity;
-                document.querySelector('#exampleModalCenter input[name="quantity"]').value = itemQuantity;
-                document.querySelector('#exampleModalCenter input[name="property_id"]').value = propertyId;
+      document.querySelectorAll('.edit-item-btn').forEach(button => {
+        button.addEventListener('click', function () {
+          const itemId = this.getAttribute('data-id');
+          const itemName = this.getAttribute('data-name'); // Get item name
+          const totalQuantity = this.getAttribute('data-totalquantity');
+          const quantity = this.getAttribute('data-quantity');
+      
+          // Set the item name in the input field
+          document.getElementById('itemName').value = itemName;
+      
+          // Fetch PropertyID related to the item
+          fetch(`/get_property_ids/${itemId}/`) // Assuming you have an endpoint that returns the Property IDs
+            .then(response => response.json())
+            .then(data => {
+              // Empty the modal table body
+              const modalTableBody = document.getElementById('modalTableBody');
+              modalTableBody.innerHTML = '';
+      
+              // Loop through each property ID and add a new row to the table
+              data.property_ids.forEach(property => {
+                const row = document.createElement('tr');
+                row.setAttribute('data-property-id', property.property_id); // Set a data attribute for easier reference
+      
+                row.innerHTML = `
+                  <td style="text-align: center; vertical-align: middle;">
+                    <input type="text" value="${property.property_id}" 
+                           class="property-id-input" 
+                           data-original-id="${property.property_id}" 
+                           style="text-align: center; border: none; background: transparent; width: 100%;" />
+                  </td>
+                  <td style="text-align: center; vertical-align: middle;">
+                    <span class="badge ${property.status === 'Good' ? 'badge-success' : 'badge-secondary'} status-badge">
+                      ${property.status}
+                    </span>
+                  </td>
+                  <td style="text-align: center; vertical-align: middle;">
+                    <label class="switch">
+                      <input type="checkbox" ${property.status === 'Good' ? 'checked' : ''} 
+                             data-id="${property.property_id}" 
+                             class="status-toggle" />
+                      <div class="slider">
+                        <div class="circle">
+                          <i class="fa-solid fa-x cross" style="font-size:9px;"></i>
+                          <i class="fa-solid fa-check checkmark" style="font-size: 11px;"></i>
+                        </div>
+                      </div>
+                    </label>
+                  </td>
+                `;
+      
+                modalTableBody.appendChild(row);
+              });
+      
+              // Attach event listener to the checkboxes after rows are added
+              document.querySelectorAll('.status-toggle').forEach(checkbox => {
+                checkbox.addEventListener('change', function () {
+                  const propertyId = this.getAttribute('data-id');
+                  const newStatus = this.checked ? 'Good' : 'Defective';
+      
+                  // Update the badge in the table
+                  const statusBadge = this.closest('tr').querySelector('.status-badge');
+                  statusBadge.textContent = newStatus;
+                  statusBadge.className = `badge ${newStatus === 'Good' ? 'badge-success' : 'badge-secondary'} status-badge`;
+                });
+              });
+            })
+            .catch(error => {
+              console.error('Error fetching property IDs:', error);
             });
         });
+      });
+      
+      
+      // When form is submitted, check the selected checkboxes and set status to "Defective" or "Good"
+      document.querySelector('form').addEventListener('submit', function (event) {
+        const rows = document.querySelectorAll('#modalTableBody tr');
+        const propertyIds = new Set();
+        let hasDuplicate = false; // Flag to track duplicate detection
+    
+        rows.forEach(row => {
+            const propertyIdInput = row.querySelector('.property-id-input');
+            const updatedPropertyId = propertyIdInput.value;
+            const originalPropertyId = propertyIdInput.getAttribute('data-original-id');
+            const checkbox = row.querySelector('.status-toggle');
+            const status = checkbox.checked ? 'Good' : 'Defective';
+    
+            if (propertyIds.has(updatedPropertyId)) {
+                hasDuplicate = true; // Set flag for duplicate
+                alert(`Duplicate Property ID found: ${updatedPropertyId}`);
+                return; // Exit the loop
+            } else {
+                propertyIds.add(updatedPropertyId);
+            }
+    
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'property_updates[]';
+            hiddenInput.value = `${originalPropertyId},${updatedPropertyId},${status}`;
+            row.appendChild(hiddenInput);
+        });
+    
+        if (hasDuplicate) {
+            event.preventDefault(); // Prevent form submission
+            location.reload(); // Refresh the page
+        }
     });
+    
+    
 
 
 
@@ -660,6 +979,103 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 });
+
+
+// Display the notification data
+function fetchNotifications() {
+    fetch('/get-notifications/')
+      .then(response => response.json())
+      .then(data => {
+        // Update the notification count
+        const notificationCount = document.querySelector('.notification-count');
+        notificationCount.textContent = data.unread_count;
+  
+        const notificationCard = document.getElementById('notificationCard');
+        notificationCard.innerHTML = '<h4>Notifications</h4>'; // Reset the content
+  
+        if (data.notifications.length === 0) {
+          notificationCard.innerHTML += '<p>No notifications available.</p>';
+        } else {
+          data.notifications.forEach(notification => {
+            const notificationItem = document.createElement('div');
+            notificationItem.classList.add('notification-item');
+            notificationItem.style.position = 'relative'; // Enable absolute positioning for the icon
+  
+            notificationItem.innerHTML = `
+              <div>
+                <i 
+                  class="fa-solid fa-trash" 
+                  style="position: absolute; top: 5px; right: 5px; cursor: pointer; color: red; font-size: 14px;" 
+                  onclick="deleteNotification(${notification.id})">
+                </i>
+                <p><strong>Student ID:</strong> ${notification.student_id}</p>
+                <p><strong>Name:</strong> ${notification.borrower_name}</p>
+                <p><strong>Reminder:</strong> ${notification.notification_message}</p>
+                <p><strong>Time Span:</strong> ${notification.created_at}</p>
+              </div>
+            `;
+            notificationCard.appendChild(notificationItem);
+          });
+        }
+      })
+      .catch(error => console.error('Error fetching notifications:', error));
+  }
+  
+  // Delete notification
+  function deleteNotification(notificationId) {
+    fetch(`/delete-notificationn/${notificationId}/`, {
+      method: 'DELETE',
+      headers: {
+        'X-CSRFToken': getCsrfToken(), // Ensure CSRF token is sent
+      },
+    })
+      .then(response => {
+        if (response.ok) {
+          alert('Notification deleted successfully.');
+          fetchNotifications(); // Refresh notifications after deletion
+        } else {
+          alert('Failed to delete notification. Please try again.');
+          console.error('Failed to delete notification');
+        }
+      })
+      .catch(error => console.error('Error deleting notification:', error));
+  }
+  
+  // Utility function to fetch CSRF token
+  function getCsrfToken() {
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    return csrfToken;
+  }
+  
+  // Fetch notifications when the bell icon is clicked
+  function toggleNotifications() {
+    const notificationCard = document.getElementById('notificationCard');
+    if (notificationCard.style.display === 'block') {
+      notificationCard.style.display = 'none';
+    } else {
+      notificationCard.style.display = 'block';
+      fetchNotifications();
+  
+      // Mark notifications as read
+      fetch('/mark-notifications-as-read/', {
+        method: 'POST',
+        headers: {
+          'X-CSRFToken': getCsrfToken(),
+        },
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.status === 'success') {
+            const notificationCount = document.querySelector('.notification-count');
+            notificationCount.textContent = '0';
+          }
+        })
+        .catch(error => console.error('Error marking notifications as read:', error));
+    }
+  }
+  
+  // Fetch notifications once when the page loads
+  document.addEventListener('DOMContentLoaded', fetchNotifications);
 </script>
 
 

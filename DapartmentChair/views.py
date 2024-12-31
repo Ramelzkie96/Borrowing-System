@@ -3,7 +3,7 @@ from .forms import LoginForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from functools import wraps
-from faculty.models import BorrowRequest, facultyItem, BorrowRequestItemFaculty, PropertyID
+from faculty.models import BorrowRequest, facultyItem, BorrowRequestItemFaculty, PropertyID, EmailReminderLog
 from django.contrib import messages
 from django.core.paginator import Paginator
 from .models import User
@@ -718,46 +718,80 @@ def get_property_ids(request, item_id):
 
 
 
-
-
 def update_property_status(request):
     if request.method == 'POST':
-        # Get property IDs and their corresponding statuses from the form
-        property_data = request.POST.getlist('property_ids[]')
+        try:
+            item_name = request.POST.get('item_name')
+            property_data = request.POST.getlist('property_updates[]')
 
-        # Create a dictionary to count the number of "Good" statuses per facultyItem
-        good_counts = {}
+            if not property_data:
+                messages.error(request, 'No property data provided.')
+                return redirect('admin-item-record')  # Replace with your actual redirect URL
 
-        # Iterate through the list of property data (property_id,status)
-        for data in property_data:
-            property_id, status = data.split(',')
+            faculty_item = None
 
-            # Use filter to handle multiple entries for the same property_id
-            properties = PropertyID.objects.filter(property_id=property_id)
-            for property in properties:
-                # Update the status to the new status (Good or Defective)
-                property.status = status
-                property.save()
+            if item_name:
+                # Update the item name if it exists
+                try:
+                    # Assuming the `faculty_item` is associated with one of the properties
+                    first_property_data = property_data[0]
+                    original_property_id = first_property_data.split(',')[0]
+                    property = PropertyID.objects.filter(property_id=original_property_id).first()
+                    if not property:
+                        messages.error(request, f'No PropertyID found for {original_property_id}.')
+                        return redirect('admin-item-record')
 
-                # Count how many "Good" properties there are for each facultyItem
-                if status == 'Good':
-                    # If good, increment the count for the corresponding facultyItem
-                    if property.faculty_item.id not in good_counts:
-                        good_counts[property.faculty_item.id] = 0
-                    good_counts[property.faculty_item.id] += 1
+                    faculty_item = property.faculty_item
+                    faculty_item.name = item_name
+                    faculty_item.save()
+                except PropertyID.MultipleObjectsReturned:
+                    messages.error(request, f'Multiple PropertyID instances found for {original_property_id}.')
+                    return redirect('admin-item-record')
 
-        # Now update the facultyItem quantities based on the number of "Good" properties
-        for faculty_item_id, good_count in good_counts.items():
-            # Fetch the corresponding facultyItem
-            faculty_item = facultyItem.objects.get(id=faculty_item_id)
+            # Process property updates
+            for data in property_data:
+                try:
+                    original_property_id, updated_property_id, status = data.split(',')
 
-            # Update the quantity of the facultyItem based on the "Good" statuses
-            faculty_item.quantity = good_count  # Quantity is now the count of Good statuses
-            faculty_item.save()
+                    # Check if the updated property ID already exists
+                    if PropertyID.objects.filter(property_id=updated_property_id).exclude(property_id=original_property_id).exists():
+                        messages.error(request, f'Duplicate Property ID found: {updated_property_id}. Update aborted.')
+                        return redirect('admin-item-record')
 
-        return redirect('admin-item-record')  # Redirect to the appropriate page after the update
+                    # Get the property by its original ID
+                    property = PropertyID.objects.filter(property_id=original_property_id).first()
+                    if not property:
+                        messages.error(request, f'No PropertyID found for {original_property_id}.')
+                        return redirect('admin-item-record')
 
-    return render(request, 'admin-item-record.html')
+                    # Update the property
+                    property.property_id = updated_property_id
+                    property.status = status
+                    property.save()
+
+                except ValueError:
+                    messages.error(request, 'Invalid property data format.')
+                    return redirect('admin-item-record')
+
+            # Update faculty item quantity if applicable
+            if faculty_item:
+                good_count = PropertyID.objects.filter(faculty_item=faculty_item, status='Good').count()
+                faculty_item.quantity = good_count
+                faculty_item.save()
+
+            messages.success(request, 'Properties updated successfully.')
+            return redirect('admin-item-record')
+
+        except Exception as e:
+            messages.error(request, f'Unexpected error: {str(e)}')
+            return redirect('admin-item-record')
+
+    messages.error(request, 'Invalid request method.')
+    return redirect('admin-item-record')
+
+
+
+
 
 
 
@@ -873,15 +907,15 @@ def borrowers(request):
             date_borrow_parsed = datetime.strptime(date_borrow, "%d %B, %Y").date()
             date_return_parsed = datetime.strptime(date_return_value, "%d %B, %Y").date()
 
-            # Ensure date_borrow is not in the past
-            if date_borrow_parsed < timezone.now().date():
-                messages.error(request, 'ERROR! Date Borrow cannot be set to a past date.')
-                return redirect('admin-borrowers')
+            # # Ensure date_borrow is not in the past
+            # if date_borrow_parsed < timezone.now().date():
+            #     messages.error(request, 'ERROR! Date Borrow cannot be set to a past date.')
+            #     return redirect('admin-borrowers')
 
-            # Ensure date_return is not before date_borrow
-            if date_return_parsed < date_borrow_parsed:
-                messages.error(request, 'ERROR! Date Return cannot be before Date Borrow.')
-                return redirect('admin-borrowers')
+            # # Ensure date_return is not before date_borrow
+            # if date_return_parsed < date_borrow_parsed:
+            #     messages.error(request, 'ERROR! Date Return cannot be before Date Borrow.')
+            #     return redirect('admin-borrowers')
 
             borrower_type = request.POST.get('borrower_type')
             if borrower_type not in ['Student', 'Teacher']:
@@ -1904,3 +1938,97 @@ def aa_update_student_reservation(request):
     else:
         return JsonResponse({"success": False, "message": "Invalid request method."})
 
+
+import timeago
+@login_required
+def get_notifications(request):
+    logs = EmailReminderLog.objects.filter(user=request.user).order_by('-created_at')
+    unread_count = EmailReminderLog.objects.filter(user=request.user, is_read=False).count()
+
+    data = [
+        {
+            "id": log.id,  # Include the ID here
+            "student_id": log.student_id,
+            "borrower_name": log.borrower_name,
+            "notification_message": log.notification_message,
+            "created_at": timeago.format(log.created_at, timezone.now()),
+        }
+        for log in logs
+    ]
+
+    return JsonResponse({"notifications": data, "unread_count": unread_count})
+
+
+
+@login_required
+def mark_notifications_as_read(request):
+    EmailReminderLog.objects.filter(user=request.user, is_read=False).update(is_read=True)
+    return JsonResponse({"status": "success"})
+
+
+
+@login_required
+@csrf_exempt
+def delete_notification(request, notification_id):
+    if request.method == 'DELETE':
+        notification = get_object_or_404(EmailReminderLog, id=notification_id, user=request.user)
+        notification.delete()
+        return JsonResponse({"message": "Notification deleted successfully"}, status=200)
+    return JsonResponse({"error": "Invalid request method"}, status=400)
+
+from django.db.models import Sum
+
+def get_item_count(request, item_id):
+    try:
+        # Ensure the user is authenticated
+        if not request.user.is_authenticated:
+            return JsonResponse({'error': 'User not authenticated'}, status=403)
+
+        # Get the selected facultyItem
+        item = facultyItem.objects.get(id=item_id)
+
+        # Filter ReservationItems by item_name and current user's faculty items
+        total_count = ReservationItem.objects.filter(
+            item_name=item.name,
+            user_facultyItem=request.user  # Match the current user
+        ).aggregate(total_quantity=Sum('quantity'))['total_quantity'] or 0
+
+        if total_count > 0:
+            # Include the anchor tag in the message, passing total_count and item_name as query parameters
+            message = (
+                f"<small>{total_count} units of this item have already been reserved. "
+                f"<a href='#' class='text-primary view-reservations' "
+                f"onclick=\"showReservationModal('{item.name}', {total_count})\">View Students Who Reserved This Item</a></small>"
+            )
+
+
+            return JsonResponse({'message': message})
+        else:
+            # Return an empty response if no reservations exist for the current user
+            return JsonResponse({})
+    except facultyItem.DoesNotExist:
+        return JsonResponse({'error': 'Item not found'}, status=404)
+
+
+
+
+@login_required
+def view_reservation(request):
+    item_name = request.GET.get('item_name')
+    if item_name:
+        reservations = ReservationItem.objects.filter(item_name=item_name, user_facultyItem=request.user)
+        data = {
+            'reservations': [
+                {
+                    'student_id': r.reservation.student_id,
+                    'name': r.reservation.name,
+                    'reserved_quantity': r.quantity,  # Include the reserved quantity
+                    'reserve_date': r.reservation.reserve_date,
+                    'date_return': r.reservation.date_return,
+                    'status': r.status,
+                } for r in reservations
+            ]
+        }
+        return JsonResponse(data)
+    else:
+        return JsonResponse({'error': 'Item name not provided'}, status=400)

@@ -466,13 +466,19 @@
               <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
           </div>
           <div class="modal-body">
-            <form action="{% url 'update-property-status' %}" method="POST">
+            <form action="{% url 'admin-update-property-status' %}" method="POST">
               {% csrf_token %}
+              
+              <!-- Input for Item Name -->
+              <div class="form-group">
+                  <label for="itemName">Item Name</label>
+                  <input type="text" id="itemName" name="item_name" class="form-control">
+              </div>
+
               <table class="table table-bordered" style="table-layout: fixed; width: 100%;">
                   <thead class="thead-dark">
                       <tr>
                           <th style="width: 33%;">Property ID</th>
-                          <th style="width: 33%;">Item</th>
                           <th style="width: 33%;">Status</th>
                           <th style="width: 33%;">Condition (Good/Defect)</th>
                       </tr>
@@ -483,7 +489,10 @@
               </table>
           
               <div class="modal-footer">
-                  <button type="submit" name="submit" class="btn btn-secondary">Save</button>
+                <div class="mr-auto" style="font-size: 14px; color: #888;">
+                    <small>Note: You can edit the Property ID by clicking on the corresponding value in the table.</small>
+                </div>
+                <button type="submit" name="submit" class="btn btn-secondary">Save</button>
               </div>
           </form>
           
@@ -491,6 +500,7 @@
       </div>
   </div>
 </div>
+
 
 
 
@@ -546,14 +556,14 @@
                                                 <td>{{ item.quantity }}</td>
                                                 <td style="text-align: center;">
                                                   <button type="button" class="btn btn-secondary edit-item-btn" 
-                                                  data-id="{{ item.id }}" 
-                                                  data-name="{{ item.name }}"
-                                                  data-totalquantity="{{ item.total_quantity }}"
-                                                  data-quantity="{{ item.quantity }}"
-                                                  data-toggle="modal" 
-                                                  data-target="#exampleModalCenter">
-                                              <i class="fas fa-edit"></i>
-                                          </button>
+                                                    data-id="{{ item.id }}" 
+                                                    data-name="{{ item.name }}"
+                                                    data-totalquantity="{{ item.total_quantity }}"
+                                                    data-quantity="{{ item.quantity }}"
+                                                    data-toggle="modal" 
+                                                    data-target="#exampleModalCenter">
+                                                    <i class="fas fa-edit"></i>
+                                                  </button>
                                               
                                                     <button class="btn btn-danger btn deleteButton" data-item-id="{{ item.id }}"><i class="fas fa-trash"></i></button>
                                                 </td>
@@ -664,16 +674,18 @@
         window.location.search = urlParams.toString();
     }
 
-    //edit
     document.querySelectorAll('.edit-item-btn').forEach(button => {
-      button.addEventListener('click', function() {
+      button.addEventListener('click', function () {
         const itemId = this.getAttribute('data-id');
-        const itemName = this.getAttribute('data-name');
+        const itemName = this.getAttribute('data-name'); // Get item name
         const totalQuantity = this.getAttribute('data-totalquantity');
         const quantity = this.getAttribute('data-quantity');
     
+        // Set the item name in the input field
+        document.getElementById('itemName').value = itemName;
+    
         // Fetch PropertyID related to the item
-        fetch(`/get_property_ids/${itemId}/`) // Assuming you have an endpoint that returns the Property IDs
+        fetch(`/admin-get_property_ids/${itemId}/`) // Assuming you have an endpoint that returns the Property IDs
           .then(response => response.json())
           .then(data => {
             // Empty the modal table body
@@ -686,8 +698,12 @@
               row.setAttribute('data-property-id', property.property_id); // Set a data attribute for easier reference
     
               row.innerHTML = `
-                <td style="text-align: center; vertical-align: middle;">${property.property_id}</td>
-                <td style="text-align: center; vertical-align: middle;">${itemName}</td>
+                <td style="text-align: center; vertical-align: middle;">
+                  <input type="text" value="${property.property_id}" 
+                         class="property-id-input" 
+                         data-original-id="${property.property_id}" 
+                         style="text-align: center; border: none; background: transparent; width: 100%;" />
+                </td>
                 <td style="text-align: center; vertical-align: middle;">
                   <span class="badge ${property.status === 'Good' ? 'badge-success' : 'badge-secondary'} status-badge">
                     ${property.status}
@@ -695,7 +711,9 @@
                 </td>
                 <td style="text-align: center; vertical-align: middle;">
                   <label class="switch">
-                    <input type="checkbox" ${property.status === 'Good' ? 'checked' : ''} data-id="${property.property_id}" class="status-toggle" />
+                    <input type="checkbox" ${property.status === 'Good' ? 'checked' : ''} 
+                           data-id="${property.property_id}" 
+                           class="status-toggle" />
                     <div class="slider">
                       <div class="circle">
                         <i class="fa-solid fa-x cross" style="font-size:9px;"></i>
@@ -705,12 +723,13 @@
                   </label>
                 </td>
               `;
+    
               modalTableBody.appendChild(row);
             });
     
             // Attach event listener to the checkboxes after rows are added
             document.querySelectorAll('.status-toggle').forEach(checkbox => {
-              checkbox.addEventListener('change', function() {
+              checkbox.addEventListener('change', function () {
                 const propertyId = this.getAttribute('data-id');
                 const newStatus = this.checked ? 'Good' : 'Defective';
     
@@ -727,30 +746,43 @@
       });
     });
     
+    
     // When form is submitted, check the selected checkboxes and set status to "Defective" or "Good"
-    document.querySelector('form').addEventListener('submit', function(event) {
-      // Iterate over each row in the table to check the checkbox status
+    // When form is submitted, check the selected checkboxes and set status to "Defective" or "Good"
+    document.querySelector('form').addEventListener('submit', function (event) {
       const rows = document.querySelectorAll('#modalTableBody tr');
+      const propertyIds = new Set();
+      let hasDuplicate = false; // Flag to track duplicate detection
+  
       rows.forEach(row => {
-        const checkbox = row.querySelector('.status-toggle');
-        if (checkbox) {
-          const propertyId = checkbox.getAttribute('data-id');
+          const propertyIdInput = row.querySelector('.property-id-input');
+          const updatedPropertyId = propertyIdInput.value;
+          const originalPropertyId = propertyIdInput.getAttribute('data-original-id');
+          const checkbox = row.querySelector('.status-toggle');
           const status = checkbox.checked ? 'Good' : 'Defective';
-          const statusBadge = row.querySelector('.status-badge');
-    
-          // Update the status badge in the table (for UI consistency)
-          statusBadge.textContent = status;
-          statusBadge.className = `badge ${status === 'Good' ? 'badge-success' : 'badge-secondary'} status-badge`;
-    
-          // Add hidden input field with Property ID and updated status to be sent with the form
-          const statusInput = document.createElement('input');
-          statusInput.type = 'hidden';
-          statusInput.name = 'property_ids[]';  // Array of property IDs
-          statusInput.value = `${propertyId},${status}`;  // Store the property_id and the new status
-          row.appendChild(statusInput);
-        }
+  
+          if (propertyIds.has(updatedPropertyId)) {
+              hasDuplicate = true; // Set flag for duplicate
+              alert(`Duplicate Property ID found: ${updatedPropertyId}`);
+              return; // Exit the loop
+          } else {
+              propertyIds.add(updatedPropertyId);
+          }
+  
+          const hiddenInput = document.createElement('input');
+          hiddenInput.type = 'hidden';
+          hiddenInput.name = 'property_updates[]';
+          hiddenInput.value = `${originalPropertyId},${updatedPropertyId},${status}`;
+          row.appendChild(hiddenInput);
       });
-    });
+  
+      if (hasDuplicate) {
+          event.preventDefault(); // Prevent form submission
+          location.reload(); // Refresh the page
+      }
+  });
+  
+    
     
   
 
