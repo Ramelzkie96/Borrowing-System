@@ -9,7 +9,6 @@ from faculty.models import BorrowRequest, BorrowRequestItemFaculty
 from django.core.management.base import BaseCommand
 from faculty.models import EmailReminderLog
 
-
 class Command(BaseCommand):
     help = 'Send email reminders for borrowed items'
 
@@ -19,70 +18,63 @@ class Command(BaseCommand):
         django.setup()
 
         def send_email_reminders():
-            today = datetime.now().strftime('%d %B, %Y')  # Example: "30 December, 2024"
+            today = datetime.now().date()
+            all_borrowers = BorrowRequest.objects.all()
 
-            # Filter BorrowRequests where date_return is today or in the past
-            borrowers = BorrowRequest.objects.filter(date_return__lte=today)
-
-            for borrower in borrowers:
-                # Get all related items for the borrower
-                items = BorrowRequestItemFaculty.objects.filter(borrow_request=borrower)
-
-                # Count items not marked as `is_returned`
-                items_not_returned = items.filter(is_returned=False)
-                items_not_returned_count = items_not_returned.count()
-
-                # If all items are returned, skip this borrower
-                if items_not_returned_count == 0:
-                    print(f"All items for {borrower.name} are marked as returned. No email sent.")
+            for borrower in all_borrowers:
+                try:
+                    # Convert date_return string to date object (format must match stored format)
+                    return_date = datetime.strptime(borrower.date_return, '%d %B, %Y').date()
+                except (ValueError, TypeError):
+                    print(f"Invalid or missing return date for {borrower.name}")
                     continue
 
-                # Compose the email
-                subject = "Borrowing Reminder: Item Return Overdue"
-                message = (
-                    f"Dear {borrower.name},\n\n"
-                    f"This is a reminder that {items_not_returned_count} of your borrowed item(s) were due to be returned "
-                    f"on {borrower.date_return}. Please return them as soon as possible to avoid penalties.\n\n"
-                    "Thank you!\n\n- Borrowing System"
-                )
-                recipient_email = borrower.email
+                if return_date <= today:
+                    items = BorrowRequestItemFaculty.objects.filter(borrow_request=borrower)
+                    items_not_returned = items.filter(is_returned=False)
 
-                # Send the email
-                try:
-                    send_mail(
-                        subject,
-                        message,
-                        EMAIL_HOST_USER,
-                        [recipient_email],
-                        fail_silently=False,
+                    if not items_not_returned.exists():
+                        print(f"All items for {borrower.name} are marked as returned. No email sent.")
+                        continue
+
+                    subject = "Borrowing Reminder: Item Return Overdue"
+                    message = (
+                        f"Dear {borrower.name},\n\n"
+                        f"This is a reminder that {items_not_returned.count()} of your borrowed item(s) were due to be returned "
+                        f"on {borrower.date_return}. Please return them as soon as possible to avoid penalties.\n\n"
+                        "Thank you!\n\n- Borrowing System"
                     )
-                    print(f"Reminder email sent to {borrower.email}")
+                    recipient_email = borrower.email
 
-                    # Log the notification
-                    notification_message = f"Email sent to {borrower.email} on {today} at 7:00 pm, with {items_not_returned_count} item(s) overdue."
-                    print(notification_message)
+                    try:
+                        send_mail(
+                            subject,
+                            message,
+                            EMAIL_HOST_USER,
+                            [recipient_email],
+                            fail_silently=False,
+                        )
+                        print(f"Reminder email sent to {borrower.email}")
 
-                    EmailReminderLog.objects.create(
-                        borrower_name=borrower.name,
-                        borrower_email=borrower.email,
-                        student_id=borrower.student_id,
-                        user=borrower.user,
-                        notification_message=notification_message
-                    )
+                        # Log the notification
+                        notification_message = (
+                            f"Email sent to {borrower.email} on {today.strftime('%d %B, %Y')} "
+                            f"at 7:00 pm, with {items_not_returned.count()} item(s) overdue."
+                        )
 
-                except Exception as e:
-                    print(f"Failed to send email to {borrower.email}: {e}")
-                    
-        # run in every 10 seconds
-        schedule.every(10).seconds.do(send_email_reminders)
+                        EmailReminderLog.objects.create(
+                            borrower_name=borrower.name,
+                            borrower_email=borrower.email,
+                            student_id=borrower.student_id,
+                            user=borrower.user,
+                            notification_message=notification_message
+                        )
 
+                    except Exception as e:
+                        print(f"Failed to send email to {borrower.email}: {e}")
 
         # Schedule the task
-        # schedule.every(1).minutes.do(send_email_reminders)
-        
-        # Schedule the task
-        # schedule.every().day.at("19:00").do(send_email_reminders)
-
+        schedule.every(20).seconds.do(send_email_reminders)
         print("Email scheduler is running...")
 
         while True:

@@ -1,0 +1,6 @@
+# Ignore PyInstaller output folders
+build/
+dist/
+
+# Ignore PyInstaller spec files
+*.spec

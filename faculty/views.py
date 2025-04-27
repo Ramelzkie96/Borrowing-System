@@ -141,65 +141,71 @@ def get_property_ids(request, item_id):
 def update_property_status(request):
     if request.method == 'POST':
         try:
+            # Retrieve form data
             item_name = request.POST.get('item_name')
+            total_quantity = request.POST.get('total_quantity')  # Get total_quantity from the form
             property_data = request.POST.getlist('property_updates[]')
-
-            if not property_data:
-                messages.error(request, 'No property data provided.')
-                return redirect('item-record')  # Replace with your actual redirect URL
+            new_items = request.POST.get('new_items', '[]')
+            new_items = json.loads(new_items) if new_items else []
 
             faculty_item = None
 
             if item_name:
-                # Update the item name if it exists
-                try:
-                    # Assuming the `faculty_item` is associated with one of the properties
-                    first_property_data = property_data[0]
-                    original_property_id = first_property_data.split(',')[0]
-                    property = PropertyID.objects.filter(property_id=original_property_id).first()
-                    if not property:
-                        messages.error(request, f'No PropertyID found for {original_property_id}.')
-                        return redirect('item-record')
-
+                # Update item name
+                first_property_data = property_data[0]
+                original_property_id = first_property_data.split(',')[0]
+                property = PropertyID.objects.filter(property_id=original_property_id).first()
+                if property:
                     faculty_item = property.faculty_item
                     faculty_item.name = item_name
                     faculty_item.save()
-                except PropertyID.MultipleObjectsReturned:
-                    messages.error(request, f'Multiple PropertyID instances found for {original_property_id}.')
-                    return redirect('item-record')
 
             # Process property updates
             for data in property_data:
-                try:
-                    original_property_id, updated_property_id, status = data.split(',')
+                original_property_id, updated_property_id, status = data.split(',')
 
-                    # Check if the updated property ID already exists
-                    if PropertyID.objects.filter(property_id=updated_property_id).exclude(property_id=original_property_id).exists():
-                        messages.error(request, f'Duplicate Property ID found: {updated_property_id}. Update aborted.')
-                        return redirect('item-record')
+                # Check for duplicate Property ID
+                if PropertyID.objects.filter(property_id=updated_property_id).exclude(property_id=original_property_id).exists():
+                    messages.error(request, f'Duplicate Property ID found: {updated_property_id}. Update aborted.')
+                    return redirect('item-record')
 
-                    # Get the property by its original ID
-                    property = PropertyID.objects.filter(property_id=original_property_id).first()
-                    if not property:
-                        messages.error(request, f'No PropertyID found for {original_property_id}.')
-                        return redirect('item-record')
-
-                    # Update the property
+                property = PropertyID.objects.filter(property_id=original_property_id).first()
+                if property:
                     property.property_id = updated_property_id
                     property.status = status
                     property.save()
 
-                except ValueError:
-                    messages.error(request, 'Invalid property data format.')
+            # Add new items
+            for item in new_items:
+                property_id = item['property_id']
+                status = item['status']
+
+                if PropertyID.objects.filter(property_id=property_id).exists():
+                    messages.error(request, f'Duplicate Property ID found: {property_id}. New item addition aborted.')
                     return redirect('item-record')
 
-            # Update faculty item quantity if applicable
+                PropertyID.objects.create(
+                    property_id=property_id,
+                    status=status,
+                    faculty_item=faculty_item
+                )
+
+            # Update total_quantity value
+            if faculty_item and total_quantity:
+                try:
+                    faculty_item.total_quantity = int(total_quantity)  # Update total_quantity
+                    faculty_item.save()
+                except ValueError:
+                    messages.error(request, 'Invalid value for total quantity. Update aborted.')
+                    return redirect('item-record')
+
+            # Update faculty item quantity based on "Good" status
             if faculty_item:
                 good_count = PropertyID.objects.filter(faculty_item=faculty_item, status='Good').count()
                 faculty_item.quantity = good_count
                 faculty_item.save()
 
-            messages.success(request, 'Properties updated successfully.')
+            messages.success(request, 'Properties and total quantity updated successfully.')
             return redirect('item-record')
 
         except Exception as e:
@@ -208,6 +214,8 @@ def update_property_status(request):
 
     messages.error(request, 'Invalid request method.')
     return redirect('item-record')
+
+
 
 
 
@@ -323,7 +331,7 @@ def borrowers(request):
             date_borrow_parsed = datetime.strptime(date_borrow, "%d %B, %Y").date()
             date_return_parsed = datetime.strptime(date_return_value, "%d %B, %Y").date()
 
-            # Ensure date_borrow is not in the past
+            # # Ensure date_borrow is not in the past
             if date_borrow_parsed < timezone.now().date():
                 messages.error(request, 'ERROR! Date Borrow cannot be set to a past date.')
                 return redirect('borrowers')
@@ -559,7 +567,6 @@ def borrower_details(request):
     }
 
     return render(request, 'borrower-details.html', context)
-
 
 
 
@@ -989,9 +996,9 @@ def student_reservation(request):
     user_id = request.user.id
 
     # Filter ReservationItems and annotate reservations
-    reservation_items = ReservationItem.objects.filter(user_facultyItem=user_id)
+    reservation_items = ReservationItem.objects.filter(user_facultyItem=user_id, reservation__is_borrow=False)
     reserved_request = StudentReservation.objects.filter(
-        id__in=reservation_items.values('reservation')
+        id__in=reservation_items.values('reservation'),
     ).annotate(
         single_handle_status=Subquery(
             ReservationItem.objects.filter(
@@ -1003,7 +1010,8 @@ def student_reservation(request):
             When(
                 id__in=ReservationItem.objects.filter(
                     reservation=OuterRef('id'),
-                    status="Approved"
+                    status="Approved",
+                    reservation__is_borrow=False
                 ).values('reservation'),
                 then=True
             ),
@@ -1128,13 +1136,13 @@ def update_reservation_item_status(request):
         }
 
         # Send email notification
-        subject = f"Reservation Item Status Updated: {item.item_name}"
-        message = f"Dear {reservation.name},\n\nThe status of your reservation item '{item.item_name}' has been updated to '{new_status}'.\n\nNotification: {item.notification}\n\nBest regards,\nYour Reservation Team"
-        from_email = settings.EMAIL_HOST_USER
-        recipient_list = [reservation.email]
+        # subject = f"Reservation Item Status Updated: {item.item_name}"
+        # message = f"Dear {reservation.name},\n\nThe status of your reservation item '{item.item_name}' has been updated to '{new_status}'.\n\nNotification: {item.notification}\n\nBest regards,\nYour Reservation Team"
+        # from_email = settings.EMAIL_HOST_USER
+        # recipient_list = [reservation.email]
 
-        # Send the email
-        send_mail(subject, message, from_email, recipient_list)
+        # # Send the email
+        # send_mail(subject, message, from_email, recipient_list)
 
         # Redirect to 'admin-student-reservation' if needed
         if reservation.status in ['Approved', 'Denied', 'Completed']:
@@ -1209,6 +1217,7 @@ def save_reservation_request(request):
         borrower_type = request.POST.get('borrower_type')
         date_borrow = request.POST.get('date_reserve')
         date_return = request.POST.get('date_return')
+        reservation_id = request.POST.get('id') 
 
         # Handle the upload_image field
         uploaded_image = request.FILES.get('upload_image')
@@ -1238,6 +1247,15 @@ def save_reservation_request(request):
                 'upload_image': upload_image,
             }
         )
+        
+        try:
+            student_reservation = StudentReservation.objects.get(id=reservation_id)
+            student_reservation.is_borrow = True  # Explicitly set to True
+            student_reservation.save()
+        except StudentReservation.DoesNotExist:
+            messages.error(request, "Student reservation record not found.")
+            return redirect('admin-student-reservation')
+
 
         # Initialize a flag to check if any BorrowRequestItemFaculty is created
         item_created = False
@@ -1312,30 +1330,44 @@ def save_reservation_request(request):
 
 
 
+import random  # don't forget to import random at the top!
+
 @login_required
 def generate_report(request, id):
-    # Ensure only allowed users can access the report
     if not request.user.faculty:
         return HttpResponseForbidden("You do not have permission to access this page.")
 
-    # Get the specific BorrowRequest by ID
     try:
         borrow_request = BorrowRequest.objects.get(id=id)
-        items = borrow_request.facultyitems.select_related('item')  # Fetch related items with facultyItem details
+        items = borrow_request.facultyitems.select_related('item')  # already fetching related item
     except BorrowRequest.DoesNotExist:
         return HttpResponseNotFound("BorrowRequest not found.")
 
-    # Structure data for the report
+    # Prepare a list to store items with random property IDs
+    items_with_property = []
+
+    for item in items:
+        faculty_item = item.item  # this is the facultyItem instance
+        property_ids = faculty_item.property_ids.all()  # get all related PropertyIDs
+
+        if property_ids.exists():
+            selected_property = random.choice(property_ids)
+            selected_property_id = selected_property.property_id
+        else:
+            selected_property_id = "N/A"  # fallback if no property IDs exist
+
+        # Attach the selected property_id manually
+        item.random_property_id = selected_property_id
+        items_with_property.append(item)
+
     context = {
         'borrow_request': borrow_request,
-        'items': items,  # Ensure you pass the items to the context
+        'items': items_with_property,
         'image_url': request.build_absolute_uri(static('images/logo.png')),
     }
 
-    # Render the HTML template
     html_string = render_to_string('borrower-report.html', context)
 
-    # Configure pdfkit for PDF generation
     config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
 
     try:
@@ -1343,6 +1375,15 @@ def generate_report(request, id):
             'no-stop-slow-scripts': '',
             'disable-smart-shrinking': '',
             'enable-local-file-access': '',
+            'page-width': '8.5in',
+            'page-height': '13in',
+            'orientation': 'Portrait',
+            'margin-top': '0.5in',
+            'margin-right': '0.5in',
+            'margin-bottom': '0.5in',
+            'margin-left': '0.5in',
+            'dpi': 300,
+            'zoom': 1.0,
         }
 
         pdf = pdfkit.from_string(html_string, False, configuration=config, options=options)
@@ -1351,6 +1392,7 @@ def generate_report(request, id):
         return response
     except Exception as e:
         return HttpResponse(f"An error occurred: {str(e)}")
+
 
 
 

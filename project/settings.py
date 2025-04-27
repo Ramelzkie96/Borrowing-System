@@ -12,12 +12,14 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+import sys
+from pathlib import Path
 
+if getattr(sys, 'frozen', False):  # Running as a PyInstaller bundle
+    BASE_DIR = Path(sys._MEIPASS)
+else:  # Running in development
+    BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 
-
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 
 
 # Quick-start development settings - unsuitable for production
@@ -29,7 +31,8 @@ SECRET_KEY = 'django-insecure-c63_y5b*7_!!6mh%=orff-g@o95(nrm^st&!x%b9r1$i0nty-$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+
 
 
 # Application definition
@@ -61,11 +64,20 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'project.urls'
 
+def find_app_template_dirs(base_dir):
+    template_dirs = []
+    for app in INSTALLED_APPS:
+        app_path = Path(base_dir) / app
+        templates_path = app_path / 'templates'
+        if templates_path.exists():
+            template_dirs.append(str(templates_path))
+    return template_dirs
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
-        'APP_DIRS': True,
+        'DIRS': [os.path.join(BASE_DIR, 'templates')] + find_app_template_dirs(BASE_DIR),
+        'APP_DIRS': False,  # Turn off automatic app-level lookup
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -76,6 +88,7 @@ TEMPLATES = [
         },
     },
 ]
+
 
 
 MESSAGE_VERBOSE_TAGS = {
@@ -94,18 +107,24 @@ WSGI_APPLICATION = 'project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'aabbbarigatomboy',
-        'USER': 'root',
-        'PASSWORD': 'Password0012',
-        'PORT': 3306,
-        'HOST': '127.0.0.1',
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
-        },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / "db.sqlite3",  # <-- this automatically creates `db.sqlite3` in your project folder
     }
 }
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'ITborrowitem',
+#         'USER': 'root',
+#         'PASSWORD': 'Password0012',
+#         'PORT': 3306,
+#         'HOST': '127.0.0.1',
+#         'OPTIONS': {
+#             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"
+#         },
+#     }
+# }
 
 
 
@@ -159,15 +178,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # Where your static files are stored during development
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # Use dynamic BASE_DIR
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 AUTH_USER_MODEL = 'DapartmentChair.User'
 
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-
 
 # Specify the session engine to use (default is database-backed sessions)
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'

@@ -1,67 +1,47 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700&display=swap');
-*{
+/* Base styles */
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: 'Poppins',sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
-body{
-  background:linear-gradient(
-    rgba(0, 0, 0, 0.5), 
-    rgba(0, 0, 0, 0.5)
-  ), url(../images/bggg.png);
-  
+body {
+  background: linear-gradient(
+      rgba(0, 0, 0, 0.5),
+      rgba(0, 0, 0, 0.5)
+    ),
+    url(../images/ictbg.jpg);
   background-size: cover;
   overflow: hidden;
-}
-body::before { 
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%; 
-  background: linear-gradient(
-    rgba(0, 0, 0, 0.5), 
-    rgba(0, 0, 0, 0.5)
-  ), url(../images/bggg.png); 
-  background-size: cover;
-  z-index: -1;
-}
-::selection{
-  background: rgba(26,188,156,0.3);
-}
-.logo {
-  position: relative;
   display: flex;
-  padding-left: 50px;
-  padding-right: 50px;
-  padding-top: 30px;
-  justify-content: space-between;
-  
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
 }
-.img1 {
-  width: 100px;
-  height: 100px;
+
+::selection {
+  background: rgba(26, 188, 156, 0.3);
 }
-.img2 {
-  width: 100px;
-  height: 100px;
-}
-.container{
-  position: relative;
-  top: -90px;
+
+.container {
   max-width: 500px;
-  margin: 170px auto;
-  box-shadow: rgba(0, 0, 0, 0.25) 0px 54px 55px, rgba(0, 0, 0, 0.12) 0px -12px 30px, rgba(0, 0, 0, 0.12) 0px 4px 6px, rgba(0, 0, 0, 0.17) 0px 12px 13px, rgba(0, 0, 0, 0.09) 0px -3px 5px;
+  width: 90%;
+  margin: auto;
+  padding: 20px;
+
+  border-radius: 10px; /* Optional for softer edges */
+  background-color: transparent; /* Slight transparency */
 }
-.wrapper{
-  width: 100%;
-  background: #fff;
+
+.wrapper {
+  background: rgba(255, 255, 255, 0.95); /* Slight transparency */
   border-radius: 5px;
-  box-shadow: 0px 4px 10px 1px rgba(0,0,0,0.1);
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); /* Adjust for lighter shadow */
 }
-.wrapper .title{
+
+
+.wrapper .title {
   height: 90px;
   background: #343957;
   border-radius: 5px 5px 0 0;
@@ -72,21 +52,30 @@ body::before {
   align-items: center;
   justify-content: center;
 }
-.wrapper form{
-  padding: 30px 25px 25px 25px;
+
+.wrapper img {
+  width: 40px;
+  height: 40px;
 }
+
+.wrapper form {
+  padding: 30px 25px;
+}
+
 .wrapper form span {
-    position: relative;
-    display: flex;
-    justify-content: center;
-    top: -15px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  top: -15px;
 }
-.wrapper form .row{
+
+.wrapper form .row {
   height: 50px;
   margin-bottom: 30px;
   position: relative;
 }
-.wrapper form .row input{
+
+.wrapper form .row input {
   height: 100%;
   width: 100%;
   outline: none;
@@ -96,14 +85,8 @@ body::before {
   font-size: 16px;
   transition: all 0.3s ease;
 }
-form .row input:focus{
-  border-color: #343957;
-  box-shadow: inset 0px 0px 2px 2px rgba(26,188,156,0.25);
-}
-form .row input::placeholder{
-  color: #999;
-}
-.wrapper form .row i{
+
+.wrapper form .row i {
   position: absolute;
   width: 47px;
   height: 100%;
@@ -116,88 +99,197 @@ form .row input::placeholder{
   align-items: center;
   justify-content: center;
 }
-.wrapper form .pass{
-  margin: -8px 0 20px 0;
-}
-.wrapper form .pass a{
-  color: #343957;
-  font-size: 17px;
-  text-decoration: none;
-}
-.wrapper form .pass a:hover{
-  text-decoration: underline;
-}
-.wrapper form .button input{
+
+.wrapper form .button input {
   color: #fff;
   font-size: 20px;
   font-weight: 500;
-  padding-left: 0px;
   background: #343957;
   border: 1px solid #343957;
   cursor: pointer;
 }
-form .button input:hover{
+
+.wrapper form .button input:hover {
   background: #484e6f;
 }
-.wrapper form .signup-link{
+
+.wrapper form .pass a,
+.wrapper form .signup-link a {
+  color: #343957;
+  text-decoration: none;
+  font-size: 17px;
+}
+
+.wrapper form .signup-link {
   text-align: center;
   margin-top: 20px;
   font-size: 17px;
 }
-.wrapper form .signup-link a{
-  color: #343957;
-  text-decoration: none;
-}
-form .signup-link a:hover{
+
+.wrapper form .pass a:hover,
+.wrapper form .signup-link a:hover {
   text-decoration: underline;
 }
-@media screen and (max-width: 550px) {
-  .container {
-    max-width: 400px;
-    top: 50px;
-    left: 40px;
-    width: 100%;
-    margin: 10px 10px;
-  }
-}
 
-@media screen and (max-width: 456px) {
+/* Responsive adjustments */
+@media (max-width: 1000px) {
   .container {
-    max-width: 350px;
-    /* top: 50px;
-    left: 40px; */
-    width: 100%;
-    margin: 10px 10px;
+    margin: 50px auto;
   }
-}
 
-@media screen and (max-width: 392px) {
-  .container {
-    max-width: 340px;
-    left: 15px;
-    width: 100%;
-    margin: 10px 10px;
-  }
-  .img1 {
-    width: 60px;
-    height: 60px;
-  }
-  .img2 {
-    width: 60px;
-    height: 60px;
-  }
-  .logo {
-    top: 40px;
-  }
-}
-@media screen and (max-width: 361px) {
-  .container {
-    max-width: 320px;
-    left: 10px;
-    width: 100%;
-    margin: 10px 10px;
-  }
   .wrapper .title {
-    font-size: 25px;
+    font-size: 24px;
+  }
+  .wrapper img {
+    width: 30px;
+    height: 30px;
+  }
+
+  .wrapper form .row input {
+    font-size: 14px;
+    padding-left: 50px;
+  }
+
+  .wrapper form .button input {
+    font-size: 18px;
   }
 }
+
+@media (max-width: 600px) {
+  .wrapper .title {
+    font-size: 20px;
+  }
+  .wrapper img {
+    width: 20px;
+    height: 20px;
+  }
+
+  .wrapper form {
+    padding: 20px;
+  }
+
+  .wrapper form .row input {
+    font-size: 14px;
+    padding-left: 50px;
+  }
+
+  .wrapper form .button input {
+    font-size: 16px;
+  }
+
+  .wrapper form .pass a,
+  .wrapper form .signup-link a {
+    font-size: 12px; /* Reduced font size for mobile */
+  }
+
+  .wrapper form .signup-link {
+    font-size: 12px; /* Smaller font for the signup text */
+    text-align: center; /* Center-align for better mobile readability */
+    margin-top: 10px; /* Adjust margin for better spacing */
+  }
+}
+
+
+/* Specific adjustments for very small screens like 320x568 */
+@media (max-width: 320px) {
+  .wrapper .title {
+    font-size: 18px;
+  }
+
+  .wrapper img {
+    width: 15px;
+    height: 15px;
+  }
+
+  .wrapper form .row input {
+    font-size: 12px;
+    padding-left: 40px;
+  }
+
+  .wrapper form .button input {
+    font-size: 14px;
+  }
+
+  .wrapper form .pass a,
+  .wrapper form .signup-link a {
+    font-size: 10px; /* Smaller font size for very small screens */
+  }
+
+  .wrapper form .signup-link {
+    font-size: 10px; /* Smaller font for the signup text */
+    line-height: 1.2; /* Reduce line height for compact appearance */
+    margin-top: 8px; /* Adjust margin for smaller screen */
+  }
+}
+
+
+
+/* Toast Container */
+.toast-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  width: 300px; /* Set a fixed width */
+}
+
+/* Toast Styles */
+.toast {
+color: #fff;
+padding: 15px 20px;
+margin-bottom: 10px;
+border-radius: 8px;
+box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+display: flex; /* Flexbox for icon and text alignment */
+align-items: center; /* Centering content */
+position: relative; /* For positioning the loader */
+animation: fadein 0.5s, fadeout 0.5s 3.5s;
+}
+
+/* Loader (progress bar) */
+.loader {
+position: absolute;
+bottom: 0;
+left: 0;
+height: 4px;
+border-radius: 8px;
+background-color: rgba(255, 255, 255, 0.7);
+transition: width 4s linear; /* Duration should match the toast timeout */
+}
+
+/* Icon styles */
+.toast i {
+  margin-right: 10px; /* Space between icon and text */
+  font-size: 20px; /* Icon size */
+}
+
+/* Success Toast */
+.toast.success {
+  background-color: #28a745; /* Green */
+}
+
+/* Error Toast */
+.toast.error {
+  background-color: #dc3545; /* Red */
+}
+
+/* Warning Toast */
+.toast.warning {
+  background-color: #ffc107; /* Yellow */
+}
+
+/* Info Toast */
+.toast.info {
+  background-color: #17a2b8; /* Blue */
+}
+
+@keyframes fadein {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeout {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+

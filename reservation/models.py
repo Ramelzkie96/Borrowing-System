@@ -61,6 +61,7 @@ class StudentReservation(models.Model):
     status = models.CharField(max_length=20, default='Pending')
     user = models.ForeignKey('ReservationUser', on_delete=models.CASCADE)
     upload_image = models.ImageField(upload_to='borrow_upload/', null=True, blank=True)
+    is_borrow = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     
     def __str__(self):
@@ -104,6 +105,7 @@ class ReservationItem(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     user_facultyItem = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL)  # Modified to store the user
     handle_status = models.CharField(max_length=15, default='Pending')  # Set default to "Pending"
+    
 
     def __str__(self):
         return f"{self.item_name} (Qty: {self.quantity}) for {self.reservation.name}"

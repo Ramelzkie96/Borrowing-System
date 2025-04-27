@@ -64,7 +64,7 @@ urlpatterns = [
     path('delete-notificationn/<int:notification_id>/', views.delete_notification, name='delete_notificationn'),
     path('admin-get_item_count/<int:item_id>/', views.get_item_count, name='admin-get_item_count'),
     path('admin-view-reservation/', views.view_reservation, name='admin-view_reservation'),
-    
+    path('delete-user-request/<int:user_id>/', views.delete_user_request, name='delete_user_request'),
 ] 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

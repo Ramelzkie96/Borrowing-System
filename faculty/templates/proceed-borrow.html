@@ -496,7 +496,7 @@ color: red;
                                           {% endfor %}
                                         </select>
                                         <div class="error-message" id="error-message-{{ forloop.counter }}" style="color: red; display: none;"></div>
-                                        <input type="hidden" name="borrow_item_id_{{ forloop.counter }}" value="{{ borrow_item.id }}">
+                                       
                                         <div class="mt-4">
                                           <label class="text-dark">Item Details</label>
                                           <textarea name="description_{{ forloop.counter }}" class="form-control">{{ borrow_item.description }}</textarea>

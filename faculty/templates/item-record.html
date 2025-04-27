@@ -446,17 +446,26 @@ color: red;
                 {% csrf_token %}
                 
                 <!-- Input for Item Name -->
-                <div class="form-group">
-                    <label for="itemName" class="text-dark">Item Name</label>
-                    <input type="text" id="itemName" name="item_name" class="form-control text-dark" style="border: 1px solid #bebebe;">
+                <div class="row mb-3">
+                    <div class="col-4 ">
+                        <label for="itemName" class="text-dark">Item Name</label>
+                        <input type="text" id="itemName" name="item_name" class="form-control text-dark" style="border: 1px solid #bebebe;">
+                    </div>
+                    <div class="col-4 ">
+                        <label for="totalQuantity" class="text-dark">Total Quantity</label>
+                        <input type="number" id="totalQuantity" name="total_quantity" class="form-control text-dark" style="border: 1px solid #bebebe;">
+                    </div>
+                    <div class="col-4 ">
+                        <input type="hidden" id="quantity" name="quantity" class="form-control text-dark" style="border: 1px solid #bebebe;">
+                    </div>
                 </div>
-  
+            
                 <table class="table table-bordered" style="table-layout: fixed; width: 100%;">
                     <thead class="thead-dark">
                         <tr>
                             <th style="width: 33%;">Property ID</th>
                             <th style="width: 33%;">Status</th>
-                            <th style="width: 33%;">Condition (Good/Defect)</th>
+                            <th style="width: 33%;">Condition (Good/Defective)</th>
                         </tr>
                     </thead>
                     <tbody id="modalTableBody">
@@ -465,12 +474,15 @@ color: red;
                 </table>
             
                 <div class="modal-footer">
-                  <div class="mr-auto" style="font-size: 14px; color: #888;">
-                      <small>Note: You can edit the Property ID by clicking on the corresponding value in the table.</small>
-                  </div>
-                  <button type="submit" name="submit" class="btn btn-secondary">Save</button>
+                    <div class="mr-auto" style="font-size: 14px; color: #888;">
+                        <small>Note: You can edit the Property ID by clicking on the corresponding value in the table.</small>
+                    </div>
+                    <button type="submit" name="submit" class="btn btn-secondary">Save</button>
                 </div>
             </form>
+            
+          
+            
             
             </div>
         </div>
@@ -537,14 +549,15 @@ color: red;
                                                         <td>{{ item.quantity }}</td>
                                                         <td>
                                                             <button type="button" class="btn btn-secondary edit-item-btn" 
-                                                            data-id="{{ item.id }}" 
-                                                            data-name="{{ item.name }}"
-                                                            data-totalquantity="{{ item.total_quantity }}"
-                                                            data-quantity="{{ item.quantity }}"
-                                                            data-toggle="modal" 
-                                                            data-target="#exampleModalCenter">
-                                                        <i class="fas fa-edit"></i>
-                                                    </button>
+                                                                    data-id="{{ item.id }}" 
+                                                                    data-name="{{ item.name }}" 
+                                                                    data-totalquantity="{{ item.total_quantity }}" 
+                                                                    data-quantity="{{ item.quantity }}" 
+                                                                    data-toggle="modal" 
+                                                                    data-target="#exampleModalCenter">
+                                                                <i class="fas fa-edit"></i>
+                                                            </button>
+
                                                             <button class="btn btn-danger btn deleteButton" data-item-id="{{ item.id }}"><i class="fas fa-trash"></i></button>
                                                         </td>
                                                     </tr>
@@ -625,82 +638,151 @@ color: red;
 
 
     <script>
-      document.querySelectorAll('.edit-item-btn').forEach(button => {
-        button.addEventListener('click', function () {
-          const itemId = this.getAttribute('data-id');
-          const itemName = this.getAttribute('data-name'); // Get item name
-          const totalQuantity = this.getAttribute('data-totalquantity');
-          const quantity = this.getAttribute('data-quantity');
-      
-          // Set the item name in the input field
-          document.getElementById('itemName').value = itemName;
-      
-          // Fetch PropertyID related to the item
-          fetch(`/get_property_ids/${itemId}/`) // Assuming you have an endpoint that returns the Property IDs
-            .then(response => response.json())
-            .then(data => {
-              // Empty the modal table body
-              const modalTableBody = document.getElementById('modalTableBody');
-              modalTableBody.innerHTML = '';
-      
-              // Loop through each property ID and add a new row to the table
-              data.property_ids.forEach(property => {
-                const row = document.createElement('tr');
-                row.setAttribute('data-property-id', property.property_id); // Set a data attribute for easier reference
-      
-                row.innerHTML = `
-                  <td style="text-align: center; vertical-align: middle;">
-                    <input type="text" value="${property.property_id}" 
-                           class="property-id-input" 
-                           data-original-id="${property.property_id}" 
-                           style="text-align: center; border: none; background: transparent; width: 100%;" />
-                  </td>
-                  <td style="text-align: center; vertical-align: middle;">
-                    <span class="badge ${property.status === 'Good' ? 'badge-success' : 'badge-secondary'} status-badge">
-                      ${property.status}
-                    </span>
-                  </td>
-                  <td style="text-align: center; vertical-align: middle;">
-                    <label class="switch">
-                      <input type="checkbox" ${property.status === 'Good' ? 'checked' : ''} 
-                             data-id="${property.property_id}" 
-                             class="status-toggle" />
-                      <div class="slider">
-                        <div class="circle">
-                          <i class="fa-solid fa-x cross" style="font-size:9px;"></i>
-                          <i class="fa-solid fa-check checkmark" style="font-size: 11px;"></i>
-                        </div>
-                      </div>
-                    </label>
-                  </td>
-                `;
-      
-                modalTableBody.appendChild(row);
-              });
-      
-              // Attach event listener to the checkboxes after rows are added
-              document.querySelectorAll('.status-toggle').forEach(checkbox => {
-                checkbox.addEventListener('change', function () {
-                  const propertyId = this.getAttribute('data-id');
-                  const newStatus = this.checked ? 'Good' : 'Defective';
-      
-                  // Update the badge in the table
-                  const statusBadge = this.closest('tr').querySelector('.status-badge');
-                  statusBadge.textContent = newStatus;
-                  statusBadge.className = `badge ${newStatus === 'Good' ? 'badge-success' : 'badge-secondary'} status-badge`;
+        document.querySelectorAll('.edit-item-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const itemId = this.getAttribute('data-id');
+                const itemName = this.getAttribute('data-name');
+                const initialTotalQuantity = parseInt(this.getAttribute('data-totalquantity'));
+                const initialQuantity = parseInt(this.getAttribute('data-quantity'));
+        
+                // Set the item name and initial values in the input fields
+                document.getElementById('itemName').value = itemName;
+                const totalQuantityField = document.getElementById('totalQuantity');
+                const quantityField = document.getElementById('quantity');
+                totalQuantityField.value = initialTotalQuantity;
+                quantityField.value = initialQuantity;
+        
+                // Set the minimum value for totalQuantityField
+                totalQuantityField.min = initialTotalQuantity;
+        
+                // Initialize original total quantity
+                let originalTotalQuantity = initialTotalQuantity;
+        
+                // Track the dynamically added rows
+                let dynamicRows = [];
+        
+                // Update rows dynamically in real-time based on the input value
+                totalQuantityField.addEventListener('input', function () {
+                    const newTotalQuantity = this.value.trim() === '' ? '' : parseInt(this.value);
+        
+                    if (newTotalQuantity === '' || !isNaN(newTotalQuantity)) {
+                        const modalTableBody = document.getElementById('modalTableBody');
+                        const currentRowCount = modalTableBody.rows.length;
+        
+                        if (newTotalQuantity > currentRowCount) {
+                            // Add rows for increased quantity
+                            const difference = newTotalQuantity - currentRowCount;
+                            for (let i = 0; i < difference; i++) {
+                                const row = document.createElement('tr');
+                                row.innerHTML = 
+                                    `<td style="text-align: center; vertical-align: middle;">
+                                        <input type="text" required placeholder="Type here the new property ID" 
+                                               class="property-id-input" 
+                                               style="text-align: center; border: none; background: transparent; width: 100%;" />
+                                    </td>
+                                    <td style="text-align: center; vertical-align: middle;">
+                                        <span class="badge badge-success status-badge">Good</span>
+                                    </td>
+                                    <td style="text-align: center; vertical-align: middle;">
+                                        <label class="switch">
+                                            <input type="checkbox" checked class="status-toggle" />
+                                            <div class="slider">
+                                                <div class="circle">
+                                                    <i class="fa-solid fa-x cross" style="font-size:9px;"></i>
+                                                    <i class="fa-solid fa-check checkmark" style="font-size: 11px;"></i>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </td>
+                                `;
+                                modalTableBody.appendChild(row);
+                                dynamicRows.push(row);  // Track dynamic rows
+                            }
+                        } else if (newTotalQuantity < currentRowCount) {
+                            // Remove only dynamically added rows for decreased quantity
+                            const difference = currentRowCount - newTotalQuantity;
+                            for (let i = 0; i < difference; i++) {
+                                const rowToRemove = dynamicRows.pop();  // Remove from dynamic rows
+                                if (rowToRemove) {
+                                    modalTableBody.removeChild(rowToRemove);
+                                }
+                            }
+                        }
+        
+                        // Update the original total quantity if it's a valid number
+                        originalTotalQuantity = newTotalQuantity;
+                    } else {
+                        alert('Invalid total quantity value!');
+                        this.value = originalTotalQuantity;
+                    }
                 });
-              });
-            })
-            .catch(error => {
-              console.error('Error fetching property IDs:', error);
+        
+                // Fetch property IDs and populate the table
+                fetch(`/get_property_ids/${itemId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const modalTableBody = document.getElementById('modalTableBody');
+                        modalTableBody.innerHTML = '';  // Clear all rows initially
+        
+                        // Add static rows based on property IDs
+                        data.property_ids.forEach(property => {
+                            const row = document.createElement('tr');
+                            row.setAttribute('data-property-id', property.property_id);
+        
+                            row.innerHTML = 
+                                `<td style="text-align: center; vertical-align: middle;">
+                                    <input type="text" value="${property.property_id}" 
+                                           class="property-id-input" 
+                                           data-original-id="${property.property_id}" 
+                                           style="text-align: center; border: none; background: transparent; width: 100%;" />
+                                </td>
+                                <td style="text-align: center; vertical-align: middle;">
+                                    <span class="badge ${property.status === 'Good' ? 'badge-success' : 'badge-secondary'} status-badge">
+                                        ${property.status}
+                                    </span>
+                                </td>
+                                <td style="text-align: center; vertical-align: middle;">
+                                    <label class="switch">
+                                        <input type="checkbox" ${property.status === 'Good' ? 'checked' : ''} 
+                                               data-id="${property.property_id}" 
+                                               class="status-toggle" />
+                                        <div class="slider">
+                                            <div class="circle">
+                                                <i class="fa-solid fa-x cross" style="font-size:9px;"></i>
+                                                <i class="fa-solid fa-check checkmark" style="font-size: 11px;"></i>
+                                            </div>
+                                        </div>
+                                    </label>
+                                </td>
+                            `;
+                            modalTableBody.appendChild(row);
+                        });
+        
+                        // Attach event listener to status toggles
+                        document.querySelectorAll('.status-toggle').forEach(checkbox => {
+                            checkbox.addEventListener('change', function () {
+                                const propertyId = this.getAttribute('data-id');
+                                const newStatus = this.checked ? 'Good' : 'Defective';
+        
+                                const statusBadge = this.closest('tr').querySelector('.status-badge');
+                                statusBadge.textContent = newStatus;
+                                statusBadge.className = `badge ${newStatus === 'Good' ? 'badge-success' : 'badge-secondary'} status-badge`;
+                            });
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error fetching property IDs:', error);
+                    });
             });
         });
-      });
-      
-      
+        
+        
+        
+        
       // When form is submitted, check the selected checkboxes and set status to "Defective" or "Good"
       document.querySelector('form').addEventListener('submit', function (event) {
         const rows = document.querySelectorAll('#modalTableBody tr');
+        const newItems = [];
         const propertyIds = new Set();
         let hasDuplicate = false; // Flag to track duplicate detection
     
@@ -711,28 +793,46 @@ color: red;
             const checkbox = row.querySelector('.status-toggle');
             const status = checkbox.checked ? 'Good' : 'Defective';
     
-            if (propertyIds.has(updatedPropertyId)) {
-                hasDuplicate = true; // Set flag for duplicate
-                alert(`Duplicate Property ID found: ${updatedPropertyId}`);
-                return; // Exit the loop
+            if (!originalPropertyId) {
+                // Newly added rows (no `data-original-id`)
+                newItems.push({
+                    property_id: updatedPropertyId,
+                    status: status,
+                });
             } else {
-                propertyIds.add(updatedPropertyId);
-            }
+                // Handle updates for existing rows
+                if (propertyIds.has(updatedPropertyId)) {
+                    hasDuplicate = true;
+                    alert(`Duplicate Property ID found: ${updatedPropertyId}`);
+                    return; // Exit the loop
+                } else {
+                    propertyIds.add(updatedPropertyId);
+                }
     
-            const hiddenInput = document.createElement('input');
-            hiddenInput.type = 'hidden';
-            hiddenInput.name = 'property_updates[]';
-            hiddenInput.value = `${originalPropertyId},${updatedPropertyId},${status}`;
-            row.appendChild(hiddenInput);
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'property_updates[]';
+                hiddenInput.value = `${originalPropertyId},${updatedPropertyId},${status}`;
+                row.appendChild(hiddenInput);
+            }
         });
     
         if (hasDuplicate) {
-            event.preventDefault(); // Prevent form submission
-            location.reload(); // Refresh the page
+            event.preventDefault();
+            return; // Prevent submission if duplicates exist
         }
+    
+        // Add new items to a hidden field
+        const newItemsInput = document.createElement('input');
+        newItemsInput.type = 'hidden';
+        newItemsInput.name = 'new_items';
+        newItemsInput.value = JSON.stringify(newItems);
+        this.appendChild(newItemsInput);
     });
     
     
+    
+
 
 
 

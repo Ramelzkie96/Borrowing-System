@@ -11,7 +11,7 @@ body {
       rgba(0, 0, 0, 0.5),
       rgba(0, 0, 0, 0.5)
     ),
-    url(../images/ictbg.jpg);
+    url(../images/ictbg-min2.jpg);
   background-size: cover;
   overflow: hidden;
   display: flex;
