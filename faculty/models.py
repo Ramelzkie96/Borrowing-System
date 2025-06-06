@@ -22,8 +22,6 @@ class facultyItem(models.Model):
         verbose_name_plural = "Faculty Items"
 
         
-        
-        
 class PropertyID(models.Model):
     faculty_item = models.ForeignKey(facultyItem, on_delete=models.CASCADE, related_name="property_ids")
     property_id = models.CharField(max_length=100, blank=True)
@@ -116,8 +114,6 @@ class BorrowRequestItemFaculty(models.Model):
     def __str__(self):
         return f"{self.item.name}"
     
-    
-    
 class EmailReminderLog(models.Model):
     borrower_name = models.CharField(max_length=100)
     borrower_email = models.EmailField()
@@ -126,9 +122,6 @@ class EmailReminderLog(models.Model):
     notification_message = models.TextField(null=True, blank=True)
     is_read = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-
- 
-
 
 class EmailNotification(models.Model):
     title = models.CharField(max_length=255)

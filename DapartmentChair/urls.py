@@ -5,8 +5,6 @@ from django.shortcuts import redirect
 from . import views
 from django.contrib.auth import views as auth_views 
 from .views import CustomPasswordResetView
-
-
 urlpatterns = [
     path('', lambda request: redirect('login/'), name='home_redirect'),
     path('login/', views.login_view, name='login_view'),
@@ -49,13 +47,8 @@ urlpatterns = [
     path('admin-get-available-quantity/<int:item_id>/', views.get_available_quantity, name='admin-get_available_quantity'),
     path('admin-update-reservation-status/<int:reservation_id>/', views.status_update, name='admin-update-reservation-status'),
     path('admin-update-reservation-item-status/', views.update_reservation_item_status, name='admin-update_reservation_item_status'),
-    
-    
     path('delete-borrow-request/<int:borrow_request_id>/', views.delete_borrow_request, name='delete-borrow-request'),
-    
     path('delete-reservation/<int:reservation_id>/', views.delete_reservation, name='delete_reservation'),
-    
-    
     path('aa-update-student-reservation/', views.aa_update_student_reservation, name='aa-update_student_reservation'),
     path('admin-get_property_ids/<int:item_id>/', views.get_property_ids, name='admin-get_property_ids'),
     path('admin-update-property-status/', views.update_property_status, name='admin-update-property-status'),

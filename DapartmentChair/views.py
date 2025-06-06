@@ -1441,8 +1441,9 @@ def generate_report(request, id):
     }
 
     html_string = render_to_string('admin-borrower-report.html', context)
-
-    config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
+ 
+    wkhtmltopdf_path = os.path.join(settings.BASE_DIR, 'wkhtmltopdf', 'bin', 'wkhtmltopdf.exe')
+    config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
 
     try:
         options = {
@@ -1466,16 +1467,6 @@ def generate_report(request, id):
         return response
     except Exception as e:
         return HttpResponse(f"An error occurred: {str(e)}")
-
-
-
-
-
-
-
-
-
-
 
 
 

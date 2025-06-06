@@ -1368,7 +1368,8 @@ def generate_report(request, id):
 
     html_string = render_to_string('borrower-report.html', context)
 
-    config = pdfkit.configuration(wkhtmltopdf=r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe')
+    wkhtmltopdf_path = os.path.join(settings.BASE_DIR, 'wkhtmltopdf', 'bin', 'wkhtmltopdf.exe')
+    config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
 
     try:
         options = {

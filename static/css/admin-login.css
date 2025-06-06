@@ -24,7 +24,7 @@
   /* Adding the logo behind the login-box */
   .login-page::before {
     content: "";
-    background-image: url('../../static/dist/img/pit_logo.png'); /* Replace with your logo path */
+    /* background-image: url('../../static/dist/img/pit_logo.png'); Replace with your logo path */
     background-size: contain; /* Make sure the logo fits nicely */
     background-repeat: no-repeat;
     background-position: center;

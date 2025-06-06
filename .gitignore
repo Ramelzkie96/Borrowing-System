@@ -1,6 +1,7 @@
 # Ignore PyInstaller output folders
 build/
 dist/
+wkhtmltopdf/
 
 # Ignore PyInstaller spec files
 *.spec
