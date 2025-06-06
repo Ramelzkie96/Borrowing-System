@@ -18,7 +18,7 @@ This system enables IT faculty to manage item borrowing, returning, and monitori
 
 ### Links
 
-- Solution URL: [View Code](https://github.com/Ramelzkie96/pixify-image.git)
+- Solution URL: [View Code](https://github.com/Ramelzkie96/Borrowing-System)
 - Live Site URL: [Live Site](https://borrowingitem.pythonanywhere.com/login/)
 
 ## My Process
